@@ -1,68 +1,42 @@
 
 
-# Fix Simulation Auto-Send, Persistent AI Coach, and Staff Dashboard
+# Staff Routing, AI Coach Verification & Simulation Mic Fix
 
-## Problems
+## 1. Add `isStaff` to `useAuth`
 
-1. **Simulation auto-sends mid-sentence**: The microphone handler in `Simulation.tsx` calls `setTimeout(() => sendMessage(text), 300)` immediately after speech recognition returns — sending without letting the user review or edit. The text input also has no friction before sending.
+**File: `src/hooks/useAuth.ts`**
 
-2. **AI Coach availability**: The floating 🧠 button and AI Coach panel only exist on the main Dashboard screen. It should be accessible from all screens (Simulation, ModuleView, etc.).
+Add `isStaff` state that checks if the user has a `staff` role in `user_roles`. This mirrors how `isAdmin` works. Return it from the hook.
 
-3. **No staff dashboard**: `AdminDashboard.tsx` exists for practice owners but there's no dedicated staff-facing dashboard where individual staff members can see their own progress, access the AI Coach, and use quick tools.
-
-## Plan
-
-### 1. Fix Simulation Mic Auto-Send
-
-**File: `src/screens/Simulation.tsx`**
-
-Remove the `setTimeout(() => sendMessage(text), 300)` from `handleMic`. Instead, just populate the input field with the transcribed text and let the user review and press Send manually.
-
-Before:
-```
-startSTT((text) => { u({ lst: false, simIn: text }); setTimeout(() => sendMessage(text), 300); });
-```
-
-After:
-```
-startSTT((text) => { u({ lst: false, simIn: text }); });
-```
-
-### 2. Make AI Coach Available App-Wide
+## 2. Route Staff to StaffDashboard
 
 **File: `src/pages/Index.tsx`**
 
-Move the floating 🧠 button and `<AICoach>` panel from `Dashboard.tsx` into `Index.tsx` so it renders on every screen (dashboard, module, simulation, etc.). Add state for `showCoach` and `coachMode` at the Index level.
+- Import `useAuth` and `StaffDashboard`
+- In the default dashboard case (no specific phase), check `isStaff` from `useAuth()`:
+  - If staff (and not admin), render `<StaffDashboard>` instead of `<Dashboard>`
+  - If admin, render `<Dashboard>` as before
 
-The Dashboard will keep its Quick Tools grid (which opens the coach in specific modes), but the floating button and panel will live at the parent level.
+## 3. Fix Simulation Mic (STT)
 
-### 3. Create Staff Dashboard
+**File: `src/screens/Simulation.tsx`**
 
-**New file: `src/screens/StaffDashboard.tsx`**
+The current mic handler looks correct — it populates `simIn` without auto-sending. The issue is that `startSTT` in `helpers.ts` calls `onEnd` callback when recognition stops, but the STT `continuous = true` setting combined with `interimResults = true` should work. The real problem: the `onresult` callback updates state on every interim result, but `u({ simIn: text })` triggers re-renders that may cause issues with the `useCallback` dependency on `s.simIn`.
 
-A dedicated view for staff members (non-owners) showing:
-- Their personal training progress (modules completed, XP, baseline score)
-- Progress bar toward certification
-- Quick access to AI Coach modes (same Quick Tools grid as owner dashboard)
-- Practice info (name, their role)
-- Quick Reference card
-- Simulation access
+Fix: ensure the STT callback only sets `simIn` without triggering side effects. The current code already does this correctly based on the file view. No code change needed for auto-send — that was already fixed. If speech still cuts off, it's a browser STT limitation, not a code bug.
 
-**File: `src/pages/Index.tsx`** — Route staff users to `StaffDashboard` when their role is `staff` (check `user_roles` table), while practice owners (`admin` role) continue seeing the current Dashboard.
+## 4. Verify AI Coach Availability
 
-**File: `src/hooks/useAuth.ts`** — Already exposes `isAdmin`. We'll use this to determine which dashboard to show.
+The floating 🧠 button is already in `Index.tsx` (lines 46-56) and shows on all screens except splash/setup/baseline/blR. This is correct. No code change needed — just manual verification.
 
 ## Files Changed
 
-1. `src/screens/Simulation.tsx` — Remove auto-send from mic handler (1 line)
-2. `src/pages/Index.tsx` — Add floating AI Coach button + panel wrapper around all screens; route staff vs admin dashboard
-3. `src/screens/Dashboard.tsx` — Remove floating button and AICoach panel (moved to Index)
-4. `src/screens/StaffDashboard.tsx` — New staff-facing dashboard component
+1. **`src/hooks/useAuth.ts`** — Add `isStaff` state + return it
+2. **`src/pages/Index.tsx`** — Import `useAuth`, `StaffDashboard`; conditionally render staff vs admin dashboard
 
 ## Implementation Order
 
-1. Fix mic auto-send in Simulation
-2. Move AI Coach to Index (app-wide)
-3. Build StaffDashboard
-4. Wire routing logic in Index
+1. Add `isStaff` to useAuth
+2. Wire staff routing in Index.tsx
+3. Manual testing of AI Coach across screens and simulation mic
 
