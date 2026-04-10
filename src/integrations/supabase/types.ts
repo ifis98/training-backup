@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      cases: {
+        Row: {
+          assigned_to: string | null
+          case_value: number
+          created_at: string
+          id: string
+          notes: string
+          patient_name: string
+          practice_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          case_value?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          patient_name?: string
+          practice_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          case_value?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          patient_name?: string
+          practice_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_requests: {
         Row: {
           created_at: string
@@ -73,6 +120,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      practice_goals: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_case_goal: number
+          monthly_revenue_goal: number
+          practice_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_case_goal?: number
+          monthly_revenue_goal?: number
+          practice_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_case_goal?: number
+          monthly_revenue_goal?: number
+          practice_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_goals_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: true
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       practices: {
         Row: {
