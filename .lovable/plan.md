@@ -1,82 +1,51 @@
 
 
-# Phase B: Admin Setup, AI Coach, Session Summary & Landing Page Fix
+# AI Coach Copy/Save + i18n for Remaining Screens + Testing
 
-## 1. Set Up Your ByteSense Admin Account
+## 1. AI Coach — Copy & Save Features
 
-Your account (`nbc1079@gmail.com`, ID: `376373ca-2ce2-4828-9cc9-8281f204c547`) needs a `bytesense_admin` role inserted into `user_roles`. This is a single database insert.
+**Copy to Clipboard**: Add a small "📋 Copy" button on each assistant message bubble. Uses `navigator.clipboard.writeText()` with a brief "Copied!" toast feedback.
 
-## 2. Landing Page Routing Clarification & Fix
+**Save Favorites**: Add a "⭐ Save" button next to Copy. Saved responses stored in localStorage (key `bsa6_favorites`) as `{ content: string, mode: string, savedAt: string }[]`. Add a "⭐ Saved" tab in the AI Coach header that shows saved responses with a delete option.
 
-The routing IS working correctly: unauthenticated users at `/` get redirected to `/welcome`. The reason you're not seeing the landing page is because **you're already logged in** — so `/` correctly shows your dashboard.
+New translation keys: `copied`, `copy`, `save`, `saved`, `saved_responses`, `no_saved`, `delete` — added for all 5 languages.
 
-**Fix**: Add a "Sign Out" button on the dashboard so you can log out and see the landing page flow. Also ensure the Welcome page link is accessible from the nav. The landing page will always be the first thing a NEW or logged-out user sees.
+## 2. Translate Remaining Screens
 
-## 3. AI Coach Edge Function
+These screens still have hardcoded English strings:
 
-Create a new edge function `ai-coach` with:
-- Full training knowledge system prompt (same cheat sheet as patient-sim)
-- Modes: general advice, SMS/email generator, treatment plan helper, script generator, educational material creator
-- Accepts `{ messages, mode }` — mode determines the system prompt variation
-- Uses Lovable AI gateway (`google/gemini-2.5-flash`)
+- **Splash.tsx**: "Practice Onboarding", "Welcome to the ByteSense Team", field labels, "Get Started", confidential footer
+- **Baseline.tsx**: "Step 2 — Where You Are Today", "No wrong answers", "Next →", "See Results →"
+- **BaselineResults.tsx**: "Your Starting Point", "Strong Foundation"/"Developing"/"Fresh Start", level messages, "Your Roles:", "Your personalized onboarding:", "Start Onboarding →"
+- **RoleSelect.tsx**: "Step 1 — Your Role(s)", role selection instructions, "Continue"
+- **ModuleView.tsx**: "← Dashboard", speaker button, quiz labels, "Next Module →", "Back to Dashboard"
+- **Simulation.tsx**: All patient sim UI strings
+- **SimulationSummary.tsx**: Summary labels, score display, tips
+- **Report.tsx**: "Training Report", "Congratulations", certificate text, LinkedIn share, print
 
-## 4. AI Coach Floating Chat Panel
+Each screen needs the `lang` prop threaded from `AppState` and wrapped with `t(lang, key)`. ~60 new translation keys across all 5 languages.
 
-Add to `Dashboard.tsx`:
-- Floating "AI Coach" button (bottom-right corner, gold accent)
-- Slide-out chat panel when clicked
-- Chat interface with message history (session-only, no DB persistence needed initially)
-- Quick-action buttons at the top: "Patient Follow-Up", "Treatment Plan", "Handling Objections", "Educational Material"
-- Each quick action pre-fills a system prompt mode
+## 3. Thread `lang` Through All Screens
 
-New component: `src/components/AICoach.tsx`
+Currently only `Dashboard` and `AICoach` receive `lang`. Update `Index.tsx` to pass `s.lang` (as `Lang`) to every screen component. Each screen's props interface gets `lang?: Lang`.
 
-## 5. Coaching Session Summary
+## 4. Testing Plan (manual, after implementation)
 
-After simulation ends (user clicks "Back" or completes 3 patients):
-- Collect all `[COACH:]` tips from the conversation
-- Call the AI with the full conversation asking for a structured summary
-- Display a summary screen with:
-  - Performance score (AI-generated)
-  - Number of coaching tips received
-  - Key areas to improve
-  - Specific modules to review
-  - "Return to Dashboard" button
-
-New component: `src/screens/SimulationSummary.tsx`
-- Add new phase `"simSummary"` to AppState
-- Simulation "Back" button triggers summary generation instead of immediate return
-
-## 6. Dashboard Enhancements
-
-Add to the dashboard below the training modules:
-- **Quick Tools** section with cards for:
-  - Generate Patient Follow-Up (opens AI Coach with pre-filled mode)
-  - Create Treatment Plan
-  - Generate Consent Form
-  - Educational Materials
-- **Admin button** (visible to practice owners only) linking to staff management
-
----
+- **ByteSense Admin Portal**: Navigate to `/bytesense-admin`, generate codes, verify they appear
+- **AI Coach**: Open coach, send a message, verify response, test Copy and Save buttons
+- **Language Switching**: Switch to Spanish on dashboard, verify all screens translate when navigating through Splash → RoleSelect → Baseline → Results → Dashboard → Coach → Simulation → Summary → Report
 
 ## Files Changed
 
-1. **Database insert** — `user_roles` row for bytesense_admin
-2. **`supabase/functions/ai-coach/index.ts`** — New edge function
-3. **`src/components/AICoach.tsx`** — New floating chat panel component
-4. **`src/screens/SimulationSummary.tsx`** — New post-simulation summary screen
-5. **`src/screens/Dashboard.tsx`** — Add AI Coach button, Quick Tools section, sign-out button
-6. **`src/screens/Simulation.tsx`** — Route to summary instead of dashboard on exit
-7. **`src/hooks/useAppState.ts`** — Add `simSummary` phase
-8. **`src/pages/Index.tsx`** — Add SimulationSummary route
-
-## Implementation Order
-
-1. Insert bytesense_admin role for your account
-2. Add sign-out button to dashboard
-3. Create `ai-coach` edge function + deploy
-4. Build AICoach floating panel component
-5. Build SimulationSummary screen
-6. Wire everything into Dashboard and Index
-7. Add Quick Tools section to dashboard
+1. **`src/data/translations.ts`** — ~60 new keys × 5 languages
+2. **`src/components/AICoach.tsx`** — Copy/Save buttons, Saved tab
+3. **`src/screens/Splash.tsx`** — Wrap strings with `t()`
+4. **`src/screens/RoleSelect.tsx`** — Wrap strings with `t()`
+5. **`src/screens/Baseline.tsx`** — Wrap strings with `t()`
+6. **`src/screens/BaselineResults.tsx`** — Wrap strings with `t()`
+7. **`src/screens/ModuleView.tsx`** — Wrap strings with `t()`
+8. **`src/screens/Simulation.tsx`** — Wrap strings with `t()`
+9. **`src/screens/SimulationSummary.tsx`** — Wrap strings with `t()`
+10. **`src/screens/Report.tsx`** — Wrap strings with `t()`
+11. **`src/pages/Index.tsx`** — Pass `lang` to all screen components
 
