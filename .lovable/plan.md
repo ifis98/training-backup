@@ -1,32 +1,52 @@
 
 
-# Add Knowledge Score, Training Recommendations & Improvement Tips to Dashboards
+# Auto-Admin for @bytesense.ai + AI Simulations Button Fix
 
-## What Gets Added
+## 1. Auto-assign `bytesense_admin` role for @bytesense.ai emails
 
-### Knowledge Score Calculation
-Derive a "Knowledge Score" from existing data: baseline score (`s.blScore`), module quiz performance (can be computed from completed modules and XP), and simulation performance (`s.simP`). Display as a prominent radial gauge on both dashboards.
+**Database migration**: Create a trigger function that fires after a new user is created (on the `profiles` table insert, which is already triggered by `handle_new_user`). If the user's email ends in `@bytesense.ai`, automatically insert a `bytesense_admin` role into `user_roles`.
 
-Formula: weighted average of baseline score (30%), module completion rate (40%), simulation score (30%). Displayed as 0–100.
+```sql
+CREATE OR REPLACE FUNCTION public.auto_assign_bytesense_admin()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  user_email text;
+BEGIN
+  SELECT email INTO user_email FROM auth.users WHERE id = NEW.user_id;
+  IF user_email LIKE '%@bytesense.ai' THEN
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES (NEW.user_id, 'bytesense_admin')
+    ON CONFLICT (user_id, role) DO NOTHING;
+  END IF;
+  RETURN NEW;
+END;
+$$;
 
-### Training Recommendations Engine
-Analyze which phases/modules are incomplete and which quiz topics were weak. Generate personalized recommendations like "Complete Phase 3 — Product Knowledge" or "Review patient communication techniques." Shown as a prioritized card list with action buttons that navigate to the relevant module.
+CREATE TRIGGER on_profile_created_assign_admin
+AFTER INSERT ON public.profiles
+FOR EACH ROW EXECUTE FUNCTION public.auto_assign_bytesense_admin();
+```
 
-### Areas Needing Improvement + Tips
-Based on incomplete phases and low-score areas, show categorized improvement cards (e.g., "Sales Techniques", "Patient Communication", "Product Knowledge") with specific tips pulled from module content. Each card has a color-coded priority indicator (red/yellow/green).
+This means any new account with a `@bytesense.ai` email automatically gets `bytesense_admin` access — no manual role assignment needed.
 
-## Files Changed
+**For existing users**: Run a one-time data operation to assign `bytesense_admin` to any current users with `@bytesense.ai` emails who don't already have the role.
 
-1. **`src/screens/Dashboard.tsx`** — Add Knowledge Score gauge, recommendations section, improvement tips section (owner sees their own + aggregate staff view)
-2. **`src/screens/StaffDashboard.tsx`** — Add personal Knowledge Score gauge, personalized recommendations, improvement areas with tips
-3. **`src/data/translations.ts`** — Add ~15 new keys: `knowledge_score`, `training_recommendations`, `areas_to_improve`, `improvement_tips`, `recommended_next`, `priority_high/medium/low`, `score_excellent/good/needs_work`
-4. **`src/lib/helpers.ts`** — Add `computeKnowledgeScore()` and `getRecommendations()` utility functions that both dashboards share
+## 2. "Start AI Simulations" button → navigate to simulation screen
 
-## Implementation Details
+The AI Simulations KPI card (`s.simP/3`) currently just displays info. The AI Sim row in the training modules accordion (line 394-402 of Dashboard.tsx) does navigate to simulation but only when all modules are done.
 
-**Knowledge Score** — New KPI card with a circular progress ring (SVG-based, not recharts) showing the computed score with color coding: green (80+), gold (50-79), red (below 50).
+**Changes to `src/screens/Dashboard.tsx`**:
+- Make the AI Simulations KPI card clickable — when clicked, navigate to `{ phase: "simulation" }` (same behavior as the accordion row)
+- Add a visible "Start AI Simulations →" button/link inside or below the KPI card
+- Same treatment in `src/screens/StaffDashboard.tsx`
 
-**Recommendations** — Glass card with ordered list. Each item shows phase icon, module title, estimated time, and a "Start" button. Limited to top 3-5 most impactful recommendations.
+## 3. Summary of files changed
 
-**Improvement Areas** — Grid of glass cards grouped by category (Communication, Product, Sales, Operations, Advanced). Each shows completion % for that category, 2-3 specific tips, and links to relevant modules. Uses the phase color coding from constants.
+1. **Database migration** — trigger to auto-assign `bytesense_admin` role for `@bytesense.ai` emails
+2. **`src/screens/Dashboard.tsx`** — Make AI Simulations KPI card clickable, navigates to simulation phase
+3. **`src/screens/StaffDashboard.tsx`** — Same clickable simulation card
 
