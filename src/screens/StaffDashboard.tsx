@@ -139,31 +139,31 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
         {/* KPI Cards */}
         <div style={{ display: "flex", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
-          {kpiCard("Progress", `${pr}%`, `${dN}/${myM.length} modules`, C.teal, C.gradTeal)}
-          {kpiCard("XP", s.xp, "Points Earned", C.gold, C.gradGold)}
-          {kpiCard("Baseline", s.blScore ?? '—', "Initial Score", C.blue, C.gradBlue)}
-          {kpiCard("Simulations", `${s.simP}/3`, "Completed", C.red, C.gradRed)}
+          {kpiCard(T("kpi_progress"), `${pr}%`, `${dN}/${myM.length} ${T("modules")}`, C.teal, C.gradTeal)}
+          {kpiCard(T("xp"), s.xp, T("kpi_points_earned"), C.gold, C.gradGold)}
+          {kpiCard(T("kpi_baseline"), s.blScore ?? '—', T("kpi_initial_score"), C.blue, C.gradBlue)}
+          {kpiCard(T("kpi_simulations"), `${s.simP}/3`, T("kpi_completed"), C.red, C.gradRed)}
         </div>
 
         {/* Charts */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 24 }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> Progress by Phase
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("progress_by_phase")}
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={phaseChartData} barSize={14}>
                 <XAxis dataKey="name" tick={{ fill: C.ash, fontSize: 9 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="done" stackId="a" fill={C.teal} name="Done" />
-                <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" name="Remaining" />
+                 <Bar dataKey="done" stackId="a" fill={C.teal} name={T("done_label")} />
+                 <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" name={T("remaining_label")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div style={{ ...glass, padding: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} /> Completion
+             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+               <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} /> {T("completion")}
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
               <ResponsiveContainer width={160} height={160}>
@@ -175,7 +175,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               </ResponsiveContainer>
               <div style={{ marginLeft: -20, textAlign: "center" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: C.teal }}>{pr}%</div>
-                <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>Done</div>
+                <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>{T("done")}</div>
               </div>
             </div>
           </div>
@@ -201,7 +201,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {/* Training Modules Accordion */}
         <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
           <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 16 }}>📋</span> Training Modules
+            <span style={{ fontSize: 16 }}>📋</span> {T("training_modules_label")}
             <span style={{ fontSize: 11, color: C.ash, marginLeft: "auto", background: "rgba(255,255,255,0.06)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
           </div>
           {myPH.map(phase => {
