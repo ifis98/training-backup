@@ -18,15 +18,26 @@ function loadFavorites(): SavedResponse[] {
   try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]"); } catch { return []; }
 }
 
+const TypingDots = () => (
+  <div style={{ display: "flex", gap: 5, padding: "14px 18px", alignItems: "center" }}>
+    {[0, 1, 2].map(i => (
+      <div key={i} style={{
+        width: 7, height: 7, borderRadius: "50%", background: C.gold,
+        animation: `typing-dot 1.4s ease-in-out ${i * 0.2}s infinite`,
+      }} />
+    ))}
+  </div>
+);
+
 export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachProps) {
   const T = (key: string) => t(lang, key);
 
   const MODES = [
-    { id: "general", label: T("ask_anything"), desc: T("ask_anything_desc") },
-    { id: "followup", label: T("followup_label"), desc: T("followup_mode_desc") },
-    { id: "treatment", label: T("treatment_label"), desc: T("treatment_mode_desc") },
-    { id: "objections", label: T("objections_label"), desc: T("objections_mode_desc") },
-    { id: "educational", label: T("education_label"), desc: T("education_mode_desc") },
+    { id: "general", label: T("ask_anything"), desc: T("ask_anything_desc"), icon: "✦" },
+    { id: "followup", label: T("followup_label"), desc: T("followup_mode_desc"), icon: "✉" },
+    { id: "treatment", label: T("treatment_label"), desc: T("treatment_mode_desc"), icon: "◈" },
+    { id: "objections", label: T("objections_label"), desc: T("objections_mode_desc"), icon: "◇" },
+    { id: "educational", label: T("education_label"), desc: T("education_mode_desc"), icon: "◎" },
   ];
 
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -89,98 +100,166 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
 
   const hintKey = `coach_${mode}_hint`;
 
+  const glassCard = {
+    background: C.glass,
+    backdropFilter: C.blur,
+    WebkitBackdropFilter: C.blur,
+    border: `1px solid ${C.glassBorder}`,
+    borderRadius: C.radius,
+  } as React.CSSProperties;
+
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
       display: "flex", flexDirection: "column",
-      background: C.dark, fontFamily: C.fn,
+      background: `radial-gradient(ellipse at top, #1a1a24, ${C.dark})`,
+      fontFamily: C.fn,
     }}>
       {/* Header */}
-      <div style={{ padding: "14px 20px", borderBottom: `1px solid ${C.borderD}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("ai_coach")}</div>
-          <div style={{ fontSize: 11, color: C.ash }}>{MODES.find(m => m.id === mode)?.desc}</div>
+      <div style={{
+        padding: "16px 24px",
+        borderBottom: `1px solid ${C.glassBorder}`,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "rgba(20, 20, 28, 0.7)",
+        backdropFilter: C.blur,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: C.radiusSm,
+            background: C.gradGold,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 18, boxShadow: C.glow(C.gold, 0.3),
+          }}>🧠</div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.white, letterSpacing: 0.5 }}>{T("ai_coach")}</div>
+            <div style={{ fontSize: 11, color: C.ash }}>{MODES.find(m => m.id === mode)?.desc}</div>
+          </div>
         </div>
-        <button onClick={onClose} style={{ background: "none", border: "none", color: C.ash, fontSize: 20, cursor: "pointer", fontFamily: C.fn }}>✕</button>
+        <button onClick={onClose} style={{
+          background: "rgba(255,255,255,0.06)", border: `1px solid ${C.glassBorder}`,
+          color: C.ash, width: 36, height: 36, borderRadius: C.radiusSm,
+          fontSize: 16, cursor: "pointer", fontFamily: C.fn,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all 0.2s",
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = C.white; }}
+        onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = C.ash; }}
+        >✕</button>
       </div>
 
       {/* Tab Bar */}
-      <div style={{ display: "flex", borderBottom: `1px solid ${C.borderD}` }}>
-        <button onClick={() => setTab("chat")}
-          style={{ flex: 1, padding: "8px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", border: "none", background: tab === "chat" ? C.dark2 : "transparent", color: tab === "chat" ? C.gold : C.ash }}>
-          💬 {T("chat")}
-        </button>
-        <button onClick={() => setTab("saved")}
-          style={{ flex: 1, padding: "8px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", border: "none", background: tab === "saved" ? C.dark2 : "transparent", color: tab === "saved" ? C.gold : C.ash }}>
-          ⭐ {T("saved_responses")} ({favorites.length})
-        </button>
+      <div style={{ display: "flex", gap: 4, padding: "10px 24px", borderBottom: `1px solid ${C.glassBorder}` }}>
+        {[{ id: "chat" as const, label: `💬 ${T("chat")}` }, { id: "saved" as const, label: `⭐ ${T("saved_responses")} (${favorites.length})` }].map(tb => (
+          <button key={tb.id} onClick={() => setTab(tb.id)}
+            style={{
+              flex: 1, padding: "10px", fontSize: 12, fontWeight: 700, fontFamily: C.fn,
+              cursor: "pointer", border: "none", borderRadius: C.radiusXs,
+              background: tab === tb.id ? "rgba(201, 168, 76, 0.15)" : "transparent",
+              color: tab === tb.id ? C.gold : C.ash,
+              transition: "all 0.2s",
+            }}>
+            {tb.label}
+          </button>
+        ))}
       </div>
 
       {tab === "saved" ? (
-        <div style={{ flex: 1, padding: "16px 20px", overflowY: "auto" }}>
+        <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto" }}>
           {favorites.length === 0 && (
-            <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>{T("no_saved")}</div>
+            <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 60 }}>
+              <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.4 }}>⭐</div>
+              {T("no_saved")}
+            </div>
           )}
           {favorites.map((fav, i) => (
-            <div key={i} style={{ background: C.dark2, padding: "12px 14px", marginBottom: 8, fontSize: 13, color: C.white, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 9, color: C.gold, fontWeight: 700 }}>{fav.mode.toUpperCase()} · {new Date(fav.savedAt).toLocaleDateString()}</span>
+            <div key={i} style={{ ...glassCard, padding: "16px 18px", marginBottom: 10, animation: `float-up 0.3s ease-out ${i * 0.05}s both` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: 9, color: C.gold, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>
+                  {fav.mode} · {new Date(fav.savedAt).toLocaleDateString()}
+                </span>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => copyText(fav.content)} style={{ background: "none", border: "none", color: C.ash, fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>📋</button>
-                  <button onClick={() => deleteFavorite(i)} style={{ background: "none", border: "none", color: C.red, fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>🗑️</button>
+                  <button onClick={() => copyText(fav.content)} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, fontSize: 12, cursor: "pointer", fontFamily: C.fn, padding: "4px 8px", borderRadius: C.radiusXs }}>📋</button>
+                  <button onClick={() => deleteFavorite(i)} style={{ background: "rgba(204,16,16,0.1)", border: "none", color: C.red, fontSize: 12, cursor: "pointer", fontFamily: C.fn, padding: "4px 8px", borderRadius: C.radiusXs }}>🗑️</button>
                 </div>
               </div>
-              {fav.content.length > 300 ? fav.content.slice(0, 300) + "..." : fav.content}
+              <div style={{ fontSize: 13, color: C.white, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                {fav.content.length > 300 ? fav.content.slice(0, 300) + "..." : fav.content}
+              </div>
             </div>
           ))}
         </div>
       ) : (
         <>
-          {/* Mode Tabs */}
-          <div style={{ display: "flex", gap: 4, padding: "8px 12px", overflowX: "auto", borderBottom: `1px solid ${C.borderD}` }}>
+          {/* Mode Pills */}
+          <div style={{ display: "flex", gap: 6, padding: "10px 24px", overflowX: "auto", borderBottom: `1px solid ${C.glassBorder}` }}>
             {MODES.map(m => (
               <button key={m.id} onClick={() => handleModeChange(m.id)}
                 style={{
-                  background: mode === m.id ? C.gold : C.dark2,
+                  background: mode === m.id ? C.gradGold : "rgba(255,255,255,0.04)",
                   color: mode === m.id ? C.dark : C.ash,
-                  border: "none", padding: "6px 12px", fontSize: 11, fontWeight: 700,
+                  border: mode === m.id ? "none" : `1px solid ${C.glassBorder}`,
+                  padding: "7px 16px", fontSize: 11, fontWeight: 700,
                   fontFamily: C.fn, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
+                  borderRadius: 999, transition: "all 0.25s",
+                  boxShadow: mode === m.id ? C.glow(C.gold, 0.2) : "none",
                 }}>
-                {m.label}
+                <span style={{ marginRight: 5 }}>{m.icon}</span>{m.label}
               </button>
             ))}
           </div>
 
           {/* Chat Area */}
-          <div style={{ flex: 1, padding: "16px 20px", overflowY: "auto" }}>
+          <div style={{ flex: 1, padding: "20px 24px", overflowY: "auto" }}>
             {messages.length === 0 && (
-              <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
-                <div style={{ fontSize: 28, marginBottom: 12 }}>🧠</div>
-                <div style={{ fontWeight: 700, marginBottom: 4 }}>{T("coach_welcome")}</div>
-                <div style={{ fontSize: 12, maxWidth: 300, margin: "0 auto", lineHeight: 1.6 }}>{T(hintKey)}</div>
+              <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 50, animation: "float-up 0.5s ease-out" }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: C.radius,
+                  background: C.gradGold, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 28, margin: "0 auto 16px", boxShadow: C.glow(C.gold, 0.25),
+                }}>🧠</div>
+                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 16, color: C.white }}>{T("coach_welcome")}</div>
+                <div style={{ fontSize: 13, maxWidth: 340, margin: "0 auto", lineHeight: 1.7, color: C.ash }}>{T(hintKey)}</div>
               </div>
             )}
             {messages.map((msg, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
+              <div key={i} style={{
+                display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+                marginBottom: 12, animation: `float-up 0.3s ease-out`,
+              }}>
                 <div style={{
                   maxWidth: "80%",
-                  background: msg.role === "user" ? C.teal : C.dark2,
+                  background: msg.role === "user" ? C.gradTeal : C.glass,
+                  backdropFilter: msg.role === "assistant" ? C.blur : undefined,
                   color: C.white,
-                  padding: "10px 14px",
-                  borderRadius: msg.role === "user" ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
-                  fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap",
+                  padding: "12px 16px",
+                  borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                  fontSize: 13, lineHeight: 1.7, whiteSpace: "pre-wrap",
+                  border: msg.role === "assistant" ? `1px solid ${C.glassBorder}` : "none",
+                  boxShadow: msg.role === "user" ? C.glow(C.teal, 0.15) : C.shadowCard,
                 }}>
                   {msg.role === "assistant" && (
                     <>
-                      <div style={{ fontSize: 9, color: C.gold, marginBottom: 4, fontWeight: 700 }}>{T("ai_coach").toUpperCase()}</div>
+                      <div style={{ fontSize: 9, color: C.gold, marginBottom: 6, fontWeight: 700, letterSpacing: 2 }}>{T("ai_coach").toUpperCase()}</div>
                       {msg.content}
-                      <div style={{ display: "flex", gap: 8, marginTop: 8, borderTop: `1px solid ${C.borderD}`, paddingTop: 6 }}>
+                      <div style={{ display: "flex", gap: 6, marginTop: 10, borderTop: `1px solid ${C.glassBorder}`, paddingTop: 8 }}>
                         <button onClick={() => copyText(msg.content)}
-                          style={{ background: "none", border: "none", color: C.ash, fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 3 }}>
+                          style={{
+                            background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, fontSize: 11,
+                            cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4,
+                            padding: "5px 10px", borderRadius: C.radiusXs, transition: "all 0.2s",
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}>
                           📋 {T("copy")}
                         </button>
                         <button onClick={() => saveResponse(msg.content)}
-                          style={{ background: "none", border: "none", color: C.ash, fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 3 }}>
+                          style={{
+                            background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, fontSize: 11,
+                            cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4,
+                            padding: "5px 10px", borderRadius: C.radiusXs, transition: "all 0.2s",
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}>
                           ⭐ {T("save")}
                         </button>
                       </div>
@@ -191,24 +270,41 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
               </div>
             ))}
             {loading && (
-              <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-                <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>{T("thinking")}</div>
+              <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 12 }}>
+                <div style={{ ...glassCard, padding: 0 }}><TypingDots /></div>
               </div>
             )}
             <div ref={chatEnd} />
           </div>
 
           {/* Input */}
-          <div style={{ padding: "12px 20px", borderTop: `1px solid ${C.borderD}`, display: "flex", gap: 8 }}>
+          <div style={{
+            padding: "14px 24px", borderTop: `1px solid ${C.glassBorder}`,
+            display: "flex", gap: 10, alignItems: "center",
+            background: "rgba(20, 20, 28, 0.7)", backdropFilter: C.blur,
+          }}>
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && sendMessage()}
               placeholder={T("coach_placeholder")}
-              style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: "10px 14px", fontSize: 14, fontFamily: C.fn, outline: "none" }}
+              style={{
+                flex: 1, background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`,
+                color: C.white, padding: "12px 18px", fontSize: 14, fontFamily: C.fn,
+                outline: "none", borderRadius: C.radiusSm, transition: "border-color 0.2s",
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = "rgba(201, 168, 76, 0.4)"}
+              onBlur={e => e.currentTarget.style.borderColor = C.glassBorder}
             />
             <button onClick={() => sendMessage()}
-              style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
+              style={{
+                background: C.gradGold, color: C.dark, border: "none",
+                padding: "12px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn,
+                cursor: "pointer", flexShrink: 0, borderRadius: C.radiusSm,
+                boxShadow: C.glow(C.gold, 0.2), transition: "all 0.2s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
               {T("send")}
             </button>
           </div>
