@@ -18,33 +18,57 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          goals: string[] | null
+          guard_price: number | null
+          guards_per_month: number | null
+          has_scanner: boolean | null
           id: string
           message: string
+          monthly_patients: number | null
           name: string
+          operatories: number | null
           phone: string
           practice_name: string
+          practice_size: string | null
+          scanner_type: string | null
           status: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           email: string
+          goals?: string[] | null
+          guard_price?: number | null
+          guards_per_month?: number | null
+          has_scanner?: boolean | null
           id?: string
           message?: string
+          monthly_patients?: number | null
           name: string
+          operatories?: number | null
           phone?: string
           practice_name?: string
+          practice_size?: string | null
+          scanner_type?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           email?: string
+          goals?: string[] | null
+          guard_price?: number | null
+          guards_per_month?: number | null
+          has_scanner?: boolean | null
           id?: string
           message?: string
+          monthly_patients?: number | null
           name?: string
+          operatories?: number | null
           phone?: string
           practice_name?: string
+          practice_size?: string | null
+          scanner_type?: string | null
           status?: string
           updated_at?: string
         }
