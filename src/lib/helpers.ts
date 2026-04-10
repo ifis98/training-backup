@@ -99,13 +99,22 @@ export function stopSpeech() {
   window.speechSynthesis?.cancel();
 }
 
-export function startSTT(cb: (text: string) => void) {
+export function startSTT(cb: (text: string) => void, onEnd?: () => void) {
   const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   if (!SR) return null;
   const r = new SR();
-  r.continuous = false;
+  r.continuous = true;
+  r.interimResults = true;
   r.lang = "en-US";
-  r.onresult = (e: any) => cb(e.results[0][0].transcript);
+  r.onresult = (e: any) => {
+    let transcript = "";
+    for (let i = 0; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    cb(transcript);
+  };
+  r.onerror = () => { onEnd?.(); };
+  r.onend = () => { onEnd?.(); };
   r.start();
   return r;
 }
