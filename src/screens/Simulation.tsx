@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { C, ROLES } from '@/data/constants';
+import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop, startSTT } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
@@ -90,8 +91,11 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   return (
     <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
-        <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
-          style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("back")}</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Logo size={24} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
+          <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
+            style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("back")}</button>
+        </div>
         <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("patient_simulation")}</div>
         <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700 }}>{s.simP}/3</div>
       </div>

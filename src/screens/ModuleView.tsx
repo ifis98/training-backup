@@ -1,5 +1,5 @@
 import { C, PH, Module } from '@/data/constants';
-import { ContentRenderer } from '@/components/ByteSenseLogo';
+import { ContentRenderer, Logo } from '@/components/ByteSenseLogo';
 import { scrollTop, speak, stopSpeech } from '@/lib/helpers';
 import { ShuffledQuestion } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
@@ -26,8 +26,11 @@ export default function ModuleView({ s, u, myM, getQuestion, lang = "en" }: Modu
     <div style={{ fontFamily: C.fn, background: C.snow, minHeight: "100vh" }}>
       <div style={{ background: C.dark, padding: "14px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); u({ spk: false }); scrollTop(); }}
-            style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("dashboard_back")}</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <Logo size={24} light onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); u({ spk: false }); scrollTop(); }} />
+            <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); u({ spk: false }); scrollTop(); }}
+              style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("dashboard_back")}</button>
+          </div>
           <button onClick={() => {
             if (s.spk) { stopSpeech(); u({ spk: false }); }
             else { speak(mod.content); u({ spk: true }); }
