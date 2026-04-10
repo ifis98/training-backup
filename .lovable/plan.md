@@ -1,95 +1,40 @@
 
 
-# Premium UI Overhaul + ByteSense Admin Data Access + Email Notifications
+# Fix Language Translations in Dashboard + Staff Dashboard
 
-This is a large scope. The plan is organized into clear deliverables.
+## Problem
 
-## What Changes
+The language switcher works (it updates `s.lang` in state), but the recently redesigned dashboards have ~30+ hardcoded English strings that bypass the `T()` translation function. When you switch to Spanish, only the strings that use `T()` update — the new KPI cards, chart labels, revenue calculator, goals/notes, and section headers stay in English.
 
-### 1. Design System Upgrade — Glassmorphism + Modern Polish
+## What to Fix
 
-**File: `src/data/constants.ts`** — Add new design tokens:
-- Gradient definitions (e.g., `gradTeal`, `gradRed`, `gradGold`)
-- Glass effect values (`glass: "rgba(20,20,24,0.6)"`, `glassBorder: "rgba(255,255,255,0.08)"`)
-- Border radius tokens (`radius: "16px"`, `radiusSm: "12px"`)
-- Shadow/glow tokens for cards
-- Backdrop blur values
+### 1. Add ~30 new translation keys to `src/data/translations.ts`
 
-### 2. Owner Dashboard Redesign (`src/screens/Dashboard.tsx`)
+New keys needed for all 5 languages (en, es, pt, fr, zh):
 
-Full visual overhaul — same data, premium presentation:
-- **KPI Cards**: Glassmorphic cards with `backdrop-filter: blur(20px)`, subtle gradient borders, animated number counters, and soft glow effects matching each card's accent color
-- **Charts**: Rounded corners, gradient fills instead of flat colors, custom styled tooltips with glass effect, smooth area charts with gradient fills
-- **Revenue Calculator**: Redesigned with custom-styled range sliders (teal/gold/red tracks), glass comparison cards with animated value transitions
-- **Goals & Notes**: Rounded inputs, subtle hover states, glass card containers
-- **Quick Tools**: Cards with gradient hover effects, icon containers with colored glass backgrounds, micro-interactions on hover
-- **Training Modules accordion**: Smooth expand/collapse, progress rings instead of dots, phase color gradients
-- **Header**: Subtle gradient background, avatar placeholder, refined typography hierarchy
-- Overall: rounded corners everywhere (no sharp boxes), consistent 16px radius, smooth transitions
+- `kpi_training_progress`, `kpi_xp_earned`, `kpi_experience_points`, `kpi_modules_done`, `kpi_of_total`, `kpi_ai_simulations`, `kpi_patient_encounters`
+- `modules_by_phase`, `staff_training_progress`, `overall_completion`, `complete_label`
+- `training_modules_label`
+- `revenue_calculator`, `patients_per_month`, `avg_case_price`, `current_close_rate`, `current_monthly`, `with_bytesense`, `projected_close`, `potential_uplift`
+- `goals_label`, `notes_label`, `add_goal_placeholder`, `notes_placeholder`
+- `done_label`, `remaining_label`
+- Staff-specific: `kpi_progress`, `kpi_points_earned`, `kpi_baseline`, `kpi_initial_score`, `kpi_simulations`, `kpi_completed`
 
-### 3. Staff Dashboard Redesign (`src/screens/StaffDashboard.tsx`)
+### 2. Update `src/screens/Dashboard.tsx`
 
-Same glassmorphic treatment as owner dashboard, focused on personal metrics. Matching visual language — glass KPI cards, gradient charts, refined training module list.
+Replace all hardcoded English strings with `T("key")` calls. Approximately 25 replacements across KPI cards, chart titles, revenue calculator labels, goals/notes headers, and inline text.
 
-### 4. AI Coach Visual Overhaul (`src/components/AICoach.tsx`)
+### 3. Update `src/screens/StaffDashboard.tsx`
 
-- Glass background overlay with blur
-- Rounded message bubbles with gradient accents
-- Mode tabs: pill-shaped with gradient active state
-- Input area: glass container with rounded input, gradient send button
-- Typing indicator: animated dots instead of text
-- Saved responses tab: glass cards with refined typography
-- Overall: feels like a premium AI chat interface (think ChatGPT/Claude-level polish)
+Same treatment — replace hardcoded KPI card labels, chart titles, section headers with `T()` calls. Approximately 10 replacements.
 
-### 5. ByteSense Admin Portal Enhancement (`src/pages/ByteSenseAdmin.tsx`)
+### 4. Fix ResponsiveContainer warning
 
-- Same glassmorphic design system
-- Add KPI summary cards at top (total practices, active codes, pending demos, total staff)
-- Charts: practice growth over time, demo request funnel
-- Demo requests now show the expanded fields (operatories, scanner type, goals, monthly patients, guard price, etc.) in an expandable detail view
-- Tab navigation: pill-shaped, gradient active states
-
-### 6. Welcome/Landing Page Polish (`src/pages/Welcome.tsx`)
-
-- Hero: add subtle animated gradient background, refined typography
-- Revenue calculator: same premium treatment as dashboard version
-- Demo form: glass-styled multi-step form, refined inputs with focus glow effects, progress dots for steps
-- Feature cards: glassmorphic with hover lift effects
-- CTA buttons: gradient backgrounds with hover glow
-
-### 7. Admin Access to All Dashboard Data
-
-**File: `src/pages/ByteSenseAdmin.tsx`** — Add new tabs/views:
-- **Practice Dashboards**: ByteSense admins can view any practice's training progress, staff completion, XP totals, simulation counts
-- **Demo Request Details**: Expandable rows showing all collected data (scanner type, goals, guard price, monthly patients, operatories, practice size)
-- **Analytics Overview**: Aggregate stats across all practices — total users, average completion rate, total XP earned, most common goals
-
-### 8. Email Notification Setup
-
-This requires setting up email infrastructure. The plan:
-- When a demo request is submitted, notify ByteSense team via email
-- When staff complete training milestones, notify practice owner
-- This will require email domain setup through Lovable Cloud
-
-I will check if email infrastructure exists and guide you through setup if needed. For now, the UI changes come first — email can be wired up after.
+The console shows `ResponsiveContainer` warnings for the PieChart (lines 225-231 in Dashboard). Replace `<ResponsiveContainer width={180} height={180}>` with a plain `<div>` wrapper since fixed dimensions don't need ResponsiveContainer.
 
 ## Files Changed
 
-1. `src/data/constants.ts` — New design tokens (glass, gradients, radii, shadows)
-2. `src/screens/Dashboard.tsx` — Full glassmorphic redesign
-3. `src/screens/StaffDashboard.tsx` — Matching premium redesign
-4. `src/components/AICoach.tsx` — Premium chat UI overhaul
-5. `src/pages/ByteSenseAdmin.tsx` — Glass design + expanded data views + KPI cards + charts
-6. `src/pages/Welcome.tsx` — Landing page polish + glass demo form
-7. `src/index.css` — Add global glass utility classes, custom scrollbar styling, animated gradient keyframes
-
-## Implementation Order
-
-1. Design tokens in constants.ts + global CSS
-2. Dashboard.tsx (owner) — largest file, sets the visual standard
-3. StaffDashboard.tsx — mirrors owner dashboard style
-4. AICoach.tsx — premium chat experience
-5. ByteSenseAdmin.tsx — admin portal with expanded data
-6. Welcome.tsx — landing page polish
-7. Email notifications (separate step, requires domain setup)
+1. `src/data/translations.ts` — Add ~30 new keys across all 5 languages
+2. `src/screens/Dashboard.tsx` — Replace hardcoded strings with `T()` calls + fix ResponsiveContainer
+3. `src/screens/StaffDashboard.tsx` — Replace hardcoded strings with `T()` calls
 
