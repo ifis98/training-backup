@@ -6,11 +6,12 @@ import { Logo } from '@/components/ByteSenseLogo';
 import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
-interface AdminDashboardProps {
-  user: any;
-  profile: any;
-  onBack: () => void;
-}
+interface AdminDashboardProps { user: any; profile: any; onBack: () => void; }
+
+const glass = {
+  background: C.glass, backdropFilter: C.blur, WebkitBackdropFilter: C.blur,
+  border: `1px solid ${C.glassBorder}`, borderRadius: C.radius,
+} as React.CSSProperties;
 
 export default function AdminDashboard({ user, profile, onBack }: AdminDashboardProps) {
   const [staff, setStaff] = useState<any[]>([]);
@@ -81,36 +82,35 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
   const avgProgress = staff.length > 0 ? Math.round(staff.reduce((a, s) => a + getProgress(s), 0) / staff.length) : 0;
   const totalCompleted = staff.filter(s => s.completed_at).length;
   const totalSims = staff.reduce((a, s) => a + (s.sim_patients || 0), 0);
+  const staffChartData = staff.map(s => ({ name: (s.profile?.full_name || '?').split(' ')[0], progress: getProgress(s) }));
 
-  const staffChartData = staff.map(s => ({
-    name: (s.profile?.full_name || '?').split(' ')[0],
-    progress: getProgress(s),
-  }));
-
-  const tabStyle = (active: boolean) => ({
-    background: active ? C.red : "transparent", color: active ? "#fff" : C.ash,
-    border: active ? "none" : `1px solid ${C.borderD}`, padding: "10px 16px", fontSize: 12, fontWeight: 700 as const,
-    fontFamily: C.fn, cursor: "pointer",
-  });
-
-  const kpiCard = (label: string, value: string | number, color: string) => (
-    <div style={{ background: C.dark2, border: `1px solid ${C.borderD}`, padding: "20px 16px", flex: 1, minWidth: 120, position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${color}, transparent)` }} />
-      <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>{label}</div>
+  const kpiCard = (label: string, value: string | number, color: string, gradient: string) => (
+    <div style={{ ...glass, padding: "22px 18px", flex: 1, minWidth: 120, position: "relative", overflow: "hidden", transition: "all 0.3s", boxShadow: C.glow(color, 0.08) }}
+      onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.boxShadow = C.glow(color, 0.2); e.currentTarget.style.transform = "translateY(-3px)"; }}
+      onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.boxShadow = C.glow(color, 0.08); e.currentTarget.style.transform = "translateY(0)"; }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: gradient, borderRadius: `${C.radius} ${C.radius} 0 0` }} />
+      <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10, fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
     </div>
   );
 
+  const tabItems = [
+    { id: 'overview' as const, label: 'Overview' },
+    { id: 'staff' as const, label: 'Staff Progress' },
+    { id: 'invitations' as const, label: 'Invitations' },
+    { id: 'certificate' as const, label: 'Certificate' },
+  ];
+
   return (
-    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", color: C.white }}>
-      <div style={{ padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>← Dashboard</button>
-        <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>Practice Admin</div>
+    <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: "100vh", color: C.white }}>
+      <div style={{ padding: "18px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(20,20,28,0.6)", backdropFilter: C.blur }}>
+        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, padding: "8px 16px", borderRadius: C.radiusSm }}>← Dashboard</button>
+        <div style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>Practice Admin</div>
         <div />
       </div>
 
       {practiceData?.practice_code && (
-        <div style={{ background: C.dark2, padding: "12px 24px", margin: "12px 24px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ margin: "16px 28px 0", ...glass, padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>Practice Join Code</div>
             <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>Share this with staff</div>
@@ -119,34 +119,39 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
         </div>
       )}
 
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 28px" }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-          <button style={tabStyle(tab === 'overview')} onClick={() => setTab('overview')}>Overview</button>
-          <button style={tabStyle(tab === 'staff')} onClick={() => setTab('staff')}>Staff Progress</button>
-          <button style={tabStyle(tab === 'invitations')} onClick={() => setTab('invitations')}>Invitations</button>
-          <button style={tabStyle(tab === 'certificate')} onClick={() => setTab('certificate')}>Certificate</button>
+          {tabItems.map(t => (
+            <button key={t.id} style={{
+              background: tab === t.id ? C.gradRed : "rgba(255,255,255,0.04)",
+              color: tab === t.id ? "#fff" : C.ash,
+              border: tab === t.id ? "none" : `1px solid ${C.glassBorder}`,
+              padding: "9px 18px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer",
+              borderRadius: 999, transition: "all 0.25s",
+              boxShadow: tab === t.id ? C.glow(C.red, 0.2) : "none",
+            }} onClick={() => setTab(t.id)}>{t.label}</button>
+          ))}
         </div>
 
         {tab === 'overview' && (
           <div>
-            {/* KPI Cards */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-              {kpiCard("Team Members", staff.length, C.teal)}
-              {kpiCard("Avg Progress", `${avgProgress}%`, C.gold)}
-              {kpiCard("Certified", totalCompleted, C.green)}
-              {kpiCard("Total Sims", totalSims, C.red)}
+            <div style={{ display: "flex", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
+              {kpiCard("Team Members", staff.length, C.teal, C.gradTeal)}
+              {kpiCard("Avg Progress", `${avgProgress}%`, C.gold, C.gradGold)}
+              {kpiCard("Certified", totalCompleted, C.green, `linear-gradient(135deg, ${C.green}, #10B981)`)}
+              {kpiCard("Total Sims", totalSims, C.red, C.gradRed)}
             </div>
-
-            {/* Staff Chart */}
             {staffChartData.length > 0 && (
-              <div style={{ background: C.dark2, border: `1px solid ${C.borderD}`, padding: 24, marginBottom: 24 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>Staff Training Progress</div>
+              <div style={{ ...glass, padding: 24, marginBottom: 24 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> Staff Training Progress
+                </div>
                 <ResponsiveContainer width="100%" height={Math.max(staffChartData.length * 50, 150)}>
-                  <BarChart data={staffChartData} layout="vertical" barSize={20}>
+                  <BarChart data={staffChartData} layout="vertical" barSize={18}>
                     <XAxis type="number" domain={[0, 100]} tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                     <YAxis dataKey="name" type="category" tick={{ fill: C.ash, fontSize: 12 }} axisLine={false} tickLine={false} width={70} />
-                    <Tooltip contentStyle={{ background: C.dark3, border: `1px solid ${C.borderD}`, borderRadius: 4, fontSize: 12 }} />
-                    <Bar dataKey="progress" fill={C.teal} radius={[0, 4, 4, 0]} name="Progress %" />
+                    <Tooltip contentStyle={{ background: C.glass, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12 }} />
+                    <Bar dataKey="progress" fill={C.teal} radius={[0, 6, 6, 0]} name="Progress %" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -156,30 +161,30 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
 
         {tab === 'staff' && (
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Team Training Progress</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 18 }}>Team Training Progress</h2>
             {loading ? <div style={{ color: C.ash }}>Loading...</div> : staff.length === 0 ? (
               <div style={{ color: C.ash, padding: 24, textAlign: "center" }}>No staff members yet.</div>
             ) : staff.map((s, i) => {
               const isCurrentUser = s.user_id === user.id;
               return (
-                <div key={i} style={{ background: C.dark2, padding: 20, marginBottom: 12, border: `1px solid ${C.borderD}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div key={i} style={{ ...glass, padding: 22, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
                       <div style={{ fontSize: 16, fontWeight: 700 }}>{s.profile?.full_name || 'Unknown'} {isCurrentUser && <span style={{ fontSize: 10, color: C.gold }}>(You)</span>}</div>
                       <div style={{ fontSize: 12, color: C.ash }}>{(s.training_roles || []).join(', ') || 'No roles'}</div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ fontSize: 24, fontWeight: 800, color: C.teal }}>{getProgress(s)}%</div>
+                      <div style={{ fontSize: 26, fontWeight: 800, color: C.teal }}>{getProgress(s)}%</div>
                       {!isCurrentUser && (
                         <button onClick={() => removeStaff(s)} disabled={removingId === s.user_id}
-                          style={{ background: "none", border: `1px solid ${C.red}`, color: C.red, padding: "4px 10px", fontSize: 10, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>Remove</button>
+                          style={{ background: "none", border: `1px solid ${C.glassBorder}`, color: C.red, padding: "5px 12px", fontSize: 10, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs }}>Remove</button>
                       )}
                     </div>
                   </div>
-                  <div style={{ background: C.dark3, height: 6, overflow: "hidden" }}>
-                    <div style={{ background: C.teal, height: "100%", width: `${getProgress(s)}%`, transition: "width 0.3s" }} />
+                  <div style={{ background: "rgba(255,255,255,0.06)", height: 5, borderRadius: 999, overflow: "hidden" }}>
+                    <div style={{ background: C.gradTeal, height: "100%", width: `${getProgress(s)}%`, transition: "width 0.3s", borderRadius: 999 }} />
                   </div>
-                  <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 11, color: C.ash, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: 16, marginTop: 10, fontSize: 11, color: C.ash, flexWrap: "wrap" }}>
                     <span>XP: {s.xp || 0}</span>
                     <span>Modules: {(s.done_modules || []).length}/{M.length}</span>
                     <span>Sims: {s.sim_patients || 0}/3</span>
@@ -193,15 +198,15 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
 
         {tab === 'invitations' && (
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Invite Staff</h2>
-            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 18 }}>Invite Staff</h2>
+            <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
               <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="staff@example.com" type="email"
-                style={{ flex: 1, padding: "12px 16px", fontSize: 14, fontFamily: C.fn, border: `1.5px solid ${C.borderD}`, background: C.dark2, color: C.white, outline: "none" }} />
+                style={{ flex: 1, padding: "13px 18px", fontSize: 14, fontFamily: C.fn, border: `1.5px solid ${C.glassBorder}`, background: "rgba(255,255,255,0.04)", color: C.white, outline: "none", borderRadius: C.radiusSm }} />
               <button onClick={sendInvite}
-                style={{ background: C.teal, color: C.white, border: "none", padding: "12px 24px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>Send Invite</button>
+                style={{ background: C.gradTeal, color: C.white, border: "none", padding: "13px 24px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>Send Invite</button>
             </div>
             {invitations.map((inv, i) => (
-              <div key={i} style={{ background: C.dark2, padding: 16, marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center", border: `1px solid ${C.borderD}` }}>
+              <div key={i} style={{ ...glass, padding: 18, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{inv.email}</div>
                   <div style={{ fontSize: 11, color: C.ash }}>
@@ -210,8 +215,8 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
-                  {inv.status === 'requested' && <button onClick={() => approveRequest(inv)} style={{ background: C.green, color: C.white, border: "none", padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>Approve</button>}
-                  {(inv.status === 'pending' || inv.status === 'requested') && <button onClick={() => revokeInvite(inv.id)} style={{ background: "none", border: `1px solid ${C.red}`, color: C.red, padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>{inv.status === 'requested' ? 'Deny' : 'Revoke'}</button>}
+                  {inv.status === 'requested' && <button onClick={() => approveRequest(inv)} style={{ background: C.green, color: C.white, border: "none", padding: "7px 16px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs }}>Approve</button>}
+                  {(inv.status === 'pending' || inv.status === 'requested') && <button onClick={() => revokeInvite(inv.id)} style={{ background: "none", border: `1px solid ${C.glassBorder}`, color: C.red, padding: "7px 16px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs }}>{inv.status === 'requested' ? 'Deny' : 'Revoke'}</button>}
                 </div>
               </div>
             ))}
@@ -220,15 +225,15 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
 
         {tab === 'certificate' && (
           <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <div style={{ border: `3px solid ${C.gold}`, padding: "60px 40px", maxWidth: 600, margin: "0 auto", background: `linear-gradient(135deg, ${C.dark2}, ${C.dark})` }}>
-              <div style={{ fontSize: 11, letterSpacing: 5, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 16 }}>Official Certification</div>
-              <Logo size={40} light />
-              <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, marginTop: 16 }}>Certified ByteSense Location</h2>
-              <div style={{ fontSize: 18, color: C.teal, fontWeight: 700, marginBottom: 24 }}>{practiceData?.name || 'Your Practice'}</div>
-              <p style={{ fontSize: 13, color: C.ash, lineHeight: 1.7, marginBottom: 24 }}>This practice has completed the ByteSense Practice Onboarding Program and is certified to deliver ByteSense health intelligence technology to patients.</p>
+            <div style={{ ...glass, padding: "60px 40px", maxWidth: 620, margin: "0 auto", boxShadow: C.glow(C.gold, 0.1), borderColor: `${C.gold}20` }}>
+              <div style={{ fontSize: 10, letterSpacing: 6, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 18 }}>Official Certification</div>
+              <Logo size={42} light />
+              <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 10, marginTop: 18 }}>Certified ByteSense Location</h2>
+              <div style={{ fontSize: 20, color: C.teal, fontWeight: 700, marginBottom: 28 }}>{practiceData?.name || 'Your Practice'}</div>
+              <p style={{ fontSize: 13, color: C.ash, lineHeight: 1.8, marginBottom: 28 }}>This practice has completed the ByteSense Practice Onboarding Program and is certified to deliver ByteSense health intelligence technology to patients.</p>
               <div style={{ fontSize: 12, color: C.gold }}>byteSense Inc. · {new Date().getFullYear()}</div>
             </div>
-            <button onClick={() => window.print()} style={{ marginTop: 24, background: C.gold, color: C.dark, border: "none", padding: "12px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>Print Certificate</button>
+            <button onClick={() => window.print()} style={{ marginTop: 28, background: C.gradGold, color: C.dark, border: "none", padding: "13px 30px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.gold, 0.2) }}>Print Certificate</button>
           </div>
         )}
       </div>

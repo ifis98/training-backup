@@ -1,4 +1,4 @@
-// ByteSense Brand Colors
+// ByteSense Brand Colors + Design Tokens
 export const C = {
   fn: "'Outfit', system-ui, sans-serif",
   red: "#CC1010",
@@ -32,6 +32,25 @@ export const C = {
   cyanBg: "#CFFAFE",
   rose: "#DB2777",
   roseBg: "#FCE7F3",
+  // Glassmorphism tokens
+  glass: "rgba(20, 20, 28, 0.55)",
+  glassBorder: "rgba(255, 255, 255, 0.08)",
+  glassHover: "rgba(255, 255, 255, 0.12)",
+  blur: "blur(20px)",
+  radius: "16px",
+  radiusSm: "12px",
+  radiusXs: "8px",
+  // Gradients
+  gradTeal: "linear-gradient(135deg, #14B8A6, #0D9488)",
+  gradRed: "linear-gradient(135deg, #CC1010, #FF3030)",
+  gradGold: "linear-gradient(135deg, #C9A84C, #D4AF37)",
+  gradBlue: "linear-gradient(135deg, #2563EB, #3B82F6)",
+  gradViolet: "linear-gradient(135deg, #7C3AED, #8B5CF6)",
+  gradDark: "linear-gradient(135deg, #141418, #1C1C22)",
+  // Shadows
+  glow: (color: string, intensity = 0.3) => `0 0 24px ${color}${Math.round(intensity * 255).toString(16).padStart(2, '0')}`,
+  shadowCard: "0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)",
+  shadowElevated: "0 16px 48px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3)",
 };
 
 export interface Role {
