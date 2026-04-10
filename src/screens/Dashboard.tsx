@@ -32,10 +32,11 @@ const glass = {
   borderRadius: C.radius,
 } as React.CSSProperties;
 
-const glassHover = (e: React.MouseEvent, enter: boolean) => {
+const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
   e.currentTarget.style.borderColor = enter ? C.glassHover : C.glassBorder;
   e.currentTarget.style.transform = enter ? "translateY(-2px)" : "translateY(0)";
 };
+
 
 export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: DashboardProps) {
   const allModsDone = dN === myM.length && myM.length > 0;
