@@ -6,6 +6,7 @@ import BaselineResults from '@/screens/BaselineResults';
 import Dashboard from '@/screens/Dashboard';
 import ModuleView from '@/screens/ModuleView';
 import Simulation from '@/screens/Simulation';
+import SimulationSummary from '@/screens/SimulationSummary';
 import Report from '@/screens/Report';
 
 const Index = () => {

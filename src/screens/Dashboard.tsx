@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { C, PH, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
+import { supabase } from '@/integrations/supabase/client';
+import AICoach from '@/components/AICoach';
 
 interface DashboardProps {
   s: AppState;
@@ -19,6 +22,19 @@ interface DashboardProps {
 export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset }: DashboardProps) {
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
+  const [showCoach, setShowCoach] = useState(false);
+  const [coachMode, setCoachMode] = useState("general");
+
+  const openCoach = (mode: string) => {
+    setCoachMode(mode);
+    setShowCoach(true);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('bsa6');
+    window.location.href = '/welcome';
+  };
 
   return (
     <div style={{ fontFamily: C.fn, background: C.snow, minHeight: "100vh" }}>
@@ -29,8 +45,12 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Logo size={28} light />
             </div>
-            <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); }}
-              style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>Change Roles</button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); }}
+                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>Change Roles</button>
+              <button onClick={handleSignOut}
+                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>Sign Out</button>
+            </div>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
             {sRoles.map(r => <span key={r.id} style={{ background: r.bg, color: r.color, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>{r.short}</span>)}
@@ -131,6 +151,26 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         )}
 
+        {/* Quick Tools */}
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: C.charcoal, marginBottom: 8 }}>🛠️ Quick Tools</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {[
+              { mode: "followup", icon: "✉️", label: "Patient Follow-Up", desc: "Generate SMS, email, letters" },
+              { mode: "treatment", icon: "📋", label: "Treatment Plan", desc: "Scripts & presentations" },
+              { mode: "objections", icon: "🛡️", label: "Handle Objections", desc: "Word-for-word scripts" },
+              { mode: "educational", icon: "📚", label: "Educational Material", desc: "Patient-facing content" },
+            ].map(tool => (
+              <div key={tool.mode} onClick={() => openCoach(tool.mode)}
+                style={{ background: C.white, border: `1.5px solid ${C.border}`, padding: "14px 12px", cursor: "pointer", transition: "border-color 0.2s" }}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{tool.icon}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.charcoal }}>{tool.label}</div>
+                <div style={{ fontSize: 10, color: C.ash }}>{tool.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Quick Reference */}
         <div style={{ background: C.white, border: `1.5px solid ${C.border}`, marginBottom: 16 }}>
           <div style={{ background: C.red, color: C.white, padding: "10px 16px", fontSize: 13, fontWeight: 700 }}>Quick Reference</div>
@@ -166,6 +206,20 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           byteSense Inc. · Proprietary · Confidential
         </div>
       </div>
+
+      {/* Floating AI Coach Button */}
+      <button onClick={() => openCoach("general")}
+        style={{
+          position: "fixed", bottom: 24, right: 24, width: 56, height: 56,
+          borderRadius: "50%", background: C.gold, border: "none",
+          fontSize: 24, cursor: "pointer", boxShadow: "0 4px 20px rgba(201,168,76,0.4)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+        }}>
+        🧠
+      </button>
+
+      {/* AI Coach Panel */}
+      {showCoach && <AICoach onClose={() => setShowCoach(false)} initialMode={coachMode} />}
     </div>
   );
 }
