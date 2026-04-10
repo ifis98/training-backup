@@ -41,6 +41,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   const [loading, setLoading] = useState(false);
   const [patientIdx, setPatientIdx] = useState(() => getRandomPatientIdx());
   const chatEnd = useRef<HTMLDivElement>(null);
+  const sttRef = useRef<any>(null);
   const sRoles = ROLES.filter(r => s.roles.includes(r.id));
   const patient = PATIENTS[patientIdx];
 
@@ -73,9 +74,17 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
 
   const handleNewPatient = () => { setPatientIdx(getRandomPatientIdx(patientIdx)); u({ simMsgs: [] }); };
   const handleMic = () => {
-    if (s.lst) { u({ lst: false }); return; }
+    if (s.lst) {
+      sttRef.current?.stop();
+      sttRef.current = null;
+      u({ lst: false });
+      return;
+    }
     u({ lst: true });
-    startSTT((text: string) => { u({ lst: false, simIn: text }); });
+    sttRef.current = startSTT(
+      (text: string) => { u({ simIn: text }); },
+      () => { u({ lst: false }); sttRef.current = null; }
+    );
   };
 
   return (
