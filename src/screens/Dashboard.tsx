@@ -375,7 +375,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <BarChart data={phaseChartData} barSize={14}>
                 <XAxis dataKey="name" tick={{ fill: C.ash, fontSize: 9 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} />
+                <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} cursor={{ fill: 'transparent' }} />
                 <Bar dataKey="done" stackId="a" fill={C.teal} radius={[0, 0, 0, 0]} name={T("done_label")} />
                 <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" radius={[4, 4, 0, 0]} name={T("remaining_label")} />
               </BarChart>
@@ -392,7 +392,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 <BarChart data={staffChartData} barSize={18} layout="vertical">
                   <XAxis type="number" domain={[0, 100]} tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis dataKey="name" type="category" tick={{ fill: C.ash, fontSize: 11 }} axisLine={false} tickLine={false} width={60} />
-                  <Tooltip contentStyle={tooltipStyle} />
+                  <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} cursor={{ fill: 'transparent' }} />
                   <Bar dataKey="progress" fill={C.teal} radius={[0, 6, 6, 0]} name={T("progress_pct")} />
                 </BarChart>
               </ResponsiveContainer>

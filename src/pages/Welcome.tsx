@@ -236,13 +236,13 @@ export default function Welcome() {
                 <input value={demoData.practice_name} onChange={e => setDemoData({ ...demoData, practice_name: e.target.value })} placeholder="Practice Name" style={inputStyle}
                   onFocus={e => e.currentTarget.style.borderColor = `${C.teal}60`} onBlur={e => e.currentTarget.style.borderColor = C.glassBorder} />
                 <select value={demoData.practice_size} onChange={e => setDemoData({ ...demoData, practice_size: e.target.value })}
-                  style={{ ...inputStyle, appearance: "auto" as any }}>
-                  <option value="">Practice Size</option>
-                  <option value="solo">Solo Practice</option>
-                  <option value="small">Small (2-3 providers)</option>
-                  <option value="medium">Medium (4-6 providers)</option>
-                  <option value="large">Large (7+ providers)</option>
-                  <option value="dso">DSO / Multi-Location</option>
+                  style={{ ...inputStyle, appearance: "auto" as any, colorScheme: "dark" }}>
+                  <option value="" style={{ background: C.dark, color: C.ash }}>Practice Size</option>
+                  <option value="solo" style={{ background: C.dark, color: C.white }}>Solo Practice</option>
+                  <option value="small" style={{ background: C.dark, color: C.white }}>Small (2-3 providers)</option>
+                  <option value="medium" style={{ background: C.dark, color: C.white }}>Medium (4-6 providers)</option>
+                  <option value="large" style={{ background: C.dark, color: C.white }}>Large (7+ providers)</option>
+                  <option value="dso" style={{ background: C.dark, color: C.white }}>DSO / Multi-Location</option>
                 </select>
                 <button onClick={() => { if (!demoData.name.trim() || !demoData.email.trim()) { toast.error('Name and email required'); return; } setDemoStep(1); }}
                   style={{ background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", width: "100%", marginTop: 8, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.2) }}>
