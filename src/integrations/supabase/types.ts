@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      demo_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string
+          practice_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message?: string
+          name: string
+          phone?: string
+          practice_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string
+          practice_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       practices: {
         Row: {
           created_at: string
@@ -75,6 +111,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registration_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          practice_name: string
+          rep_name: string
+          status: string
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          practice_name: string
+          rep_name?: string
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          practice_name?: string
+          rep_name?: string
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
       }
       staff_invitations: {
         Row: {
@@ -191,6 +266,7 @@ export type Database = {
     }
     Functions: {
       generate_practice_code: { Args: never; Returns: string }
+      generate_registration_code: { Args: never; Returns: string }
       get_user_practice_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -199,6 +275,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      use_registration_code: {
+        Args: { _code: string; _user_id: string }
+        Returns: boolean
+      }
+      validate_registration_code: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "staff" | "bytesense_admin"
