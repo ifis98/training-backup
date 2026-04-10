@@ -4,7 +4,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useState } from 'react';
-import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight, Briefcase } from 'lucide-react';
 
 interface DashboardSidebarProps {
   s: AppState;
@@ -30,6 +30,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   const navItems = [
     { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), phase: "dashboard" },
     { id: "training", icon: BookOpen, label: T("sidebar_training"), phase: "dashboard" },
+    { id: "cases", icon: Briefcase, label: T("sidebar_cases"), phase: "dashboard" },
     { id: "simulations", icon: Bot, label: T("sidebar_simulations"), phase: "simulation" },
     { id: "coach", icon: Brain, label: T("sidebar_coach"), action: () => openCoach("general") },
     { id: "report", icon: FileText, label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },

@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Tooltip } from 'recharts';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight } from 'lucide-react';
 
 interface DashboardProps {
   s: AppState;
@@ -53,6 +54,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const [revPatients, setRevPatients] = useState(200);
   const [revPrice, setRevPrice] = useState(2500);
   const [revClose, setRevClose] = useState(15);
+  const [cases, setCases] = useState<any[]>([]);
+  const [practiceGoals, setPracticeGoals] = useState<any>(null);
+  const [caseFilter, setCaseFilter] = useState('all');
+  const [showAddCase, setShowAddCase] = useState(false);
+  const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
@@ -70,6 +76,14 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       const userIds = tp.map(t => t.user_id);
       const { data: profiles } = await supabase.from('profiles').select('*').in('user_id', userIds);
       setStaffData(tp.map(t => ({ ...t, name: profiles?.find(p => p.user_id === t.user_id)?.full_name || 'Unknown' })));
+
+      // Load cases
+      const { data: casesData } = await supabase.from('cases').select('*').eq('practice_id', profile.practice_id).order('created_at', { ascending: false });
+      if (casesData) setCases(casesData);
+
+      // Load practice goals
+      const { data: goalsData } = await supabase.from('practice_goals').select('*').eq('practice_id', profile.practice_id).single();
+      if (goalsData) setPracticeGoals(goalsData);
     };
     load();
   }, []);
@@ -89,6 +103,32 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     await supabase.auth.signOut();
     localStorage.removeItem('bsa6');
     window.location.href = '/welcome';
+  };
+
+  const handleAddCase = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
+    const { data, error } = await supabase.from('cases').insert({
+      user_id: user.id,
+      practice_id: profile?.practice_id,
+      patient_name: newCase.patient_name,
+      status: newCase.status,
+      case_value: newCase.case_value,
+      notes: newCase.notes,
+    }).select().single();
+    if (data) {
+      setCases([data, ...cases]);
+      setNewCase({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
+      setShowAddCase(false);
+    }
+  };
+
+  const handleUpdateCaseStatus = async (caseId: string, newStatus: string) => {
+    const { error } = await supabase.from('cases').update({ status: newStatus }).eq('id', caseId);
+    if (!error) {
+      setCases(cases.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
+    }
   };
 
   // Chart data
@@ -169,6 +209,26 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const hasTopPerformerBadge = s.xp > 600 && s.signed;
   const avgSimScore = simReviews.length > 0 ? Math.round(simReviews.reduce((a, r) => a + r.score, 0) / simReviews.length) : null;
 
+  // Case metrics
+  const convertedCases = cases.filter(c => c.status === 'converted');
+  const totalCaseRevenue = convertedCases.reduce((a, c) => a + (Number(c.case_value) || 0), 0);
+  const monthlyGoal = practiceGoals?.monthly_case_goal || 0;
+  const revenueGoal = practiceGoals?.monthly_revenue_goal || 0;
+  const filteredCases = caseFilter === 'all' ? cases : cases.filter(c => c.status === caseFilter);
+
+  const caseStatusIcon = (status: string) => {
+    switch (status) {
+      case 'converted': return <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} />;
+      case 'follow_up': return <Clock size={14} strokeWidth={1.5} color={C.gold} />;
+      case 'rejected': return <XCircle size={14} strokeWidth={1.5} color={C.red} />;
+      default: return <Clock size={14} strokeWidth={1.5} color={C.ash} />;
+    }
+  };
+
+  const caseStatusColor = (status: string) => {
+    switch (status) { case 'converted': return C.green; case 'follow_up': return C.gold; case 'rejected': return C.red; default: return C.ash; }
+  };
+
   const kpiCard = (label: string, value: string | number, sub: string, color: string, gradient: string) => (
     <div style={{
       ...glass, padding: "22px 20px", flex: 1, minWidth: 140,
@@ -238,13 +298,13 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 18, fontWeight: 700 }}>{s.name || 'Welcome'}</span>
                 {hasCertifiedBadge && (
-                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40` }}>
-                    🏅 {T("badge_certified")}
+                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Award size={10} strokeWidth={1.5} /> {T("badge_certified")}
                   </span>
                 )}
                 {hasTopPerformerBadge && (
-                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40` }}>
-                    ⭐ {T("badge_top_performer")}
+                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40`, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Star size={10} strokeWidth={1.5} /> {T("badge_top_performer")}
                   </span>
                 )}
               </div>
@@ -263,6 +323,63 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       </div>
 
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
+
+        {/* Practice Performance — Goals vs Actuals */}
+        {isOwnerOrManager && (practiceGoals || cases.length > 0) && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14, marginBottom: 28 }}>
+            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradTeal }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Briefcase size={14} strokeWidth={1.5} color={C.teal} />
+                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("cases_this_month")}</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: C.teal }}>{convertedCases.length}</div>
+              {monthlyGoal > 0 && (
+                <>
+                  <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("goal_label")}: {monthlyGoal}</div>
+                  <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999, marginTop: 6 }}>
+                    <div style={{ height: "100%", width: `${Math.min((convertedCases.length / monthlyGoal) * 100, 100)}%`, background: C.teal, borderRadius: 999 }} />
+                  </div>
+                </>
+              )}
+            </div>
+            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradGold }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <DollarSign size={14} strokeWidth={1.5} color={C.gold} />
+                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("revenue_actual")}</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: C.gold }}>${totalCaseRevenue.toLocaleString()}</div>
+              {revenueGoal > 0 && (
+                <>
+                  <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("goal_label")}: ${revenueGoal.toLocaleString()}</div>
+                  <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999, marginTop: 6 }}>
+                    <div style={{ height: "100%", width: `${Math.min((totalCaseRevenue / revenueGoal) * 100, 100)}%`, background: C.gold, borderRadius: 999 }} />
+                  </div>
+                </>
+              )}
+            </div>
+            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${C.gold}, ${C.green})` }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Clock size={14} strokeWidth={1.5} color={C.gold} />
+                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("follow_ups")}</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: C.gold }}>{cases.filter(c => c.status === 'follow_up').length}</div>
+              <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("needs_attention")}</div>
+            </div>
+            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradRed }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <XCircle size={14} strokeWidth={1.5} color={C.red} />
+                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("rejected_cases")}</span>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: C.red }}>{cases.filter(c => c.status === 'rejected').length}</div>
+              <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("this_month")}</div>
+            </div>
+          </div>
+        )}
+
         {/* KPI Cards */}
         <div style={{ display: "flex", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
           {kpiCard(T("kpi_training_progress"), `${pr}%`, `${dN} ${T("kpi_of_total").replace("{n}", String(myM.length))}`, C.teal, C.gradTeal)}
@@ -304,7 +421,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           {/* Training Recommendations */}
           <div style={{ ...glass, padding: 24, overflow: "hidden" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>🎯</span> {T("training_recommendations")}
+              <Target size={16} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
               {simReviews.length > 0 && (
                 <span style={{ fontSize: 9, color: C.teal, background: `${C.teal}15`, padding: "2px 8px", borderRadius: 999, fontWeight: 600 }}>
                   {T("sim_driven")}
@@ -312,7 +429,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               )}
             </div>
             {recommendations.length === 0 ? (
-              <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20 }}>✅ {T("all_complete")}</div>
+              <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} /> {T("all_complete")}
+              </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {recommendations.map((rec, i) => (
@@ -342,7 +461,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {improvementAreas.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>📊</span> {T("areas_to_improve")}
+              <BarChart3 size={16} strokeWidth={1.5} color={C.teal} /> {T("areas_to_improve")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
               {improvementAreas.map(area => (
@@ -412,11 +531,92 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         </div>
 
+        {/* Case Pipeline — Owner/Manager */}
+        {isOwnerOrManager && (
+          <div style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
+            <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Briefcase size={16} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
+              </span>
+              <button onClick={() => setShowAddCase(!showAddCase)}
+                style={{ background: C.gradTeal, color: C.white, border: "none", padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4 }}>
+                <Plus size={12} strokeWidth={2} /> {T("add_case")}
+              </button>
+            </div>
+
+            {/* Add case form */}
+            {showAddCase && (
+              <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(255,255,255,0.02)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
+                  <input value={newCase.patient_name} onChange={e => setNewCase({ ...newCase, patient_name: e.target.value })} placeholder={T("patient_name")}
+                    style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                  <select value={newCase.status} onChange={e => setNewCase({ ...newCase, status: e.target.value })}
+                    style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }}>
+                    <option value="pending" style={{ background: C.dark2, color: C.white }}>{T("status_pending")}</option>
+                    <option value="follow_up" style={{ background: C.dark2, color: C.white }}>{T("status_follow_up")}</option>
+                    <option value="converted" style={{ background: C.dark2, color: C.white }}>{T("status_converted")}</option>
+                    <option value="rejected" style={{ background: C.dark2, color: C.white }}>{T("status_rejected")}</option>
+                  </select>
+                  <input type="number" value={newCase.case_value} onChange={e => setNewCase({ ...newCase, case_value: +e.target.value })} placeholder={T("case_value")}
+                    style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                  <button onClick={handleAddCase} disabled={!newCase.patient_name}
+                    style={{ background: newCase.patient_name ? C.gradTeal : "rgba(255,255,255,0.05)", color: C.white, border: "none", padding: "8px 14px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: newCase.patient_name ? "pointer" : "not-allowed", borderRadius: C.radiusXs }}>
+                    {T("save")}
+                  </button>
+                </div>
+                <input value={newCase.notes} onChange={e => setNewCase({ ...newCase, notes: e.target.value })} placeholder={T("case_notes")}
+                  style={{ width: "100%", background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+              </div>
+            )}
+
+            {/* Filter tabs */}
+            <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${C.glassBorder}` }}>
+              {[
+                { id: 'all', label: T("all"), count: cases.length },
+                { id: 'follow_up', label: T("status_follow_up"), count: cases.filter(c => c.status === 'follow_up').length },
+                { id: 'converted', label: T("status_converted"), count: convertedCases.length },
+                { id: 'rejected', label: T("status_rejected"), count: cases.filter(c => c.status === 'rejected').length },
+                { id: 'pending', label: T("status_pending"), count: cases.filter(c => c.status === 'pending').length },
+              ].map(tab => (
+                <button key={tab.id} onClick={() => setCaseFilter(tab.id)}
+                  style={{ padding: "10px 16px", fontSize: 11, fontWeight: caseFilter === tab.id ? 700 : 400, color: caseFilter === tab.id ? C.teal : C.ash, background: "transparent", border: "none", borderBottom: caseFilter === tab.id ? `2px solid ${C.teal}` : "2px solid transparent", cursor: "pointer", fontFamily: C.fn, transition: "all 0.2s", display: "flex", gap: 4, alignItems: "center" }}>
+                  {tab.label} <span style={{ fontSize: 9, background: "rgba(255,255,255,0.06)", padding: "1px 6px", borderRadius: 999 }}>{tab.count}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Case list */}
+            {filteredCases.length === 0 ? (
+              <div style={{ padding: 30, textAlign: "center", fontSize: 12, color: C.ash }}>{T("no_cases")}</div>
+            ) : (
+              filteredCases.slice(0, 10).map(c => (
+                <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 22px", borderBottom: `1px solid ${C.glassBorder}`, transition: "background 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  {caseStatusIcon(c.status)}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600 }}>{c.patient_name}</div>
+                    {c.notes && <div style={{ fontSize: 10, color: C.ash, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.notes}</div>}
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>{c.case_value > 0 ? `$${Number(c.case_value).toLocaleString()}` : ''}</span>
+                  <select value={c.status} onChange={e => handleUpdateCaseStatus(c.id, e.target.value)}
+                    style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: caseStatusColor(c.status), padding: "4px 8px", fontSize: 10, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, fontWeight: 700 }}>
+                    <option value="pending" style={{ background: C.dark2, color: C.white }}>{T("status_pending")}</option>
+                    <option value="follow_up" style={{ background: C.dark2, color: C.white }}>{T("status_follow_up")}</option>
+                    <option value="converted" style={{ background: C.dark2, color: C.white }}>{T("status_converted")}</option>
+                    <option value="rejected" style={{ background: C.dark2, color: C.white }}>{T("status_rejected")}</option>
+                  </select>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
         {/* Report & Certificate Access */}
         {(allComplete || s.signed) && (
           <div style={{ ...glass, padding: 22, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 20 }}>📄</span>
+              <FileText size={20} strokeWidth={1.5} color={C.gold} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{T("view_report")}</div>
                 <div style={{ fontSize: 10, color: C.ash }}>{s.signed ? T("report_signed") : T("report_ready")}</div>
@@ -429,8 +629,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               </button>
               {s.signed && (
                 <button onClick={() => { u({ phase: "report" }); scrollTop(); setTimeout(() => window.print(), 500); }}
-                  style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>
-                  🖨️ {T("print_report")}
+                  style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Printer size={12} strokeWidth={1.5} /> {T("print_report")}
                 </button>
               )}
             </div>
@@ -440,7 +640,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Completion Banners */}
         {allComplete && !s.signed && (
           <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: C.glow(C.gold, 0.15), borderColor: `${C.gold}30` }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10 }}>🏆 {T("all_complete")}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <Trophy size={22} strokeWidth={1.5} /> {T("all_complete")}
+            </div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
               style={{ background: C.gradRed, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3) }}>
               {T("complete_onboarding")}
@@ -458,7 +660,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
           <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>📋</span> {T("training_modules_label")}
+              <ClipboardList size={16} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
             </span>
             <span style={{ fontSize: 11, color: C.ash, background: "rgba(255,255,255,0.06)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
           </div>
@@ -475,7 +677,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: pc ? C.green : `${phase.color}60`, border: `2px solid ${pc ? C.green : phase.color}`, transition: "all 0.3s" }} />
                   <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{phase.label}</span>
                   <span style={{ fontSize: 10, color: pc ? C.green : C.ash, background: pc ? `${C.green}15` : "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 999 }}>{phDone}/{pm.length}</span>
-                  <span style={{ color: C.ash, fontSize: 11, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.25s" }}>▶</span>
+                  <ChevronRight size={14} strokeWidth={1.5} color={C.ash} style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.25s" }} />
                 </div>
                 {isOpen && pm.map(mod => {
                   const done = s.done.includes(mod.id);
@@ -492,7 +694,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                         <div style={{ fontSize: 12, fontWeight: 600 }}>{mod.title}</div>
                         <div style={{ fontSize: 10, color: C.ash, marginTop: 1 }}>{mod.time}</div>
                       </div>
-                      <span style={{ color: C.ash, fontSize: 12, opacity: 0.5 }}>→</span>
+                      <ArrowRight size={12} strokeWidth={1.5} color={C.ash} style={{ opacity: 0.5 }} />
                     </div>
                   );
                 })}
@@ -506,7 +708,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: s.simP >= 3 ? C.green : `${C.gold}60`, border: `2px solid ${s.simP >= 3 ? C.green : C.gold}` }} />
             <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{T("ai_patient_sim")}</span>
             <span style={{ fontSize: 10, color: s.simP >= 3 ? C.green : C.ash, background: s.simP >= 3 ? `${C.green}15` : "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 999 }}>{s.simP}/3</span>
-            <span style={{ color: C.ash, fontSize: 12, opacity: 0.5 }}>→</span>
+            <ArrowRight size={12} strokeWidth={1.5} color={C.ash} style={{ opacity: 0.5 }} />
           </div>
         </div>
 
@@ -514,7 +716,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {isOwnerOrManager && (
           <div style={{ ...glass, padding: 28, marginBottom: 24 }}>
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: C.radiusSm, background: C.gradGold, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💰</div>
+              <div style={{ width: 32, height: 32, borderRadius: C.radiusSm, background: C.gradGold, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <DollarSign size={16} strokeWidth={1.5} color={C.dark} />
+              </div>
                {T("revenue_calculator")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 24 }}>
@@ -552,7 +756,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Goals & Notes Row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
           <div style={{ ...glass, padding: 22 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>🎯 {T("goals_label")}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+              <Target size={14} strokeWidth={1.5} color={C.teal} /> {T("goals_label")}
+            </div>
             {goals.map((g, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.glassBorder}` }}>
                 <div onClick={() => { const ng = [...goals]; ng[i] = { ...ng[i], done: !ng[i].done }; setGoals(ng); }}
@@ -574,7 +780,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
 
           <div style={{ ...glass, padding: 22 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>📝 {T("notes_label")}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+              <StickyNote size={14} strokeWidth={1.5} color={C.gold} /> {T("notes_label")}
+            </div>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={T("notes_placeholder")}
               style={{ width: "100%", minHeight: 160, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: 14, fontSize: 12, fontFamily: C.fn, outline: "none", resize: "vertical", lineHeight: 1.8, borderRadius: C.radiusSm }} />
           </div>
@@ -582,19 +790,23 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Quick Tools */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>⚡ {T("quick_tools")}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Zap size={14} strokeWidth={1.5} color={C.teal} /> {T("quick_tools")}
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
             {[
-              { mode: "followup", icon: "✉️", label: T("patient_followup"), desc: T("followup_desc"), color: C.teal },
-              { mode: "treatment", icon: "📋", label: T("treatment_plan"), desc: T("treatment_desc"), color: C.blue },
-              { mode: "objections", icon: "🛡️", label: T("handle_objections"), desc: T("objections_desc"), color: C.violet },
-              { mode: "educational", icon: "📚", label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
+              { mode: "followup", Icon: Mail, label: T("patient_followup"), desc: T("followup_desc"), color: C.teal },
+              { mode: "treatment", Icon: ClipboardList, label: T("treatment_plan"), desc: T("treatment_desc"), color: C.blue },
+              { mode: "objections", Icon: Shield, label: T("handle_objections"), desc: T("objections_desc"), color: C.violet },
+              { mode: "educational", Icon: BookOpen, label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
             ].map(tool => (
               <div key={tool.mode} onClick={() => openCoach(tool.mode)}
                 style={{ ...glass, padding: "18px 14px", cursor: "pointer", transition: "all 0.3s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = `${tool.color}40`; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = C.glow(tool.color, 0.12); }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-                <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: `${tool.color}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, marginBottom: 10 }}>{tool.icon}</div>
+                <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: `${tool.color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+                  <tool.Icon size={18} strokeWidth={1.5} color={tool.color} />
+                </div>
                 <div style={{ fontSize: 12, fontWeight: 700 }}>{tool.label}</div>
                 <div style={{ fontSize: 10, color: C.ash, marginTop: 3, lineHeight: 1.5 }}>{tool.desc}</div>
               </div>

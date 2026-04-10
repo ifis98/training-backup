@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface StaffDashboardProps {
   s: AppState;
@@ -53,7 +54,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     fetchPractice();
   }, []);
 
-  // Load simulation reviews
   useEffect(() => {
     const loadReviews = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -83,12 +83,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
   const tooltipStyle = { background: C.dark2, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12, color: C.white };
 
-  // Knowledge Score
   const knowledgeScore = useMemo(() => computeKnowledgeScore(s.blScore, dN, myM.length, s.simP), [s.blScore, dN, myM.length, s.simP]);
   const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
   const scoreLabelKey = getScoreLabel(knowledgeScore);
 
-  // Simulation-driven recommendations
   const recommendations = useMemo(() => {
     if (simReviews.length > 0) {
       const latestReview = simReviews[0];
@@ -113,7 +111,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     return getRecommendations(s.done, myM, myPH, 5);
   }, [s.done, myM, myPH, simReviews]);
 
-  // Simulation-driven improvement areas
   const improvementAreas = useMemo(() => {
     const baseAreas = getImprovementAreas(s.done, myM, myPH);
     if (simReviews.length > 0) {
@@ -132,7 +129,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     return baseAreas;
   }, [s.done, myM, myPH, simReviews, lang]);
 
-  // Badge logic
   const hasCertifiedBadge = allComplete && s.signed;
   const hasTopPerformerBadge = s.xp > 600 && s.signed;
   const avgSimScore = simReviews.length > 0 ? Math.round(simReviews.reduce((a, r) => a + r.score, 0) / simReviews.length) : null;
@@ -154,7 +150,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
   return (
     <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: "100vh", color: C.white, display: "flex" }}>
-      {/* Sidebar */}
       <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} lang={lang} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -195,13 +190,13 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 18, fontWeight: 700 }}>{s.name || 'Welcome'}</span>
                 {hasCertifiedBadge && (
-                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40` }}>
-                    🏅 {T("badge_certified")}
+                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Award size={10} strokeWidth={1.5} /> {T("badge_certified")}
                   </span>
                 )}
                 {hasTopPerformerBadge && (
-                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40` }}>
-                    ⭐ {T("badge_top_performer")}
+                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40`, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Star size={10} strokeWidth={1.5} /> {T("badge_top_performer")}
                   </span>
                 )}
               </div>
@@ -230,7 +225,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           </div>
         </div>
 
-        {/* Knowledge Score + Recommendations Row */}
+        {/* Knowledge Score + Recommendations */}
         <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             <div style={{ fontSize: 11, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
@@ -258,7 +253,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           </div>
           <div style={{ ...glass, padding: 24, overflow: "hidden" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>🎯</span> {T("training_recommendations")}
+              <Target size={16} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
               {simReviews.length > 0 && (
                 <span style={{ fontSize: 9, color: C.teal, background: `${C.teal}15`, padding: "2px 8px", borderRadius: 999, fontWeight: 600 }}>
                   {T("sim_driven")}
@@ -266,7 +261,9 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               )}
             </div>
             {recommendations.length === 0 ? (
-              <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20 }}>✅ {T("all_complete")}</div>
+              <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} /> {T("all_complete")}
+              </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {recommendations.map(rec => (
@@ -296,7 +293,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {improvementAreas.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>📊</span> {T("areas_to_improve")}
+              <BarChart3 size={16} strokeWidth={1.5} color={C.teal} /> {T("areas_to_improve")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
               {improvementAreas.map(area => (
@@ -357,7 +354,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {(allComplete || s.signed) && (
           <div style={{ ...glass, padding: 22, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 20 }}>📄</span>
+              <FileText size={20} strokeWidth={1.5} color={C.gold} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{T("view_report")}</div>
                 <div style={{ fontSize: 10, color: C.ash }}>{s.signed ? T("report_signed") : T("report_ready")}</div>
@@ -370,8 +367,8 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               </button>
               {s.signed && (
                 <button onClick={() => { u({ phase: "report" }); scrollTop(); setTimeout(() => window.print(), 500); }}
-                  style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>
-                  🖨️ {T("print_report")}
+                  style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Printer size={12} strokeWidth={1.5} /> {T("print_report")}
                 </button>
               )}
             </div>
@@ -381,7 +378,9 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {/* Completion Banners */}
         {allComplete && !s.signed && (
           <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: C.glow(C.gold, 0.15), borderColor: `${C.gold}30` }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10 }}>🏆 {T("all_complete")}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <Trophy size={22} strokeWidth={1.5} /> {T("all_complete")}
+            </div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
               style={{ background: C.gradRed, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3) }}>
               {T("complete_onboarding")}
@@ -398,7 +397,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {/* Training Modules Accordion */}
         <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
           <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 16 }}>📋</span> {T("training_modules_label")}
+            <ClipboardList size={16} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
             <span style={{ fontSize: 11, color: C.ash, marginLeft: "auto", background: "rgba(255,255,255,0.06)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
           </div>
           {myPH.map(phase => {
@@ -414,7 +413,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: pc ? C.green : `${phase.color}60`, border: `2px solid ${pc ? C.green : phase.color}` }} />
                   <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{phase.label}</span>
                   <span style={{ fontSize: 10, color: pc ? C.green : C.ash, background: pc ? `${C.green}15` : "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 999 }}>{phDone}/{pm.length}</span>
-                  <span style={{ color: C.ash, fontSize: 11, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.25s" }}>▶</span>
+                  <ChevronRight size={14} strokeWidth={1.5} color={C.ash} style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.25s" }} />
                 </div>
                 {isOpen && pm.map(mod => {
                   const done = s.done.includes(mod.id);
@@ -431,7 +430,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                         <div style={{ fontSize: 12, fontWeight: 600 }}>{mod.title}</div>
                         <div style={{ fontSize: 10, color: C.ash, marginTop: 1 }}>{mod.time}</div>
                       </div>
-                      <span style={{ color: C.ash, fontSize: 12, opacity: 0.5 }}>→</span>
+                      <ArrowRight size={12} strokeWidth={1.5} color={C.ash} style={{ opacity: 0.5 }} />
                     </div>
                   );
                 })}
@@ -443,25 +442,29 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: s.simP >= 3 ? C.green : `${C.gold}60`, border: `2px solid ${s.simP >= 3 ? C.green : C.gold}` }} />
             <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{T("ai_patient_sim")}</span>
             <span style={{ fontSize: 10, color: s.simP >= 3 ? C.green : C.ash, background: s.simP >= 3 ? `${C.green}15` : "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 999 }}>{s.simP}/3</span>
-            <span style={{ color: C.ash, fontSize: 12, opacity: 0.5 }}>→</span>
+            <ArrowRight size={12} strokeWidth={1.5} color={C.ash} style={{ opacity: 0.5 }} />
           </div>
         </div>
 
         {/* Quick Tools */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>⚡ {T("quick_tools")}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <Zap size={14} strokeWidth={1.5} color={C.teal} /> {T("quick_tools")}
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
             {[
-              { mode: "followup", icon: "✉️", label: T("patient_followup"), desc: T("followup_desc"), color: C.teal },
-              { mode: "treatment", icon: "📋", label: T("treatment_plan"), desc: T("treatment_desc"), color: C.blue },
-              { mode: "objections", icon: "🛡️", label: T("handle_objections"), desc: T("objections_desc"), color: C.violet },
-              { mode: "educational", icon: "📚", label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
+              { mode: "followup", Icon: Mail, label: T("patient_followup"), desc: T("followup_desc"), color: C.teal },
+              { mode: "treatment", Icon: ClipboardList, label: T("treatment_plan"), desc: T("treatment_desc"), color: C.blue },
+              { mode: "objections", Icon: Shield, label: T("handle_objections"), desc: T("objections_desc"), color: C.violet },
+              { mode: "educational", Icon: BookOpen, label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
             ].map(tool => (
               <div key={tool.mode} onClick={() => openCoach(tool.mode)}
                 style={{ ...glass, padding: "18px 14px", cursor: "pointer", transition: "all 0.3s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = `${tool.color}40`; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = C.glow(tool.color, 0.12); }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-                <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: `${tool.color}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, marginBottom: 10 }}>{tool.icon}</div>
+                <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: `${tool.color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+                  <tool.Icon size={18} strokeWidth={1.5} color={tool.color} />
+                </div>
                 <div style={{ fontSize: 12, fontWeight: 700 }}>{tool.label}</div>
                 <div style={{ fontSize: 10, color: C.ash, marginTop: 3, lineHeight: 1.5 }}>{tool.desc}</div>
               </div>
