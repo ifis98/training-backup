@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useAppState } from '@/hooks/useAppState';
+import { useAuth } from '@/hooks/useAuth';
 import Splash from '@/screens/Splash';
 import RoleSelect from '@/screens/RoleSelect';
 import Baseline from '@/screens/Baseline';
 import BaselineResults from '@/screens/BaselineResults';
 import Dashboard from '@/screens/Dashboard';
+import StaffDashboard from '@/screens/StaffDashboard';
 import ModuleView from '@/screens/ModuleView';
 import Simulation from '@/screens/Simulation';
 import SimulationSummary from '@/screens/SimulationSummary';
