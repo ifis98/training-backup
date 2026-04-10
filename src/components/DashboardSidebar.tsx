@@ -89,7 +89,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
               onMouseEnter={e => { if (!isDisabled && !isActive) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
               onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
             >
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <item.icon size={18} strokeWidth={1.5} />
               {!collapsed && <span>{item.label}</span>}
             </div>
           );
