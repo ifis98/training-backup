@@ -28,12 +28,12 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
-    { id: "dashboard", icon: "📊", label: T("sidebar_dashboard"), phase: "dashboard" },
-    { id: "training", icon: "📋", label: T("sidebar_training"), phase: "dashboard" },
-    { id: "simulations", icon: "🤖", label: T("sidebar_simulations"), phase: "simulation" },
-    { id: "coach", icon: "🧠", label: T("sidebar_coach"), action: () => openCoach("general") },
-    { id: "report", icon: "📄", label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
-    { id: "signout", icon: "🚪", label: T("sign_out"), action: onSignOut },
+    { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), phase: "dashboard" },
+    { id: "training", icon: BookOpen, label: T("sidebar_training"), phase: "dashboard" },
+    { id: "simulations", icon: Bot, label: T("sidebar_simulations"), phase: "simulation" },
+    { id: "coach", icon: Brain, label: T("sidebar_coach"), action: () => openCoach("general") },
+    { id: "report", icon: FileText, label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
+    { id: "signout", icon: LogOut, label: T("sign_out"), action: onSignOut },
   ];
 
   return (
