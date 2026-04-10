@@ -3,6 +3,7 @@ import { C } from '@/data/constants';
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SimulationSummaryProps {
   s: AppState;
@@ -28,6 +29,26 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
 
   useEffect(() => { generateSummary(); }, []);
 
+  const saveSummaryToDb = async (data: SummaryData) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).maybeSingle();
+      await supabase.from('simulation_reviews').insert({
+        user_id: user.id,
+        practice_id: profile?.practice_id || null,
+        session_number: s.simP,
+        score: data.score,
+        score_label: data.scoreLabel,
+        strengths: data.strengths,
+        improvements: data.improvements,
+        tips: data.tips,
+        modules_to_review: data.modulesToReview,
+        overall_feedback: data.overallFeedback,
+      });
+    } catch {}
+  };
+
   const generateSummary = async () => {
     try {
       const conversationText = s.simMsgs.map(m => `${m.r === "user" ? "Staff" : "Patient"}: ${m.t}`).join("\n");
@@ -41,7 +62,11 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
       if (!resp.ok) throw new Error("Failed to generate summary");
       const data = await resp.json();
       const jsonMatch = data.reply.match(/\{[\s\S]*\}/);
-      if (jsonMatch) { setSummary(JSON.parse(jsonMatch[0])); } else { throw new Error("Could not parse summary"); }
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        setSummary(parsed);
+        await saveSummaryToDb(parsed);
+      } else { throw new Error("Could not parse summary"); }
     } catch (e: any) { setError(e.message); } finally { setLoading(false); }
   };
 
