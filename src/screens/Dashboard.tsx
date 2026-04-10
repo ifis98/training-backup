@@ -128,7 +128,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <Logo size={30} light />
-              <span style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>Practice Dashboard</span>
+              <span style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("practice_dashboard")}</span>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <div style={{ position: "relative" }}>
@@ -183,25 +183,25 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
         {/* KPI Cards */}
         <div style={{ display: "flex", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
-          {kpiCard("Training Progress", `${pr}%`, `${dN} of ${myM.length} modules`, C.teal, C.gradTeal)}
-          {kpiCard("XP Earned", s.xp, "Experience Points", C.gold, C.gradGold)}
-          {kpiCard("Modules Done", dN, `of ${myM.length} total`, C.blue, C.gradBlue)}
-          {kpiCard("AI Simulations", `${s.simP}/3`, "Patient Encounters", C.red, C.gradRed)}
+          {kpiCard(T("kpi_training_progress"), `${pr}%`, `${dN} ${T("kpi_of_total").replace("{n}", String(myM.length))}`, C.teal, C.gradTeal)}
+          {kpiCard(T("kpi_xp_earned"), s.xp, T("kpi_experience_points"), C.gold, C.gradGold)}
+          {kpiCard(T("kpi_modules_done"), dN, T("kpi_of_total").replace("{n}", String(myM.length)), C.blue, C.gradBlue)}
+          {kpiCard(T("kpi_ai_simulations"), `${s.simP}/3`, T("kpi_patient_encounters"), C.red, C.gradRed)}
         </div>
 
         {/* Charts Row */}
         <div style={{ display: "grid", gridTemplateColumns: staffChartData.length > 0 ? "1fr 1fr" : "1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 24 }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, color: C.white, display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> Modules by Phase
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("modules_by_phase")}
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={phaseChartData} barSize={14}>
                 <XAxis dataKey="name" tick={{ fill: C.ash, fontSize: 9 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="done" stackId="a" fill={C.teal} radius={[0, 0, 0, 0]} name="Done" />
-                <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" radius={[4, 4, 0, 0]} name="Remaining" />
+                <Bar dataKey="done" stackId="a" fill={C.teal} radius={[0, 0, 0, 0]} name={T("done_label")} />
+                <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" radius={[4, 4, 0, 0]} name={T("remaining_label")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -209,7 +209,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           <div style={{ ...glass, padding: 24 }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, color: C.white, display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} />
-              {staffChartData.length > 1 ? 'Staff Training Progress' : 'Overall Completion'}
+              {staffChartData.length > 1 ? T("staff_training_progress") : T("overall_completion")}
             </div>
             {staffChartData.length > 1 ? (
               <ResponsiveContainer width="100%" height={200}>
@@ -217,21 +217,19 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   <XAxis type="number" domain={[0, 100]} tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis dataKey="name" type="category" tick={{ fill: C.ash, fontSize: 11 }} axisLine={false} tickLine={false} width={60} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="progress" fill={C.teal} radius={[0, 6, 6, 0]} name="Progress %" />
+                  <Bar dataKey="progress" fill={C.teal} radius={[0, 6, 6, 0]} name={T("progress_pct")} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
-                <ResponsiveContainer width={180} height={180}>
-                  <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={58} outerRadius={78} dataKey="value" strokeWidth={0}>
-                      {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <PieChart width={180} height={180}>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={58} outerRadius={78} dataKey="value" strokeWidth={0}>
+                    {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                  </Pie>
+                </PieChart>
                 <div style={{ marginLeft: -30, textAlign: "center" }}>
                   <div style={{ fontSize: 30, fontWeight: 800, color: C.teal }}>{pr}%</div>
-                  <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>Complete</div>
+                  <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>{T("complete_label")}</div>
                 </div>
               </div>
             )}
@@ -259,7 +257,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
           <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>📋</span> Training Modules
+              <span style={{ fontSize: 16 }}>📋</span> {T("training_modules_label")}
             </span>
             <span style={{ fontSize: 11, color: C.ash, background: "rgba(255,255,255,0.06)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
           </div>
@@ -316,13 +314,13 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           <div style={{ ...glass, padding: 28, marginBottom: 24 }}>
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: C.radiusSm, background: C.gradGold, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💰</div>
-              Revenue Calculator
+               {T("revenue_calculator")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 24 }}>
               {[
-                { label: "Patients / Month", value: revPatients, min: 50, max: 800, step: 1, set: setRevPatients, color: C.teal, format: (v: number) => `${v}` },
-                { label: "Avg Case Price ($)", value: revPrice, min: 500, max: 5000, step: 100, set: setRevPrice, color: C.gold, format: (v: number) => `$${v.toLocaleString()}` },
-                { label: "Current Close Rate (%)", value: revClose, min: 5, max: 60, step: 1, set: setRevClose, color: C.red, format: (v: number) => `${v}%` },
+                { label: T("patients_per_month"), value: revPatients, min: 50, max: 800, step: 1, set: setRevPatients, color: C.teal, format: (v: number) => `${v}` },
+                { label: T("avg_case_price"), value: revPrice, min: 500, max: 5000, step: 100, set: setRevPrice, color: C.gold, format: (v: number) => `$${v.toLocaleString()}` },
+                { label: T("current_close_rate"), value: revClose, min: 5, max: 60, step: 1, set: setRevClose, color: C.red, format: (v: number) => `${v}%` },
               ].map((sl, i) => (
                 <div key={i}>
                   <label style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{sl.label}</label>
@@ -334,18 +332,18 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div style={{ background: "rgba(255,255,255,0.03)", padding: 22, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.glassBorder}` }}>
-                <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Current Monthly</div>
+                <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>{T("current_monthly")}</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: C.ash }}>${currentRev.toLocaleString()}</div>
-                <div style={{ fontSize: 11, color: C.slate, marginTop: 4 }}>{revClose}% close rate</div>
+                <div style={{ fontSize: 11, color: C.slate, marginTop: 4 }}>{revClose}% {T("close_rate")}</div>
               </div>
               <div style={{ background: `rgba(20,184,166,0.06)`, padding: 22, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: C.glow(C.teal, 0.08) }}>
-                <div style={{ fontSize: 10, color: C.teal, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>With ByteSense</div>
+                <div style={{ fontSize: 10, color: C.teal, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>{T("with_bytesense")}</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: C.teal }}>${projectedRev.toLocaleString()}</div>
-                <div style={{ fontSize: 11, color: C.teal, marginTop: 4 }}>{projectedClose.toFixed(0)}% projected close</div>
+                <div style={{ fontSize: 11, color: C.teal, marginTop: 4 }}>{projectedClose.toFixed(0)}% {T("projected_close")}</div>
               </div>
             </div>
             <div style={{ textAlign: "center", marginTop: 14, fontSize: 13, color: C.gold, fontWeight: 700 }}>
-              +${(projectedRev - currentRev).toLocaleString()}/mo · ${((projectedRev - currentRev) * 12).toLocaleString()}/yr potential uplift
+              +${(projectedRev - currentRev).toLocaleString()}/mo · ${((projectedRev - currentRev) * 12).toLocaleString()}/yr {T("potential_uplift")}
             </div>
           </div>
         )}
@@ -353,7 +351,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Goals & Notes Row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
           <div style={{ ...glass, padding: 22 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>🎯 Goals</div>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>🎯 {T("goals_label")}</div>
             {goals.map((g, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.glassBorder}` }}>
                 <div onClick={() => { const ng = [...goals]; ng[i] = { ...ng[i], done: !ng[i].done }; setGoals(ng); }}
@@ -366,7 +364,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               </div>
             ))}
             <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
-              <input value={newGoal} onChange={e => setNewGoal(e.target.value)} placeholder="Add a goal..."
+              <input value={newGoal} onChange={e => setNewGoal(e.target.value)} placeholder={T("add_goal_placeholder")}
                 onKeyDown={e => { if (e.key === 'Enter' && newGoal.trim()) { setGoals([...goals, { text: newGoal.trim(), done: false }]); setNewGoal(''); } }}
                 style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
               <button onClick={() => { if (newGoal.trim()) { setGoals([...goals, { text: newGoal.trim(), done: false }]); setNewGoal(''); } }}
@@ -375,8 +373,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
 
           <div style={{ ...glass, padding: 22 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>📝 Notes</div>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Write your notes here..."
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>📝 {T("notes_label")}</div>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={T("notes_placeholder")}
               style={{ width: "100%", minHeight: 160, background: "rgba(255,255,255,0.03)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: 14, fontSize: 12, fontFamily: C.fn, outline: "none", resize: "vertical", lineHeight: 1.8, borderRadius: C.radiusSm }} />
           </div>
         </div>
