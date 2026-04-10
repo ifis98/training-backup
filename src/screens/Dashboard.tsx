@@ -136,7 +136,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           <div style={{ background: C.red, color: C.white, padding: "10px 16px", fontSize: 13, fontWeight: 700 }}>Quick Reference</div>
           <div style={{ padding: 16, fontSize: 12, color: C.slate, lineHeight: 1.8 }}>
             <div>· ByteSense is NOT a night guard — it's a wellness health intelligence platform</div>
-            <div>· 5 sensors: HR/HRV, EMG/Force, Respiratory, Temperature, Motion</div>
+            <div>· 6 sensors: HR/HRV, EMG/Force, Respiratory, Temperature, Motion, Blood Oxygen (SpO2)</div>
             <div>· Data flows to the bitely app with daily byteSense Score</div>
             <div>· NEVER say: "night guard," "mouthguard," "diagnoses," "FDA approved medical device"</div>
             <div>· Support: Natasha Blake — 909-527-9602</div>
