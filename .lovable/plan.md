@@ -1,60 +1,40 @@
 
 
-# Dashboard Professional Upgrade + Case Tracking + Revenue Goals
+# Case Analytics Charts + Practice Goals Editor + Training Complete Button Fix
 
-## What's being added
+## Changes
 
-### 1. Case Tracking Section (new)
-A "Case Pipeline" section on the owner/manager dashboard showing cases that need follow-up, converted cases, and rejected cases. This requires a new database table `cases` with fields: `id`, `user_id`, `practice_id`, `patient_name`, `status` (follow_up, converted, rejected, pending), `notes`, `assigned_to`, `value`, `created_at`, `updated_at`. Staff can log and update case statuses. The dashboard renders a filterable table/card view with status tabs (All, Follow-Up, Converted, Rejected) and counts.
+### 1. Practice Goals Editor (Dashboard.tsx)
+Add an inline editor in the Practice Performance section that lets owner/managers set and save `monthly_case_goal` and `monthly_revenue_goal` directly. Shows edit icon next to goal values; clicking opens small inline inputs that save to the `practice_goals` table via upsert.
 
-### 2. Practice Goals vs Actuals (new)
-At the top of the dashboard, add a "Practice Performance" row showing:
-- **Goal cases/month** vs **Actual cases completed** (progress bar + numbers)
-- **Revenue target** vs **Actual revenue** (with green/red indicator)
-- These use the `cases` table data + a `practice_goals` table (`id`, `practice_id`, `monthly_case_goal`, `monthly_revenue_goal`, `created_at`, `updated_at`)
+### 2. Case Analytics Charts (Dashboard.tsx)
+Add two new charts below the Case Pipeline section (owner/manager only):
+- **Conversion Rate Over Time** — AreaChart showing monthly conversion rate (converted / total cases per month)
+- **Revenue Trend by Month** — BarChart showing monthly case revenue from converted cases
 
-### 3. Full Visual Upgrade
-Replace remaining emoji icons with Lucide outline icons throughout both dashboards. Clean up visual noise:
-- Replace 🎯, 📊, 📋, 📝, ⚡, 💰, 📄, 🏆, ✉️, 🛡️, 📚 with matching Lucide icons (Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen)
-- Replace emoji badge indicators (🏅, ⭐) with Lucide Award/Star icons
-- Consistent icon sizing (16-18px), strokeWidth 1.5, white/brand colors
-- Apply same clean treatment to Quick Tools grid, Goals & Notes section, Revenue Calculator, Quick Reference, and completion banners
+Both charts derive data from the existing `cases` state, grouped by month using `created_at`.
 
-## Database changes
+### 3. "Training Complete" Banner → Clickable Button (Dashboard.tsx + StaffDashboard.tsx)
+Line 653-657: The static div saying "Training Complete! Start AI simulations above" becomes a clickable button that navigates to the simulation phase (`u({ phase: "simulation" }); scrollTop()`). Same treatment in StaffDashboard.
 
-**New table: `cases`**
-- `id` uuid PK
-- `practice_id` uuid (nullable, FK to practices)
-- `user_id` uuid (who created it)
-- `patient_name` text
-- `status` text (default 'pending') — values: pending, follow_up, converted, rejected
-- `notes` text (default '')
-- `case_value` numeric (default 0)
-- `assigned_to` uuid (nullable)
-- `created_at`, `updated_at` timestamps
-- RLS: users see own practice cases, bytesense_admin sees all
-
-**New table: `practice_goals`**
-- `id` uuid PK
-- `practice_id` uuid (FK to practices)
-- `monthly_case_goal` integer (default 0)
-- `monthly_revenue_goal` numeric (default 0)
-- `created_at`, `updated_at` timestamps
-- RLS: practice admins can CRUD, bytesense_admin sees all
+### 4. End-to-End Testing
+After implementation, browser-test:
+- Sidebar navigation (each item, collapse/expand)
+- Chart tooltip hover (no white box)
+- Logo click → dashboard
+- Training Complete button → simulation
+- Practice goals editing
+- Login persistence (name/practice remembered)
 
 ## Files changed
-
-1. **Database migration** — create `cases` + `practice_goals` tables with RLS
-2. **`src/screens/Dashboard.tsx`** — add Practice Performance row at top, Case Pipeline section, replace all emojis with Lucide icons
-3. **`src/screens/StaffDashboard.tsx`** — same Lucide icon upgrade, add case tracking view for staff
-4. **`src/data/translations.ts`** — new keys for case tracking, goals, pipeline labels
-5. **`src/components/DashboardSidebar.tsx`** — add "Cases" nav item with Lucide Briefcase icon
+1. `src/screens/Dashboard.tsx` — goals editor UI, analytics charts, training complete button fix
+2. `src/screens/StaffDashboard.tsx` — training complete button fix
+3. `src/data/translations.ts` — new keys for goals editing and chart labels
 
 ## Implementation order
-1. Database migration (cases + practice_goals)
-2. Replace all emoji icons with Lucide across both dashboards
-3. Add Practice Performance goals vs actuals row at dashboard top
-4. Add Case Pipeline section with status tabs and add/update functionality
-5. Add Cases to sidebar navigation
-6. Add translation keys
+1. Fix training complete banner → clickable button (both dashboards)
+2. Add practice goals inline editor
+3. Add case analytics charts
+4. Add translation keys
+5. Browser testing
 
