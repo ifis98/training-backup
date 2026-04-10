@@ -372,58 +372,92 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
 
         {/* Practice Performance — Goals vs Actuals */}
-        {isOwnerOrManager && (practiceGoals || cases.length > 0) && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14, marginBottom: 28 }}>
-            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradTeal }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <Briefcase size={14} strokeWidth={1.5} color={C.teal} />
-                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("cases_this_month")}</span>
+        {isOwnerOrManager && (
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+                <TrendingUp size={16} strokeWidth={1.5} color={C.teal} /> {T("practice_performance")}
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: C.teal }}>{convertedCases.length}</div>
-              {monthlyGoal > 0 && (
-                <>
-                  <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("goal_label")}: {monthlyGoal}</div>
-                  <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999, marginTop: 6 }}>
-                    <div style={{ height: "100%", width: `${Math.min((convertedCases.length / monthlyGoal) * 100, 100)}%`, background: C.teal, borderRadius: 999 }} />
-                  </div>
-                </>
+              {!editingGoals ? (
+                <button onClick={startEditGoals}
+                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "5px 12px", fontSize: 10, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4, transition: "all 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = C.teal}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
+                  <Pencil size={10} strokeWidth={1.5} /> {T("edit_goals")}
+                </button>
+              ) : (
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <label style={{ fontSize: 10, color: C.ash }}>{T("case_goal")}:</label>
+                  <input type="number" value={editCaseGoal} onChange={e => setEditCaseGoal(+e.target.value)}
+                    style={{ width: 60, background: "rgba(255,255,255,0.06)", border: `1px solid ${C.teal}40`, color: C.white, padding: "4px 8px", fontSize: 11, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, textAlign: "center" }} />
+                  <label style={{ fontSize: 10, color: C.ash }}>{T("revenue_goal")}:</label>
+                  <input type="number" value={editRevenueGoal} onChange={e => setEditRevenueGoal(+e.target.value)}
+                    style={{ width: 80, background: "rgba(255,255,255,0.06)", border: `1px solid ${C.gold}40`, color: C.white, padding: "4px 8px", fontSize: 11, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, textAlign: "center" }} />
+                  <button onClick={handleSaveGoals}
+                    style={{ background: C.gradTeal, color: C.white, border: "none", padding: "5px 12px", fontSize: 10, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Save size={10} strokeWidth={2} /> {T("save")}
+                  </button>
+                  <button onClick={() => setEditingGoals(false)}
+                    style={{ background: "transparent", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "5px 10px", fontSize: 10, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs }}>
+                    ✕
+                  </button>
+                </div>
               )}
             </div>
-            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradGold }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <DollarSign size={14} strokeWidth={1.5} color={C.gold} />
-                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("revenue_actual")}</span>
+            {(practiceGoals || cases.length > 0) && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14 }}>
+              <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradTeal }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <Briefcase size={14} strokeWidth={1.5} color={C.teal} />
+                  <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("cases_this_month")}</span>
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: C.teal }}>{convertedCases.length}</div>
+                {monthlyGoal > 0 && (
+                  <>
+                    <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("goal_label")}: {monthlyGoal}</div>
+                    <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999, marginTop: 6 }}>
+                      <div style={{ height: "100%", width: `${Math.min((convertedCases.length / monthlyGoal) * 100, 100)}%`, background: C.teal, borderRadius: 999 }} />
+                    </div>
+                  </>
+                )}
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: C.gold }}>${totalCaseRevenue.toLocaleString()}</div>
-              {revenueGoal > 0 && (
-                <>
-                  <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("goal_label")}: ${revenueGoal.toLocaleString()}</div>
-                  <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999, marginTop: 6 }}>
-                    <div style={{ height: "100%", width: `${Math.min((totalCaseRevenue / revenueGoal) * 100, 100)}%`, background: C.gold, borderRadius: 999 }} />
-                  </div>
-                </>
-              )}
-            </div>
-            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${C.gold}, ${C.green})` }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <Clock size={14} strokeWidth={1.5} color={C.gold} />
-                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("follow_ups")}</span>
+              <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradGold }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <DollarSign size={14} strokeWidth={1.5} color={C.gold} />
+                  <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("revenue_actual")}</span>
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: C.gold }}>${totalCaseRevenue.toLocaleString()}</div>
+                {revenueGoal > 0 && (
+                  <>
+                    <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("goal_label")}: ${revenueGoal.toLocaleString()}</div>
+                    <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999, marginTop: 6 }}>
+                      <div style={{ height: "100%", width: `${Math.min((totalCaseRevenue / revenueGoal) * 100, 100)}%`, background: C.gold, borderRadius: 999 }} />
+                    </div>
+                  </>
+                )}
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: C.gold }}>{cases.filter(c => c.status === 'follow_up').length}</div>
-              <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("needs_attention")}</div>
-            </div>
-            <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradRed }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <XCircle size={14} strokeWidth={1.5} color={C.red} />
-                <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("rejected_cases")}</span>
+              <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${C.gold}, ${C.green})` }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <Clock size={14} strokeWidth={1.5} color={C.gold} />
+                  <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("follow_ups")}</span>
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: C.gold }}>{cases.filter(c => c.status === 'follow_up').length}</div>
+                <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("needs_attention")}</div>
               </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: C.red }}>{cases.filter(c => c.status === 'rejected').length}</div>
-              <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("this_month")}</div>
+              <div style={{ ...glass, padding: "18px 16px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: C.gradRed }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <XCircle size={14} strokeWidth={1.5} color={C.red} />
+                  <span style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("rejected_cases")}</span>
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: C.red }}>{cases.filter(c => c.status === 'rejected').length}</div>
+                <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{T("this_month")}</div>
+              </div>
             </div>
+            )}
           </div>
         )}
 
