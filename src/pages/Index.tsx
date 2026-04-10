@@ -18,6 +18,7 @@ const Index = () => {
   if (s.phase === "blR") return <BaselineResults s={s} u={u} sc={sc} sRoles={sRoles} myPH={myPH} myM={myM} />;
   if (s.phase === "module" && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} />;
   if (s.phase === "simulation") return <Simulation s={s} u={u} />;
+  if (s.phase === "simSummary") return <SimulationSummary s={s} u={u} />;
   if (s.phase === "report") return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} />;
 
   return <Dashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} />;
