@@ -2,10 +2,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { C, ROLES } from '@/data/constants';
 import { scrollTop, startSTT } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
+import { t, Lang } from '@/data/translations';
 
 interface SimulationProps {
   s: AppState;
   u: (d: Partial<AppState>) => void;
+  lang?: Lang;
 }
 
 const SUCCESS_REGEX = /(interested|next step|sign me up|let's do it|schedule|sounds good|i'm in|let's move forward|make it work)/i;
@@ -13,12 +15,7 @@ const COACH_REGEX = /\[COACH:\s*([\s\S]*?)\]$/;
 
 function parseCoaching(text: string): { patientText: string; coachTip: string | null } {
   const match = text.match(COACH_REGEX);
-  if (match) {
-    return {
-      patientText: text.slice(0, match.index).trim(),
-      coachTip: match[1].trim(),
-    };
-  }
+  if (match) return { patientText: text.slice(0, match.index).trim(), coachTip: match[1].trim() };
   return { patientText: text, coachTip: null };
 }
 
@@ -39,16 +36,15 @@ function getRandomPatientIdx(exclude?: number): number {
   return idx;
 }
 
-export default function Simulation({ s, u }: SimulationProps) {
+export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
+  const T = (key: string) => t(lang, key);
   const [loading, setLoading] = useState(false);
   const [patientIdx, setPatientIdx] = useState(() => getRandomPatientIdx());
   const chatEnd = useRef<HTMLDivElement>(null);
   const sRoles = ROLES.filter(r => s.roles.includes(r.id));
   const patient = PATIENTS[patientIdx];
 
-  useEffect(() => {
-    chatEnd.current?.scrollIntoView({ behavior: "smooth" });
-  }, [s.simMsgs]);
+  useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [s.simMsgs]);
 
   const sendMessage = useCallback(async (overrideText?: string) => {
     const msg = (overrideText || s.simIn).trim();
@@ -56,145 +52,76 @@ export default function Simulation({ s, u }: SimulationProps) {
     const msgs = [...s.simMsgs, { r: "user", t: msg }];
     u({ simMsgs: msgs, simIn: "" });
     setLoading(true);
-
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      
       const resp = await fetch(`${supabaseUrl}/functions/v1/patient-sim`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })),
-          patientIndex: patientIdx,
-        }),
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseKey}` },
+        body: JSON.stringify({ messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })), patientIndex: patientIdx }),
       });
-
-      if (!resp.ok) {
-        const errData = await resp.json().catch(() => ({}));
-        throw new Error(errData.error || `Error ${resp.status}`);
-      }
-
+      if (!resp.ok) { const errData = await resp.json().catch(() => ({})); throw new Error(errData.error || `Error ${resp.status}`); }
       const data = await resp.json();
       const aiText = data.reply || "I'm not sure what to say to that.";
-
-      let newSimP = s.simP;
-      let newXp = s.xp;
-      if (SUCCESS_REGEX.test(aiText) && s.simP < 3) {
-        newSimP = s.simP + 1;
-        newXp = s.xp + 150;
-      }
-
+      let newSimP = s.simP, newXp = s.xp;
+      if (SUCCESS_REGEX.test(aiText) && s.simP < 3) { newSimP = s.simP + 1; newXp = s.xp + 150; }
       u({ simMsgs: [...msgs, { r: "ai", t: aiText }], simP: newSimP, xp: newXp });
     } catch (e: any) {
       u({ simMsgs: [...msgs, { r: "ai", t: `[Error: ${e.message}]` }] });
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, [s.simMsgs, s.simIn, s.simP, s.xp, loading, u, patientIdx]);
 
-  const handleNewPatient = () => {
-    const newIdx = getRandomPatientIdx(patientIdx);
-    setPatientIdx(newIdx);
-    u({ simMsgs: [] });
-  };
-
+  const handleNewPatient = () => { setPatientIdx(getRandomPatientIdx(patientIdx)); u({ simMsgs: [] }); };
   const handleMic = () => {
-    if (s.lst) {
-      u({ lst: false });
-      return;
-    }
+    if (s.lst) { u({ lst: false }); return; }
     u({ lst: true });
-    startSTT((text: string) => {
-      u({ lst: false, simIn: text });
-      setTimeout(() => sendMessage(text), 300);
-    });
+    startSTT((text: string) => { u({ lst: false, simIn: text }); setTimeout(() => sendMessage(text), 300); });
   };
 
   return (
     <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
       <div style={{ padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
         <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
-          style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>← Back</button>
-        <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>Patient Simulation</div>
+          style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("back")}</button>
+        <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("patient_simulation")}</div>
         <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700 }}>{s.simP}/3</div>
       </div>
 
-      {/* Patient Card */}
       <div style={{ background: C.dark2, padding: "14px 24px", margin: "0 24px", marginTop: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>Patient: {patient.name}, {patient.age}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{T("patient_label")} {patient.name}, {patient.age}</div>
         <div style={{ fontSize: 12, color: C.ash }}>{patient.card}</div>
       </div>
 
-      {/* Chat Area */}
       <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto", minHeight: 200 }}>
         {s.simMsgs.length === 0 && (
           <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
-            Start the conversation with {patient.name}. Type or tap mic.
+            {T("start_conversation").replace("{name}", patient.name)}
           </div>
         )}
         {s.simMsgs.map((msg, i) => {
           if (msg.r === "user") {
             return (
               <div key={i} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-                <div style={{
-                  maxWidth: "75%",
-                  background: C.teal,
-                  color: C.white,
-                  padding: "10px 14px",
-                  borderRadius: "14px 14px 4px 14px",
-                  fontSize: 13, lineHeight: 1.6,
-                }}>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>
-                    You ({sRoles.map(r => r.short).join(", ")})
-                  </div>
+                <div style={{ maxWidth: "75%", background: C.teal, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 4px 14px", fontSize: 13, lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>{T("you_label")} ({sRoles.map(r => r.short).join(", ")})</div>
                   {msg.t}
                 </div>
               </div>
             );
           }
-
-          // AI message — parse for coaching
           const { patientText, coachTip } = parseCoaching(msg.t);
-
           return (
             <div key={i} style={{ marginBottom: 10 }}>
-              {/* Patient bubble */}
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{
-                  maxWidth: "75%",
-                  background: C.dark2,
-                  color: C.white,
-                  padding: "10px 14px",
-                  borderRadius: "14px 14px 14px 4px",
-                  fontSize: 13, lineHeight: 1.6,
-                }}>
+                <div style={{ maxWidth: "75%", background: C.dark2, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13, lineHeight: 1.6 }}>
                   <div style={{ fontSize: 9, color: C.ash, marginBottom: 4 }}>{patient.name}</div>
                   {patientText}
                 </div>
               </div>
-
-              {/* Coaching tip card */}
               {coachTip && (
-                <div style={{
-                  marginTop: 8,
-                  marginLeft: 12,
-                  maxWidth: "80%",
-                  background: "rgba(212,175,55,0.08)",
-                  borderLeft: `3px solid ${C.gold}`,
-                  borderRadius: "0 8px 8px 0",
-                  padding: "10px 14px",
-                }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>
-                    💡 Training Tip
-                  </div>
-                  <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>
-                    {coachTip}
-                  </div>
+                <div style={{ marginTop: 8, marginLeft: 12, maxWidth: "80%", background: "rgba(212,175,55,0.08)", borderLeft: `3px solid ${C.gold}`, borderRadius: "0 8px 8px 0", padding: "10px 14px" }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{T("training_tip")}</div>
+                  <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>{coachTip}</div>
                 </div>
               )}
             </div>
@@ -202,34 +129,31 @@ export default function Simulation({ s, u }: SimulationProps) {
         })}
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-            <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>{patient.name} is typing...</div>
+            <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>{T("typing").replace("{name}", patient.name)}</div>
           </div>
         )}
         <div ref={chatEnd} />
       </div>
 
-      {/* Success Banner */}
       {s.simP >= 3 && (
         <div style={{ background: C.green, color: C.white, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 14, fontWeight: 700 }}>3 patients guided!</span>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>3 {T("patients_guided")}</span>
           <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}
             style={{ background: "rgba(255,255,255,0.2)", color: C.white, border: "none", padding: "8px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-            Return →
+            {T("return_arrow")}
           </button>
         </div>
       )}
 
-      {/* New Patient Button */}
       {s.simMsgs.length >= 8 && s.simP < 3 && (
         <div style={{ padding: "8px 24px", textAlign: "center" }}>
           <button onClick={handleNewPatient}
             style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-            New Patient →
+            {T("new_patient")}
           </button>
         </div>
       )}
 
-      {/* Input Bar */}
       <div style={{ padding: "12px 24px", borderTop: `1px solid ${C.borderD}`, display: "flex", gap: 8, alignItems: "center" }}>
         <button onClick={handleMic}
           style={{ width: 40, height: 40, background: s.lst ? C.red : C.dark2, border: "none", borderRadius: "50%", fontSize: 18, cursor: "pointer", flexShrink: 0 }}>🎤</button>
@@ -237,12 +161,12 @@ export default function Simulation({ s, u }: SimulationProps) {
           value={s.simIn}
           onChange={e => u({ simIn: e.target.value })}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder={`Talk to ${patient.name}...`}
+          placeholder={T("talk_to").replace("{name}", patient.name)}
           style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: "10px 14px", fontSize: 14, fontFamily: C.fn, outline: "none" }}
         />
         <button onClick={() => sendMessage()}
           style={{ background: C.teal, color: C.white, border: "none", padding: "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
-          Send
+          {T("send")}
         </button>
       </div>
     </div>

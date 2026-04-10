@@ -1,13 +1,16 @@
 import { C, BL } from '@/data/constants';
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
+import { t, Lang } from '@/data/translations';
 
 interface BaselineProps {
   s: AppState;
   u: (d: Partial<AppState>) => void;
+  lang?: Lang;
 }
 
-export default function Baseline({ s, u }: BaselineProps) {
+export default function Baseline({ s, u, lang = "en" }: BaselineProps) {
+  const T = (key: string) => t(lang, key);
   const qs = s.blQs || BL.map((v, i) => v[(s.seed + i) % v.length]);
   const q = qs[s.blIdx];
   const sel = s.bl[s.blIdx];
@@ -16,8 +19,8 @@ export default function Baseline({ s, u }: BaselineProps) {
     <div style={{ fontFamily: C.fn, background: C.white, minHeight: "100vh" }}>
       <div style={{ background: C.dark, padding: "18px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ fontSize: 10, letterSpacing: 3, color: C.ash, textTransform: "uppercase" }}>Step 2 — Where You Are Today</div>
-          <p style={{ fontSize: 13, color: C.ash, marginTop: 4 }}>This helps us understand your starting point. No wrong answers.</p>
+          <div style={{ fontSize: 10, letterSpacing: 3, color: C.ash, textTransform: "uppercase" }}>{T("step2_baseline")}</div>
+          <p style={{ fontSize: 13, color: C.ash, marginTop: 4 }}>{T("no_wrong_answers")}</p>
           <div style={{ display: "flex", gap: 3, marginTop: 10 }}>
             {qs.map((_: any, i: number) => <div key={i} style={{ flex: 1, height: 3, background: i <= s.blIdx ? C.teal : C.dark3 }} />)}
           </div>
@@ -42,7 +45,7 @@ export default function Baseline({ s, u }: BaselineProps) {
               else { u({ phase: "blR", blScore: Math.round(s.bl.reduce((a, v) => a + v * 25, 0) / qs.length) }); scrollTop(); }
             }}
               style={{ background: C.teal, color: "#fff", border: "none", padding: "14px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", marginTop: 14, display: "inline-flex", alignItems: "center", gap: 8 }}>
-              {s.blIdx < qs.length - 1 ? "Next →" : "See Results →"}
+              {s.blIdx < qs.length - 1 ? T("next_arrow") : T("see_results")}
             </button>
           )}
         </div>
