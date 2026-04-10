@@ -651,9 +651,12 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         )}
 
         {allModsDone && !allComplete && (
-          <div style={{ background: C.gradTeal, color: C.white, padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: C.glow(C.teal, 0.25) }}>
-            {T("training_complete")}
-          </div>
+          <button onClick={() => { u({ phase: "simulation" }); scrollTop(); }}
+            style={{ background: C.gradTeal, color: C.white, padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: C.glow(C.teal, 0.25), width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.4); }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.25); }}>
+            {T("training_complete")} <ArrowRight size={16} strokeWidth={2} />
+          </button>
         )}
 
         {/* Training Modules Accordion */}
