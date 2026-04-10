@@ -9,7 +9,7 @@ const corsHeaders = {
 const TRAINING_CHEAT_SHEET = `
 TRAINING KNOWLEDGE (what the employee has been taught — use this to evaluate their answers and coach them):
 - ByteSense is a WELLNESS HEALTH INTELLIGENCE PLATFORM. NEVER call it a "night guard" or "mouthguard." If the employee uses those terms, coach them.
-- 5 embedded sensors: Heart Rate/HRV, EMG (grinding intensity), Respiratory, Temperature, Motion/Sleep Position
+- 6 embedded sensors: Heart Rate/HRV, EMG (grinding intensity), Respiratory, Temperature, Motion/Sleep Position, Blood Oxygen (SpO2)
 - bitely companion app: daily ByteSense Score (0-100), trends, sleep quality data
 - Integrates with Apple Health & Google Health
 - Wellness device category (like Apple Watch for your mouth) — no prescription needed
