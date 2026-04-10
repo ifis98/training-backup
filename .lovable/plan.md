@@ -1,120 +1,55 @@
 
 
-# ByteSense — Multi-Patient Sim, Logo Fix, TTS Improvement, DB Sync & Practice Join
+# AI Simulation Coaching & Training-Aligned Patient Questions
 
-## Summary
-Seven changes: (1) randomize AI patient scenarios instead of always Jordan, (2) fix logo visibility on dark backgrounds, (3) improve TTS quality, (4) sync training state to database, (5) prevent duplicate email registration, (6) allow employees to request joining an existing practice, (7) admin staff removal.
+## Problem
+Two issues: (1) Patient personas like Patricia ask questions (e.g., "What's the sensor accuracy?" "Is there clinical validation?") that aren't well-covered in the training modules, leaving employees unable to answer confidently. (2) When an employee gives a weak or incorrect response, the simulation just moves on — there's no feedback or coaching.
 
----
+## Solution
 
-## 1. Random Patient Scenarios in AI Simulation
+### 1. Add a Coaching Mode to the Simulation
 
-**Current**: Only one patient — Jordan, 38, marketing manager.
+When the employee struggles (vague, incorrect, or off-brand response), the AI will break from the patient roleplay and provide a **coaching tip** — a short, actionable suggestion of what they could have said, referencing the actual training content.
 
-**Change**: Create a pool of 6+ distinct patient personas in the edge function. When "New Patient" is clicked or a new conversation starts, the client sends a `patientIndex` (0–5, randomized). The edge function picks the matching persona.
+**How it works:**
+- Update the patient system prompts in `supabase/functions/patient-sim/index.ts` to include a coaching instruction
+- After each user message, the AI evaluates the response quality. If the response is weak, vague, uses forbidden language ("night guard"), or misses a key technique from training, the patient responds naturally AND a coaching note is appended in a distinct format: `[COACH: Here's what would work better — ...]`
+- The coaching tip references specific ByteSense training concepts (e.g., "Try the Feel-Felt-Found framework", "Remember to reframe cost vs. $15K–$40K in damage")
+- On the client side, `Simulation.tsx` parses `[COACH: ...]` blocks from AI responses and renders them as a visually distinct coaching card (gold border, different background) below the patient's chat bubble
 
-Patient pool (all dental-relevant, varied demographics/objections):
-| # | Name | Age | Occupation | Scenario | Key Objections |
-|---|------|-----|-----------|----------|---------------|
-| 0 | Jordan | 38 | Marketing Manager | Grinding, jaw sore | Budget, "isn't it a night guard?" |
-| 1 | Maria | 52 | School Teacher | TMJ pain, headaches | Insurance coverage, skepticism |
-| 2 | Devon | 28 | Software Engineer | Partner complains about grinding | "I feel fine", tech-curious |
-| 3 | Patricia | 65 | Retired Nurse | Broken teeth history, dentist recommended | Already tried a night guard, medical knowledge |
-| 4 | Marcus | 44 | Construction Foreman | Sleep apnea concerns, jaw clenching | Time off work, cost |
-| 5 | Aisha | 33 | New Mom | Stress grinding since pregnancy | Baby budget, "will it work?" |
+### 2. Inject Training Knowledge into Patient Prompts
 
-- Update `supabase/functions/patient-sim/index.ts` — add personas array, accept `patientIndex` in request body
-- Update `Simulation.tsx` — randomize patientIndex on mount and on "New Patient", display current patient name/details in the card, show patient name in chat bubbles
-- Update `AppState` — add `simPatientIdx` field
+The patient system prompts currently have no knowledge of what the training teaches. Update each persona's system prompt to include a condensed "training cheat sheet" so the AI:
+- Asks questions that ARE answerable from the training (sensor types, 5 metrics, wellness positioning, pricing moment, objection handling frameworks)
+- Knows what a GOOD answer looks like (so it can coach effectively)
+- Still challenges the employee, but within the scope of what they've been taught
 
-## 2. Fix ByteSense Logo Visibility on Dark Backgrounds
+**Cheat sheet content** (appended to each persona's system prompt):
+- ByteSense = wellness health intelligence platform, NEVER "night guard"
+- 5 sensors: HR/HRV, EMG grinding, respiratory, temperature, motion
+- bitely app, daily byteSense Score (0-100), Apple/Google Health integration
+- Wellness device category (like Apple Watch), no prescription needed
+- Comfort: custom-fit from exact scan, 3-7 nights to adjust
+- Cost reframe: one-time investment vs. $15K-$40K in dental damage over 10 years
+- Objection handling: Feel-Felt-Found framework, Isolation Technique for "think about it"
+- Price moment: state price, then SILENCE
+- 8-stage patient journey, warm handoff protocol
 
-The logo PNG has dark text that's invisible on dark backgrounds.
+### 3. Update Simulation.tsx UI
 
-**Fix**: Add a CSS `filter: brightness(0) invert(1)` on the `<img>` tags when used on dark backgrounds. Update:
-- `ByteSenseLogo.tsx` — add optional `light` prop to Logo/LogoText components
-- `Splash.tsx` — use `<Logo light />` in dark header
-- `Dashboard.tsx` — use `<Logo light />` in dark header
-- `Simulation.tsx` — already text-based, no logo needed
-- `Report.tsx` — logo on white bg is fine, no change
-- `Welcome.tsx` — add filter to logo img
-- `Auth.tsx` — add filter to logo img
-- `AdminDashboard.tsx` — add filter to logo img on dark bg
+- Parse `[COACH: ...]` from AI responses and render as a separate coaching card
+- Style: gold left border, dark background, coach icon, smaller text
+- Show a "Training Tip" label so employees know this is guidance, not the patient talking
+- Track coaching interactions (optional: count how many tips were given per session)
 
-## 3. Improve TTS Voice Quality
+## Files Changed
 
-**Current**: Uses Web SpeechSynthesis API with `rate: 0.95`. Sounds robotic/choppy.
-
-**Fix**: 
-- Select a higher-quality voice — prefer "Google UK English Female" or similar natural voice when available
-- Add `pitch: 1.0` and wait for `voiceschanged` event before speaking
-- Add sentence-level chunking with small pauses for natural flow
-- Clean markdown more thoroughly (strip bullets, headers formatting) before speaking
-- Update `speak()` in `src/lib/helpers.ts`
-
-Note: Browser TTS quality varies by platform. For truly smooth speech, ElevenLabs would be ideal but requires an API key. We'll optimize the free browser API first and note the upgrade path.
-
-## 4. Database Persistence for Training State
-
-**Current**: Training state lives in `localStorage` only.
-
-**Change**: On login, check for existing `training_progress` row. If found, hydrate app state from DB. On every state change, debounce-sync to DB.
-
-- Update `useAppState.ts` — add `syncToDb()` function that upserts to `training_progress`
-- Update `Index.tsx` — load from DB on mount when user is authenticated
-- Pass `user` context into the app state hook
-
-## 5. Prevent Duplicate Email Registration
-
-**Current**: Supabase Auth already prevents duplicate emails at the auth level. But we should also show a clear error message.
-
-**Change**: In `Auth.tsx`, catch the specific "User already registered" error and show a friendly toast directing them to sign in instead.
-
-## 6. Employee Practice Join Request
-
-**Current**: Employees can only join a practice if invited by admin.
-
-**Change**: After registration, if an employee doesn't have a practice, show a "Request to Join Practice" flow:
-- New screen/modal after login where unpracticed users can search by practice name or enter a practice code
-- Creates a row in `staff_invitations` with `status: 'requested'` (reversed flow)
-- Admin sees requests in their Invitations tab and can approve/deny
-- On approval, employee's profile gets `practice_id` set
-
-Database changes:
-- Add `'requested'` as valid status in `staff_invitations`
-- Add RLS policy for authenticated users to insert their own join requests
-- Add `practice_code` column to `practices` table (short unique code for lookup)
-
-## 7. Admin Staff Removal
-
-**Current**: Admin can revoke invitations but can't remove active staff.
-
-**Change**: Add "Remove" button on each staff card in admin dashboard. Removes:
-- Clears `practice_id` from profile
-- Deletes `training_progress` for that user in this practice
-- Shows confirmation dialog before removal
-
----
+1. **`supabase/functions/patient-sim/index.ts`** — Update all 6 patient system prompts with training cheat sheet + coaching instructions
+2. **`src/screens/Simulation.tsx`** — Parse and render coaching tips as distinct UI cards
 
 ## Implementation Order
 
-1. Database migration — add `practice_code` to practices, update staff_invitations RLS for self-requests
-2. Fix logo visibility (light mode prop)
-3. Random patient personas in edge function + Simulation UI
-4. TTS voice improvement
-5. DB sync for training state
-6. Duplicate email handling
-7. Practice join request flow (UI + admin approval)
-8. Admin staff removal
-9. Deploy edge function + test end-to-end
-
----
-
-## Technical Details
-
-- **Edge function**: `patient-sim` updated with 6 persona system prompts, selected by `patientIndex` param
-- **Logo**: CSS filter approach avoids needing a second logo asset
-- **TTS**: `window.speechSynthesis.getVoices()` with preference ranking; sentence chunking via regex split on `.!?`
-- **DB sync**: Debounced (2s) upsert to `training_progress` table on state changes
-- **Practice code**: 6-char alphanumeric generated on practice creation, used for join requests
+1. Update edge function with enriched prompts + coaching behavior
+2. Deploy edge function
+3. Update Simulation.tsx to parse and render coaching cards
 
