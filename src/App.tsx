@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import AuthPage from "./pages/Auth";
+import ByteSenseAdmin from "./pages/ByteSenseAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ function AppRoutes() {
       <Route path="/welcome" element={!user ? <Welcome /> : <Navigate to="/" />} />
       <Route path="/login" element={!user ? <AuthPage mode="login" /> : <Navigate to="/" />} />
       <Route path="/register" element={!user ? <AuthPage mode="register" /> : <Navigate to="/" />} />
+      <Route path="/bytesense-admin" element={<ByteSenseAdmin />} />
       <Route path="/" element={user ? <Index /> : <Navigate to="/welcome" />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

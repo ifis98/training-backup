@@ -7,6 +7,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isByteSenseAdmin, setIsByteSenseAdmin] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
@@ -30,10 +31,12 @@ export function useAuth() {
               .select('role')
               .eq('user_id', session.user.id);
             setIsAdmin(roleData?.some(r => r.role === 'admin') ?? false);
+            setIsByteSenseAdmin(roleData?.some(r => r.role === 'bytesense_admin') ?? false);
           }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
+          setIsByteSenseAdmin(false);
         }
         setLoading(false);
       }
@@ -54,7 +57,8 @@ export function useAuth() {
     setSession(null);
     setProfile(null);
     setIsAdmin(false);
+    setIsByteSenseAdmin(false);
   };
 
-  return { user, session, loading, isAdmin, profile, signOut };
+  return { user, session, loading, isAdmin, isByteSenseAdmin, profile, signOut };
 }
