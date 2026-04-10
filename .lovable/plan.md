@@ -1,51 +1,68 @@
 
 
-# AI Coach Copy/Save + i18n for Remaining Screens + Testing
+# Fix Simulation Auto-Send, Persistent AI Coach, and Staff Dashboard
 
-## 1. AI Coach — Copy & Save Features
+## Problems
 
-**Copy to Clipboard**: Add a small "📋 Copy" button on each assistant message bubble. Uses `navigator.clipboard.writeText()` with a brief "Copied!" toast feedback.
+1. **Simulation auto-sends mid-sentence**: The microphone handler in `Simulation.tsx` calls `setTimeout(() => sendMessage(text), 300)` immediately after speech recognition returns — sending without letting the user review or edit. The text input also has no friction before sending.
 
-**Save Favorites**: Add a "⭐ Save" button next to Copy. Saved responses stored in localStorage (key `bsa6_favorites`) as `{ content: string, mode: string, savedAt: string }[]`. Add a "⭐ Saved" tab in the AI Coach header that shows saved responses with a delete option.
+2. **AI Coach availability**: The floating 🧠 button and AI Coach panel only exist on the main Dashboard screen. It should be accessible from all screens (Simulation, ModuleView, etc.).
 
-New translation keys: `copied`, `copy`, `save`, `saved`, `saved_responses`, `no_saved`, `delete` — added for all 5 languages.
+3. **No staff dashboard**: `AdminDashboard.tsx` exists for practice owners but there's no dedicated staff-facing dashboard where individual staff members can see their own progress, access the AI Coach, and use quick tools.
 
-## 2. Translate Remaining Screens
+## Plan
 
-These screens still have hardcoded English strings:
+### 1. Fix Simulation Mic Auto-Send
 
-- **Splash.tsx**: "Practice Onboarding", "Welcome to the ByteSense Team", field labels, "Get Started", confidential footer
-- **Baseline.tsx**: "Step 2 — Where You Are Today", "No wrong answers", "Next →", "See Results →"
-- **BaselineResults.tsx**: "Your Starting Point", "Strong Foundation"/"Developing"/"Fresh Start", level messages, "Your Roles:", "Your personalized onboarding:", "Start Onboarding →"
-- **RoleSelect.tsx**: "Step 1 — Your Role(s)", role selection instructions, "Continue"
-- **ModuleView.tsx**: "← Dashboard", speaker button, quiz labels, "Next Module →", "Back to Dashboard"
-- **Simulation.tsx**: All patient sim UI strings
-- **SimulationSummary.tsx**: Summary labels, score display, tips
-- **Report.tsx**: "Training Report", "Congratulations", certificate text, LinkedIn share, print
+**File: `src/screens/Simulation.tsx`**
 
-Each screen needs the `lang` prop threaded from `AppState` and wrapped with `t(lang, key)`. ~60 new translation keys across all 5 languages.
+Remove the `setTimeout(() => sendMessage(text), 300)` from `handleMic`. Instead, just populate the input field with the transcribed text and let the user review and press Send manually.
 
-## 3. Thread `lang` Through All Screens
+Before:
+```
+startSTT((text) => { u({ lst: false, simIn: text }); setTimeout(() => sendMessage(text), 300); });
+```
 
-Currently only `Dashboard` and `AICoach` receive `lang`. Update `Index.tsx` to pass `s.lang` (as `Lang`) to every screen component. Each screen's props interface gets `lang?: Lang`.
+After:
+```
+startSTT((text) => { u({ lst: false, simIn: text }); });
+```
 
-## 4. Testing Plan (manual, after implementation)
+### 2. Make AI Coach Available App-Wide
 
-- **ByteSense Admin Portal**: Navigate to `/bytesense-admin`, generate codes, verify they appear
-- **AI Coach**: Open coach, send a message, verify response, test Copy and Save buttons
-- **Language Switching**: Switch to Spanish on dashboard, verify all screens translate when navigating through Splash → RoleSelect → Baseline → Results → Dashboard → Coach → Simulation → Summary → Report
+**File: `src/pages/Index.tsx`**
+
+Move the floating 🧠 button and `<AICoach>` panel from `Dashboard.tsx` into `Index.tsx` so it renders on every screen (dashboard, module, simulation, etc.). Add state for `showCoach` and `coachMode` at the Index level.
+
+The Dashboard will keep its Quick Tools grid (which opens the coach in specific modes), but the floating button and panel will live at the parent level.
+
+### 3. Create Staff Dashboard
+
+**New file: `src/screens/StaffDashboard.tsx`**
+
+A dedicated view for staff members (non-owners) showing:
+- Their personal training progress (modules completed, XP, baseline score)
+- Progress bar toward certification
+- Quick access to AI Coach modes (same Quick Tools grid as owner dashboard)
+- Practice info (name, their role)
+- Quick Reference card
+- Simulation access
+
+**File: `src/pages/Index.tsx`** — Route staff users to `StaffDashboard` when their role is `staff` (check `user_roles` table), while practice owners (`admin` role) continue seeing the current Dashboard.
+
+**File: `src/hooks/useAuth.ts`** — Already exposes `isAdmin`. We'll use this to determine which dashboard to show.
 
 ## Files Changed
 
-1. **`src/data/translations.ts`** — ~60 new keys × 5 languages
-2. **`src/components/AICoach.tsx`** — Copy/Save buttons, Saved tab
-3. **`src/screens/Splash.tsx`** — Wrap strings with `t()`
-4. **`src/screens/RoleSelect.tsx`** — Wrap strings with `t()`
-5. **`src/screens/Baseline.tsx`** — Wrap strings with `t()`
-6. **`src/screens/BaselineResults.tsx`** — Wrap strings with `t()`
-7. **`src/screens/ModuleView.tsx`** — Wrap strings with `t()`
-8. **`src/screens/Simulation.tsx`** — Wrap strings with `t()`
-9. **`src/screens/SimulationSummary.tsx`** — Wrap strings with `t()`
-10. **`src/screens/Report.tsx`** — Wrap strings with `t()`
-11. **`src/pages/Index.tsx`** — Pass `lang` to all screen components
+1. `src/screens/Simulation.tsx` — Remove auto-send from mic handler (1 line)
+2. `src/pages/Index.tsx` — Add floating AI Coach button + panel wrapper around all screens; route staff vs admin dashboard
+3. `src/screens/Dashboard.tsx` — Remove floating button and AICoach panel (moved to Index)
+4. `src/screens/StaffDashboard.tsx` — New staff-facing dashboard component
+
+## Implementation Order
+
+1. Fix mic auto-send in Simulation
+2. Move AI Coach to Index (app-wide)
+3. Build StaffDashboard
+4. Wire routing logic in Index
 
