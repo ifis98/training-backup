@@ -52,6 +52,7 @@ const defaultState: AppState = {
   xp: 0,
   spk: false,
   signed: false,
+  lang: "en",
 };
 
 export function useAppState() {
