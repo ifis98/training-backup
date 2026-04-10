@@ -7,6 +7,7 @@ import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Tooltip } from 'recharts';
+import DashboardSidebar from '@/components/DashboardSidebar';
 
 interface DashboardProps {
   s: AppState;
@@ -23,7 +24,6 @@ interface DashboardProps {
 
 const CHART_COLORS = [C.teal, C.red, C.gold, C.blue, C.violet, C.cyan, C.green, C.rose, C.amber];
 
-// Shared glass styles
 const glass = {
   background: C.glass,
   backdropFilter: C.blur,
@@ -44,6 +44,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [staffData, setStaffData] = useState<any[]>([]);
+  const [simReviews, setSimReviews] = useState<any[]>([]);
   const [notes, setNotes] = useState(() => localStorage.getItem('bsa6_notes') || '');
   const [goals, setGoals] = useState<{ text: string; done: boolean }[]>(() => {
     try { return JSON.parse(localStorage.getItem('bsa6_goals') || '[]'); } catch { return []; }
@@ -71,6 +72,17 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       setStaffData(tp.map(t => ({ ...t, name: profiles?.find(p => p.user_id === t.user_id)?.full_name || 'Unknown' })));
     };
     load();
+  }, []);
+
+  // Load simulation reviews
+  useEffect(() => {
+    const loadReviews = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from('simulation_reviews').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      if (data) setSimReviews(data);
+    };
+    loadReviews();
   }, []);
 
   const handleSignOut = async () => {
@@ -108,11 +120,54 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
   const scoreLabelKey = getScoreLabel(knowledgeScore);
 
-  // Recommendations
-  const recommendations = useMemo(() => getRecommendations(s.done, myM, myPH, 5), [s.done, myM, myPH]);
+  // Simulation-driven recommendations
+  const recommendations = useMemo(() => {
+    if (simReviews.length > 0) {
+      const latestReview = simReviews[0];
+      const simRecs: any[] = [];
+      if (latestReview.modules_to_review) {
+        for (const modName of latestReview.modules_to_review) {
+          const mod = myM.find(m => m.title.toLowerCase().includes(modName.toLowerCase()) || modName.toLowerCase().includes(m.title.toLowerCase()));
+          if (mod && !s.done.includes(mod.id)) {
+            const ph = myPH.find(p => p.id === mod.phase);
+            simRecs.push({
+              phaseId: mod.phase, phaseLabel: ph?.label || mod.phase, moduleId: mod.id,
+              moduleTitle: mod.title, time: mod.time, priority: "high" as const, color: ph?.color || "#888",
+            });
+          }
+        }
+      }
+      if (simRecs.length > 0) {
+        const fallback = getRecommendations(s.done, myM, myPH, 3).filter(r => !simRecs.find(sr => sr.moduleId === r.moduleId));
+        return [...simRecs.slice(0, 3), ...fallback.slice(0, 2)];
+      }
+    }
+    return getRecommendations(s.done, myM, myPH, 5);
+  }, [s.done, myM, myPH, simReviews]);
 
-  // Improvement Areas
-  const improvementAreas = useMemo(() => getImprovementAreas(s.done, myM, myPH), [s.done, myM, myPH]);
+  // Simulation-driven improvement areas
+  const improvementAreas = useMemo(() => {
+    const baseAreas = getImprovementAreas(s.done, myM, myPH);
+    if (simReviews.length > 0) {
+      const latestReview = simReviews[0];
+      if (latestReview.improvements?.length > 0) {
+        const simArea = {
+          category: T("sim_performance"),
+          phaseId: "simulation",
+          completion: Math.min(latestReview.score, 100),
+          tips: latestReview.tips?.slice(0, 3) || latestReview.improvements?.slice(0, 3) || [],
+          color: C.gold,
+        };
+        return [simArea, ...baseAreas];
+      }
+    }
+    return baseAreas;
+  }, [s.done, myM, myPH, simReviews, lang]);
+
+  // Badge logic
+  const hasCertifiedBadge = allComplete && s.signed;
+  const hasTopPerformerBadge = s.xp > 600 && s.signed;
+  const avgSimScore = simReviews.length > 0 ? Math.round(simReviews.reduce((a, r) => a + r.score, 0) / simReviews.length) : null;
 
   const kpiCard = (label: string, value: string | number, sub: string, color: string, gradient: string) => (
     <div style={{
@@ -129,16 +184,20 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     </div>
   );
 
-  const tooltipStyle = { background: C.glass, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12, backdropFilter: C.blur };
+  const tooltipStyle = { background: C.dark2, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12, color: C.white };
 
   return (
-    <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: "100vh", color: C.white }}>
+    <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: "100vh", color: C.white, display: "flex" }}>
+      {/* Sidebar */}
+      <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} lang={lang} />
+
+      <div style={{ flex: 1, minWidth: 0 }}>
       {/* Header */}
       <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid ${C.glassBorder}` }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <Logo size={30} light />
+              <Logo size={30} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
               <span style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("practice_dashboard")}</span>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -176,7 +235,19 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               {(s.name || 'U')[0].toUpperCase()}
             </div>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{s.name || 'Welcome'}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 18, fontWeight: 700 }}>{s.name || 'Welcome'}</span>
+                {hasCertifiedBadge && (
+                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40` }}>
+                    🏅 {T("badge_certified")}
+                  </span>
+                )}
+                {hasTopPerformerBadge && (
+                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40` }}>
+                    ⭐ {T("badge_top_performer")}
+                  </span>
+                )}
+              </div>
               <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
                 {sRoles.map(r => <span key={r.id} style={{ background: `${r.color}20`, color: r.color, padding: "2px 10px", fontSize: 10, fontWeight: 700, borderRadius: 999 }}>{r.short}</span>)}
               </div>
@@ -223,12 +294,22 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             <div style={{ marginTop: 14, padding: "4px 14px", borderRadius: 999, fontSize: 11, fontWeight: 700, color: scoreColor, background: `${scoreColor}15` }}>
               {T(scoreLabelKey)}
             </div>
+            {avgSimScore !== null && (
+              <div style={{ marginTop: 10, fontSize: 10, color: C.ash, textAlign: "center" }}>
+                {T("avg_sim_score")}: <span style={{ color: C.gold, fontWeight: 700 }}>{avgSimScore}</span>
+              </div>
+            )}
           </div>
 
           {/* Training Recommendations */}
           <div style={{ ...glass, padding: 24, overflow: "hidden" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 16 }}>🎯</span> {T("training_recommendations")}
+              {simReviews.length > 0 && (
+                <span style={{ fontSize: 9, color: C.teal, background: `${C.teal}15`, padding: "2px 8px", borderRadius: 999, fontWeight: 600 }}>
+                  {T("sim_driven")}
+                </span>
+              )}
             </div>
             {recommendations.length === 0 ? (
               <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20 }}>✅ {T("all_complete")}</div>
@@ -316,13 +397,13 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
+              <div style={{ position: "relative", width: 180, height: 180, margin: "0 auto" }}>
                 <PieChart width={180} height={180}>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={58} outerRadius={78} dataKey="value" strokeWidth={0}>
                     {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
                 </PieChart>
-                <div style={{ marginLeft: -30, textAlign: "center" }}>
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                   <div style={{ fontSize: 30, fontWeight: 800, color: C.teal }}>{pr}%</div>
                   <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>{T("complete_label")}</div>
                 </div>
@@ -331,8 +412,33 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         </div>
 
+        {/* Report & Certificate Access */}
+        {(allComplete || s.signed) && (
+          <div style={{ ...glass, padding: 22, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 20 }}>📄</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>{T("view_report")}</div>
+                <div style={{ fontSize: 10, color: C.ash }}>{s.signed ? T("report_signed") : T("report_ready")}</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
+                style={{ background: C.gradGold, color: C.dark, border: "none", padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>
+                {T("view_report")}
+              </button>
+              {s.signed && (
+                <button onClick={() => { u({ phase: "report" }); scrollTop(); setTimeout(() => window.print(), 500); }}
+                  style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>
+                  🖨️ {T("print_report")}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Completion Banners */}
-        {allComplete && (
+        {allComplete && !s.signed && (
           <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: C.glow(C.gold, 0.15), borderColor: `${C.gold}30` }}>
             <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10 }}>🏆 {T("all_complete")}</div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
@@ -532,6 +638,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ textAlign: "center", fontSize: 10, color: C.ash, marginTop: 24, opacity: 0.6 }}>
           {T("confidential")}
         </div>
+      </div>
       </div>
     </div>
   );

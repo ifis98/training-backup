@@ -175,6 +175,62 @@ export type Database = {
         }
         Relationships: []
       }
+      simulation_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          improvements: string[]
+          modules_to_review: string[]
+          overall_feedback: string
+          practice_id: string | null
+          score: number
+          score_label: string
+          session_number: number
+          strengths: string[]
+          tips: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          improvements?: string[]
+          modules_to_review?: string[]
+          overall_feedback?: string
+          practice_id?: string | null
+          score?: number
+          score_label?: string
+          session_number?: number
+          strengths?: string[]
+          tips?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          improvements?: string[]
+          modules_to_review?: string[]
+          overall_feedback?: string
+          practice_id?: string | null
+          score?: number
+          score_label?: string
+          session_number?: number
+          strengths?: string[]
+          tips?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_reviews_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_invitations: {
         Row: {
           created_at: string

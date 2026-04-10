@@ -46,6 +46,23 @@ const translations: Record<Lang, Record<string, string>> = {
     "reset_progress": "Reset All Progress",
     "confidential": "byteSense Inc. · Proprietary · Confidential",
     "language": "Language",
+    // Sidebar
+    "sidebar_dashboard": "Dashboard",
+    "sidebar_training": "Training Modules",
+    "sidebar_simulations": "AI Simulations",
+    "sidebar_coach": "AI Coach",
+    "sidebar_report": "Report & Certificates",
+    // Badges
+    "badge_certified": "Certified Advisor",
+    "badge_top_performer": "Top Performer",
+    // Report access
+    "view_report": "View Report",
+    "report_signed": "Signed & certified",
+    "report_ready": "Ready to view & sign",
+    // Simulation-driven
+    "sim_driven": "AI-Powered",
+    "sim_performance": "Simulation Performance",
+    "avg_sim_score": "Avg. Sim Score",
 
     // AI Coach
     "ai_coach": "AI Coach",
