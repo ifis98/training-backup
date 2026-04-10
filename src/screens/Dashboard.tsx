@@ -59,6 +59,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const [caseFilter, setCaseFilter] = useState('all');
   const [showAddCase, setShowAddCase] = useState(false);
   const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
+  const [editingGoals, setEditingGoals] = useState(false);
+  const [editCaseGoal, setEditCaseGoal] = useState(0);
+  const [editRevenueGoal, setEditRevenueGoal] = useState(0);
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
