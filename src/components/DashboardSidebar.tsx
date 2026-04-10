@@ -4,6 +4,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useState } from 'react';
+import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DashboardSidebarProps {
   s: AppState;
@@ -27,12 +28,12 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
-    { id: "dashboard", icon: "📊", label: T("sidebar_dashboard"), phase: "dashboard" },
-    { id: "training", icon: "📋", label: T("sidebar_training"), phase: "dashboard" },
-    { id: "simulations", icon: "🤖", label: T("sidebar_simulations"), phase: "simulation" },
-    { id: "coach", icon: "🧠", label: T("sidebar_coach"), action: () => openCoach("general") },
-    { id: "report", icon: "📄", label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
-    { id: "signout", icon: "🚪", label: T("sign_out"), action: onSignOut },
+    { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), phase: "dashboard" },
+    { id: "training", icon: BookOpen, label: T("sidebar_training"), phase: "dashboard" },
+    { id: "simulations", icon: Bot, label: T("sidebar_simulations"), phase: "simulation" },
+    { id: "coach", icon: Brain, label: T("sidebar_coach"), action: () => openCoach("general") },
+    { id: "report", icon: FileText, label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
+    { id: "signout", icon: LogOut, label: T("sign_out"), action: onSignOut },
   ];
 
   return (
@@ -52,8 +53,8 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
       <div style={{ padding: collapsed ? "20px 10px" : "20px 16px", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderBottom: `1px solid ${C.glassBorder}` }}>
         {!collapsed && <Logo size={24} light />}
         <button onClick={() => setCollapsed(!collapsed)}
-          style={{ background: "none", border: "none", color: C.ash, cursor: "pointer", fontSize: 14, padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {collapsed ? "▶" : "◀"}
+          style={{ background: "none", border: "none", color: C.ash, cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {collapsed ? <ChevronRight size={16} strokeWidth={1.5} /> : <ChevronLeft size={16} strokeWidth={1.5} />}
         </button>
       </div>
 
@@ -88,7 +89,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
               onMouseEnter={e => { if (!isDisabled && !isActive) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
               onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
             >
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <item.icon size={18} strokeWidth={1.5} />
               {!collapsed && <span>{item.label}</span>}
             </div>
           );
