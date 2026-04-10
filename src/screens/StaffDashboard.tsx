@@ -329,7 +329,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               <BarChart data={phaseChartData} barSize={14}>
                 <XAxis dataKey="name" tick={{ fill: C.ash, fontSize: 9 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} />
+                <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} cursor={{ fill: 'transparent' }} />
                  <Bar dataKey="done" stackId="a" fill={C.teal} name={T("done_label")} />
                  <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" name={T("remaining_label")} />
               </BarChart>
@@ -340,13 +340,11 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} /> {T("completion")}
             </div>
             <div style={{ position: "relative", width: 160, height: 160, margin: "20px auto 0" }}>
-              <ResponsiveContainer width={160} height={160}>
-                <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} dataKey="value" strokeWidth={0}>
-                    {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+              <PieChart width={160} height={160}>
+                <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} dataKey="value" strokeWidth={0}>
+                  {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                </Pie>
+              </PieChart>
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: C.teal }}>{pr}%</div>
                 <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>{T("done")}</div>

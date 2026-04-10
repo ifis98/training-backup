@@ -111,6 +111,8 @@ export function useAppState() {
           sim_patients: s.simP,
           signed: s.signed,
           completed_at: s.signed ? new Date().toISOString() : null,
+          name: s.name,
+          practice: s.practice,
         };
 
         if (existing) {
@@ -126,7 +128,7 @@ export function useAppState() {
       } catch {}
     }, SYNC_DEBOUNCE);
     return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
-  }, [s.roles, s.blScore, s.done, s.xp, s.simP, s.signed]);
+  }, [s.roles, s.blScore, s.done, s.xp, s.simP, s.signed, s.name, s.practice]);
 
   // Load from DB on mount
   useEffect(() => {
@@ -134,20 +136,46 @@ export function useAppState() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+        
+        // Load training progress
         const { data } = await supabase
           .from('training_progress')
           .select('*')
           .eq('user_id', user.id)
           .maybeSingle();
-        if (data && data.done_modules?.length > 0) {
+        
+        // Load profile for name fallback
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (data) {
+          const restoredName = (data as any).name || profile?.full_name || '';
+          const restoredPractice = (data as any).practice || '';
+          
+          setS(prev => {
+            const hasProgress = data.done_modules?.length > 0 || data.training_roles?.length > 0;
+            return {
+              ...prev,
+              roles: data.training_roles?.length ? data.training_roles : prev.roles,
+              blScore: data.baseline_score ?? prev.blScore,
+              done: data.done_modules?.length ? data.done_modules : prev.done,
+              xp: data.xp || prev.xp,
+              simP: data.sim_patients || prev.simP,
+              signed: data.signed || prev.signed,
+              name: restoredName || prev.name,
+              practice: restoredPractice || prev.practice,
+              // Skip splash if we have name and progress
+              phase: (restoredName && hasProgress && prev.phase === "splash") ? "dashboard" : prev.phase,
+            };
+          });
+        } else if (profile?.full_name) {
+          // No training progress yet but we have a profile name
           setS(prev => ({
             ...prev,
-            roles: data.training_roles?.length ? data.training_roles : prev.roles,
-            blScore: data.baseline_score ?? prev.blScore,
-            done: data.done_modules?.length ? data.done_modules : prev.done,
-            xp: data.xp || prev.xp,
-            simP: data.sim_patients || prev.simP,
-            signed: data.signed || prev.signed,
+            name: prev.name || profile.full_name,
           }));
         }
       } catch {}

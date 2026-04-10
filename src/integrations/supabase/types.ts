@@ -276,6 +276,8 @@ export type Database = {
           created_at: string
           done_modules: string[]
           id: string
+          name: string
+          practice: string
           practice_id: string | null
           signed: boolean
           sim_patients: number
@@ -290,6 +292,8 @@ export type Database = {
           created_at?: string
           done_modules?: string[]
           id?: string
+          name?: string
+          practice?: string
           practice_id?: string | null
           signed?: boolean
           sim_patients?: number
@@ -304,6 +308,8 @@ export type Database = {
           created_at?: string
           done_modules?: string[]
           id?: string
+          name?: string
+          practice?: string
           practice_id?: string | null
           signed?: boolean
           sim_patients?: number
