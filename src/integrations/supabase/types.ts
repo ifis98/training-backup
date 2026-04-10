@@ -14,16 +14,190 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      practices: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          practice_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          practice_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          practice_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string
+          practice_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by: string
+          practice_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string
+          practice_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_invitations_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_progress: {
+        Row: {
+          baseline_score: number | null
+          completed_at: string | null
+          created_at: string
+          done_modules: string[]
+          id: string
+          practice_id: string | null
+          signed: boolean
+          sim_patients: number
+          training_roles: string[]
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          baseline_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          done_modules?: string[]
+          id?: string
+          practice_id?: string | null
+          signed?: boolean
+          sim_patients?: number
+          training_roles?: string[]
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          baseline_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          done_modules?: string[]
+          id?: string
+          practice_id?: string | null
+          signed?: boolean
+          sim_patients?: number
+          training_roles?: string[]
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_progress_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_practice_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +324,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "staff"],
+    },
   },
 } as const
