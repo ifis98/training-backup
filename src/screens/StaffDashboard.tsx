@@ -152,6 +152,85 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           {kpiCard(T("kpi_simulations"), `${s.simP}/3`, T("kpi_completed"), C.red, C.gradRed)}
         </div>
 
+        {/* Knowledge Score + Recommendations Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, marginBottom: 28 }}>
+          <div style={{ ...glass, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ fontSize: 11, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
+            <div style={{ position: "relative", width: 140, height: 140 }}>
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                <circle cx="70" cy="70" r="58" fill="none" stroke={scoreColor} strokeWidth="8"
+                  strokeDasharray={`${(knowledgeScore / 100) * 364.4} 364.4`}
+                  strokeLinecap="round" transform="rotate(-90 70 70)"
+                  style={{ transition: "stroke-dasharray 0.8s ease", filter: `drop-shadow(0 0 8px ${scoreColor}40)` }} />
+              </svg>
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ fontSize: 36, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{knowledgeScore}</div>
+                <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>/100</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 14, padding: "4px 14px", borderRadius: 999, fontSize: 11, fontWeight: 700, color: scoreColor, background: `${scoreColor}15` }}>
+              {T(scoreLabelKey)}
+            </div>
+          </div>
+          <div style={{ ...glass, padding: 24, overflow: "hidden" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🎯</span> {T("training_recommendations")}
+            </div>
+            {recommendations.length === 0 ? (
+              <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20 }}>✅ {T("all_complete")}</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {recommendations.map(rec => (
+                  <div key={rec.moduleId}
+                    onClick={() => { u({ phase: "module", curMod: rec.moduleId, ckA: null }); scrollTop(); }}
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "rgba(255,255,255,0.02)", borderRadius: C.radiusXs, cursor: "pointer", border: `1px solid ${C.glassBorder}`, transition: "all 0.2s" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${rec.color}40`; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: rec.color, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{rec.moduleTitle}</div>
+                      <div style={{ fontSize: 10, color: C.ash }}>{rec.time}</div>
+                    </div>
+                    <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 999, fontWeight: 700,
+                      color: rec.priority === "high" ? C.red : rec.priority === "medium" ? C.gold : C.ash,
+                      background: rec.priority === "high" ? `${C.red}15` : rec.priority === "medium" ? `${C.gold}15` : "rgba(255,255,255,0.04)",
+                    }}>{T(`priority_${rec.priority}`)}</span>
+                    <span style={{ color: C.teal, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{T("start_module")}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Improvement Areas */}
+        {improvementAreas.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>📊</span> {T("areas_to_improve")}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
+              {improvementAreas.map(area => (
+                <div key={area.phaseId} style={{ ...glass, padding: 20, position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: area.color }} />
+                  <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8 }}>{area.category}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 999 }}>
+                      <div style={{ height: "100%", width: `${area.completion}%`, background: area.color, borderRadius: 999, transition: "width 0.5s" }} />
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: area.color }}>{area.completion}%</span>
+                  </div>
+                  <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6, fontWeight: 600 }}>{T("tip_label")}</div>
+                  {area.tips.map((tip, i) => (
+                    <div key={i} style={{ fontSize: 11, color: C.ash, lineHeight: 1.6, paddingLeft: 10, borderLeft: `2px solid ${area.color}30`, marginBottom: 4 }}>{tip}</div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Charts */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 24 }}>
