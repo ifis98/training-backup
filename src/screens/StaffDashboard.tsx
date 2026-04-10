@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { C, PH, Role, Phase } from '@/data/constants';
+import { useState, useEffect } from 'react';
+import { C, ROLES, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop } from '@/lib/helpers';
@@ -7,7 +7,7 @@ import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 
-interface DashboardProps {
+interface StaffDashboardProps {
   s: AppState;
   u: (d: Partial<AppState>) => void;
   sRoles: Role[];
@@ -20,12 +20,26 @@ interface DashboardProps {
   openCoach: (mode: string) => void;
 }
 
-export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: DashboardProps) {
+export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: StaffDashboardProps) {
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [practiceName, setPracticeName] = useState("");
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
+
+  useEffect(() => {
+    const fetchPractice = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
+      if (profile?.practice_id) {
+        const { data: practice } = await supabase.from('practices').select('name').eq('id', profile.practice_id).single();
+        if (practice) setPracticeName(practice.name);
+      }
+    };
+    fetchPractice();
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -35,15 +49,15 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
   return (
     <div style={{ fontFamily: C.fn, background: C.snow, minHeight: "100vh" }}>
-      {/* Dark Header */}
+      {/* Header */}
       <div style={{ background: C.dark, padding: "18px 24px 20px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Logo size={28} light />
+              {practiceName && <span style={{ fontSize: 12, color: C.ash }}>· {practiceName}</span>}
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              {/* Language Selector */}
               <div style={{ position: "relative" }}>
                 <button onClick={() => setShowLangMenu(!showLangMenu)}
                   style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4 }}>
@@ -60,15 +74,15 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   </div>
                 )}
               </div>
-              <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); }}
-                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>{T("change_roles")}</button>
               <button onClick={handleSignOut}
                 style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>{T("sign_out")}</button>
             </div>
           </div>
+
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
             {sRoles.map(r => <span key={r.id} style={{ background: r.bg, color: r.color, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>{r.short}</span>)}
           </div>
+
           <div style={{ display: "flex", gap: 12 }}>
             <div style={{ flex: 1, background: C.dark2, padding: "8px 12px" }}>
               <div style={{ fontSize: 10, color: C.ash }}>{s.name}</div>
@@ -82,6 +96,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <div style={{ fontSize: 8, color: C.ash }}>{T("done")}</div>
             </div>
           </div>
+
           <div style={{ marginTop: 8 }}>
             <div style={{ height: 4, background: C.dark3 }}>
               <div style={{ height: "100%", width: `${pr}%`, background: `linear-gradient(90deg, ${C.teal}, ${C.green})`, transition: "width 0.5s" }} />
@@ -93,11 +108,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
       {/* Body */}
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 24px 60px" }}>
+        {/* Training Modules */}
         {myPH.map(phase => {
           const pm = myM.filter(m => m.phase === phase.id);
           if (!pm.length) return null;
           const pc = pm.every(m => s.done.includes(m.id));
-
           return (
             <div key={phase.id} style={{ marginBottom: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -127,7 +142,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           );
         })}
 
-        {/* AI Simulation Section */}
+        {/* AI Simulation */}
         <div style={{ marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <div style={{ width: 8, height: 8, background: C.gold, borderRadius: "50%" }} />
@@ -148,7 +163,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         </div>
 
-        {/* Completion Banners */}
+        {/* Completion */}
         {allComplete && (
           <div style={{ background: `linear-gradient(135deg, ${C.goldBg}, ${C.tealBg})`, border: `1.5px solid ${C.gold}`, padding: 20, textAlign: "center", marginBottom: 16 }}>
             <div style={{ fontSize: 16, fontWeight: 800, color: C.charcoal, marginBottom: 8 }}>{T("all_complete")}</div>
@@ -176,7 +191,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               { mode: "educational", icon: "📚", label: T("educational_material"), desc: T("educational_desc") },
             ].map(tool => (
               <div key={tool.mode} onClick={() => openCoach(tool.mode)}
-                style={{ background: C.white, border: `1.5px solid ${C.border}`, padding: "14px 12px", cursor: "pointer", transition: "border-color 0.2s" }}>
+                style={{ background: C.white, border: `1.5px solid ${C.border}`, padding: "14px 12px", cursor: "pointer" }}>
                 <div style={{ fontSize: 20, marginBottom: 4 }}>{tool.icon}</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: C.charcoal }}>{tool.label}</div>
                 <div style={{ fontSize: 10, color: C.ash }}>{tool.desc}</div>
@@ -205,14 +220,6 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           <button onClick={() => window.open("https://calendly.com", "_blank")}
             style={{ background: C.teal, color: "#fff", border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
             {T("schedule_call")}
-          </button>
-        </div>
-
-        {/* Reset */}
-        <div style={{ textAlign: "center" }}>
-          <button onClick={reset}
-            style={{ background: "transparent", color: C.slate, border: `1px solid ${C.border}`, padding: "10px 20px", fontSize: 12, fontFamily: C.fn, cursor: "pointer" }}>
-            {T("reset_progress")}
           </button>
         </div>
 
