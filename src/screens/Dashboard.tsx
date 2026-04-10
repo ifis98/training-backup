@@ -134,6 +134,28 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     }
   };
 
+  const handleSaveGoals = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
+    if (!profile?.practice_id) return;
+    const { data, error } = await supabase.from('practice_goals').upsert({
+      practice_id: profile.practice_id,
+      monthly_case_goal: editCaseGoal,
+      monthly_revenue_goal: editRevenueGoal,
+    }, { onConflict: 'practice_id' }).select().single();
+    if (data) {
+      setPracticeGoals(data);
+      setEditingGoals(false);
+    }
+  };
+
+  const startEditGoals = () => {
+    setEditCaseGoal(practiceGoals?.monthly_case_goal || 0);
+    setEditRevenueGoal(practiceGoals?.monthly_revenue_goal || 0);
+    setEditingGoals(true);
+  };
+
   // Chart data
   const phaseChartData = myPH.map(ph => {
     const pm = myM.filter(m => m.phase === ph.id);
