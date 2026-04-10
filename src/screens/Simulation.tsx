@@ -75,7 +75,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   const handleMic = () => {
     if (s.lst) { u({ lst: false }); return; }
     u({ lst: true });
-    startSTT((text: string) => { u({ lst: false, simIn: text }); setTimeout(() => sendMessage(text), 300); });
+    startSTT((text: string) => { u({ lst: false, simIn: text }); });
   };
 
   return (
