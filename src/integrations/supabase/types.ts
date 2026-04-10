@@ -20,6 +20,7 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          practice_code: string | null
           updated_at: string
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           id?: string
           name: string
           owner_id: string
+          practice_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
+          practice_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -187,6 +190,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_practice_code: { Args: never; Returns: string }
       get_user_practice_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

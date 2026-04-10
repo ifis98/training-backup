@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ROLES, PH, BL } from '@/data/constants';
 import { M } from '@/data/modules';
 import { ShuffledQuestion, shuffleQuestion } from '@/lib/helpers';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'bsa6';
+const SYNC_DEBOUNCE = 2000;
 
 export interface AppState {
   phase: string;
@@ -70,11 +72,13 @@ export function useAppState() {
     return defaultState;
   });
 
+  const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const u = useCallback((d: Partial<AppState>) => {
     setS(p => ({ ...p, ...d }));
   }, []);
 
-  // Persist
+  // Persist to localStorage
   useEffect(() => {
     if (s.phase !== "splash") {
       try {
@@ -82,6 +86,71 @@ export function useAppState() {
       } catch {}
     }
   }, [s]);
+
+  // Debounced sync to database
+  useEffect(() => {
+    if (s.phase === "splash") return;
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: existing } = await supabase
+          .from('training_progress')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        const payload = {
+          training_roles: s.roles,
+          baseline_score: s.blScore,
+          done_modules: s.done,
+          xp: s.xp,
+          sim_patients: s.simP,
+          signed: s.signed,
+          completed_at: s.signed ? new Date().toISOString() : null,
+        };
+
+        if (existing) {
+          await supabase.from('training_progress').update(payload).eq('id', existing.id);
+        } else {
+          const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).maybeSingle();
+          await supabase.from('training_progress').insert({
+            user_id: user.id,
+            practice_id: profile?.practice_id || null,
+            ...payload,
+          });
+        }
+      } catch {}
+    }, SYNC_DEBOUNCE);
+    return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
+  }, [s.roles, s.blScore, s.done, s.xp, s.simP, s.signed]);
+
+  // Load from DB on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+          .from('training_progress')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (data && data.done_modules?.length > 0) {
+          setS(prev => ({
+            ...prev,
+            roles: data.training_roles?.length ? data.training_roles : prev.roles,
+            blScore: data.baseline_score ?? prev.blScore,
+            done: data.done_modules?.length ? data.done_modules : prev.done,
+            xp: data.xp || prev.xp,
+            simP: data.sim_patients || prev.simP,
+            signed: data.signed || prev.signed,
+          }));
+        }
+      } catch {}
+    })();
+  }, []);
 
   const sRoles = useMemo(() => ROLES.filter(r => s.roles.includes(r.id)), [s.roles]);
   const sc = s.blScore || 0;
@@ -102,7 +171,6 @@ export function useAppState() {
     if (!mod?.checks?.length) return null;
     const p = mod.checks[s.seed % mod.checks.length];
     const sq = shuffleQuestion(p, s.seed + id.charCodeAt(0) * 37);
-    // Side-effect: save to state
     setS(prev => ({ ...prev, mQs: { ...prev.mQs, [id]: sq } }));
     return sq;
   }, [s.mQs, s.seed]);

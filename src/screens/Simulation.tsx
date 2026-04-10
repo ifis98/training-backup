@@ -8,12 +8,31 @@ interface SimulationProps {
   u: (d: Partial<AppState>) => void;
 }
 
-const SUCCESS_REGEX = /(interested|next step|sign me up|let's do it|schedule|sounds good|i'm in)/i;
+const SUCCESS_REGEX = /(interested|next step|sign me up|let's do it|schedule|sounds good|i'm in|let's move forward|make it work)/i;
+
+const PATIENTS = [
+  { name: "Jordan", age: 38, card: "Marketing manager. Grinds. Jaw sore. Apple Watch. Budget-aware." },
+  { name: "Maria", age: 52, card: "School teacher. TMJ pain, headaches. Skeptical — tried splints before. Insurance-focused." },
+  { name: "Devon", age: 28, card: "Software engineer. Partner complains about grinding. Feels fine. Tech-curious." },
+  { name: "Patricia", age: 65, card: "Retired nurse. Broken teeth history. Medical knowledge. Comfort concerns." },
+  { name: "Marcus", age: 44, card: "Construction foreman. Jaw clenching, sleep apnea worry. Cost and time concerns." },
+  { name: "Aisha", age: 33, card: "New mom. Stress grinding since pregnancy. Tight budget. Wants proof it works." },
+];
+
+function getRandomPatientIdx(exclude?: number): number {
+  let idx = Math.floor(Math.random() * PATIENTS.length);
+  if (exclude !== undefined && PATIENTS.length > 1) {
+    while (idx === exclude) idx = Math.floor(Math.random() * PATIENTS.length);
+  }
+  return idx;
+}
 
 export default function Simulation({ s, u }: SimulationProps) {
   const [loading, setLoading] = useState(false);
+  const [patientIdx, setPatientIdx] = useState(() => getRandomPatientIdx());
   const chatEnd = useRef<HTMLDivElement>(null);
   const sRoles = ROLES.filter(r => s.roles.includes(r.id));
+  const patient = PATIENTS[patientIdx];
 
   useEffect(() => {
     chatEnd.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,6 +57,7 @@ export default function Simulation({ s, u }: SimulationProps) {
         },
         body: JSON.stringify({
           messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })),
+          patientIndex: patientIdx,
         }),
       });
 
@@ -58,11 +78,17 @@ export default function Simulation({ s, u }: SimulationProps) {
 
       u({ simMsgs: [...msgs, { r: "ai", t: aiText }], simP: newSimP, xp: newXp });
     } catch (e: any) {
-      u({ simMsgs: [...msgs, { r: "ai", t: `[Error: ${e.message}. The AI simulation requires Lovable Cloud to be enabled.]` }] });
+      u({ simMsgs: [...msgs, { r: "ai", t: `[Error: ${e.message}]` }] });
     } finally {
       setLoading(false);
     }
-  }, [s.simMsgs, s.simIn, s.simP, s.xp, loading, u]);
+  }, [s.simMsgs, s.simIn, s.simP, s.xp, loading, u, patientIdx]);
+
+  const handleNewPatient = () => {
+    const newIdx = getRandomPatientIdx(patientIdx);
+    setPatientIdx(newIdx);
+    u({ simMsgs: [] });
+  };
 
   const handleMic = () => {
     if (s.lst) {
@@ -88,15 +114,15 @@ export default function Simulation({ s, u }: SimulationProps) {
 
       {/* Patient Card */}
       <div style={{ background: C.dark2, padding: "14px 24px", margin: "0 24px", marginTop: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>Patient: Jordan, 38</div>
-        <div style={{ fontSize: 12, color: C.ash }}>Marketing manager. Grinds. Jaw sore. Apple Watch. Budget-aware.</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>Patient: {patient.name}, {patient.age}</div>
+        <div style={{ fontSize: 12, color: C.ash }}>{patient.card}</div>
       </div>
 
       {/* Chat Area */}
       <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto", minHeight: 200 }}>
         {s.simMsgs.length === 0 && (
           <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
-            Start the conversation. Type or tap mic.
+            Start the conversation with {patient.name}. Type or tap mic.
           </div>
         )}
         {s.simMsgs.map((msg, i) => (
@@ -110,7 +136,7 @@ export default function Simulation({ s, u }: SimulationProps) {
               fontSize: 13, lineHeight: 1.6,
             }}>
               <div style={{ fontSize: 9, color: msg.r === "user" ? "rgba(255,255,255,0.7)" : C.ash, marginBottom: 4 }}>
-                {msg.r === "user" ? `You (${sRoles.map(r => r.short).join(", ")})` : "Jordan"}
+                {msg.r === "user" ? `You (${sRoles.map(r => r.short).join(", ")})` : patient.name}
               </div>
               {msg.t}
             </div>
@@ -118,7 +144,7 @@ export default function Simulation({ s, u }: SimulationProps) {
         ))}
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-            <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>Typing...</div>
+            <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>{patient.name} is typing...</div>
           </div>
         )}
         <div ref={chatEnd} />
@@ -136,11 +162,11 @@ export default function Simulation({ s, u }: SimulationProps) {
       )}
 
       {/* New Patient Button */}
-      {s.simMsgs.length >= 14 && s.simP < 3 && (
+      {s.simMsgs.length >= 8 && s.simP < 3 && (
         <div style={{ padding: "8px 24px", textAlign: "center" }}>
-          <button onClick={() => u({ simMsgs: [] })}
+          <button onClick={handleNewPatient}
             style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-            New Patient
+            New Patient →
           </button>
         </div>
       )}
@@ -153,7 +179,7 @@ export default function Simulation({ s, u }: SimulationProps) {
           value={s.simIn}
           onChange={e => u({ simIn: e.target.value })}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder="Type or tap mic..."
+          placeholder={`Talk to ${patient.name}...`}
           style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: "10px 14px", fontSize: 14, fontFamily: C.fn, outline: "none" }}
         />
         <button onClick={() => sendMessage()}

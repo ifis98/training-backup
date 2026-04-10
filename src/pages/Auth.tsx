@@ -15,6 +15,8 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [practiceName, setPracticeName] = useState('');
+  const [isStaff, setIsStaff] = useState(false);
+  const [practiceCode, setPracticeCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,34 +33,64 @@ export default function AuthPage({ mode }: AuthPageProps) {
             emailRedirectTo: window.location.origin,
           },
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message?.toLowerCase().includes('already registered') || error.message?.toLowerCase().includes('already been registered')) {
+            toast.error('This email is already registered. Please sign in instead.');
+            return;
+          }
+          throw error;
+        }
 
         if (data.user && !data.session) {
           toast.success('Check your email to verify your account!');
           return;
         }
 
-        // Create practice and link profile
-        if (data.user && data.session && practiceName.trim()) {
-          const { data: practice } = await supabase
-            .from('practices')
-            .insert({ name: practiceName.trim(), owner_id: data.user.id })
-            .select()
-            .single();
+        // Create practice or request to join
+        if (data.user && data.session) {
+          if (isStaff && practiceCode.trim()) {
+            // Staff joining existing practice via code
+            const { data: practice } = await supabase
+              .from('practices')
+              .select('id, name')
+              .eq('practice_code', practiceCode.trim().toUpperCase())
+              .single();
 
-          if (practice) {
-            await supabase
-              .from('profiles')
-              .update({ practice_id: practice.id, full_name: fullName })
-              .eq('user_id', data.user.id);
+            if (practice) {
+              // Create join request
+              await supabase.from('staff_invitations').insert({
+                practice_id: practice.id,
+                email: email.trim().toLowerCase(),
+                invited_by: data.user.id,
+                status: 'requested',
+              });
+              await supabase.from('profiles').update({ full_name: fullName }).eq('user_id', data.user.id);
+              toast.success(`Join request sent to ${practice.name}! Your admin will approve you soon.`);
+            } else {
+              toast.error('Practice code not found. Check with your office manager.');
+            }
+          } else if (practiceName.trim()) {
+            // Creating new practice as admin
+            const { data: practice } = await supabase
+              .from('practices')
+              .insert({ name: practiceName.trim(), owner_id: data.user.id })
+              .select()
+              .single();
 
-            await supabase
-              .from('user_roles')
-              .insert({ user_id: data.user.id, role: 'admin' });
+            if (practice) {
+              await supabase
+                .from('profiles')
+                .update({ practice_id: practice.id, full_name: fullName })
+                .eq('user_id', data.user.id);
 
-            await supabase
-              .from('training_progress')
-              .insert({ user_id: data.user.id, practice_id: practice.id });
+              await supabase
+                .from('user_roles')
+                .insert({ user_id: data.user.id, role: 'admin' });
+
+              await supabase
+                .from('training_progress')
+                .insert({ user_id: data.user.id, practice_id: practice.id });
+            }
           }
         }
 
@@ -103,7 +135,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
     <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ maxWidth: 420, width: "100%", padding: "40px 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: 36, marginBottom: 20 }} />
+          <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: 36, marginBottom: 20, filter: "brightness(0) invert(1)" }} />
           <h1 style={{ fontSize: 28, fontWeight: 800, color: C.white, marginBottom: 8 }}>
             {mode === 'register' ? 'Join the ByteSense Family' : 'Welcome Back'}
           </h1>
@@ -119,10 +151,39 @@ export default function AuthPage({ mode }: AuthPageProps) {
                 <label style={labelStyle}>Full Name</label>
                 <input value={fullName} onChange={e => setFullName(e.target.value)} required style={inputStyle} />
               </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={labelStyle}>Practice Name</label>
-                <input value={practiceName} onChange={e => setPracticeName(e.target.value)} required style={inputStyle} />
+
+              {/* Toggle: Admin or Staff */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                <button type="button" onClick={() => setIsStaff(false)}
+                  style={{ flex: 1, padding: "10px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", background: !isStaff ? C.teal : "transparent", color: !isStaff ? C.white : C.ash, border: `1px solid ${!isStaff ? C.teal : C.borderD}` }}>
+                  I'm the Practice Owner
+                </button>
+                <button type="button" onClick={() => setIsStaff(true)}
+                  style={{ flex: 1, padding: "10px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", background: isStaff ? C.teal : "transparent", color: isStaff ? C.white : C.ash, border: `1px solid ${isStaff ? C.teal : C.borderD}` }}>
+                  I'm a Staff Member
+                </button>
               </div>
+
+              {!isStaff ? (
+                <div style={{ marginBottom: 16 }}>
+                  <label style={labelStyle}>Practice Name</label>
+                  <input value={practiceName} onChange={e => setPracticeName(e.target.value)} required style={inputStyle} />
+                </div>
+              ) : (
+                <div style={{ marginBottom: 16 }}>
+                  <label style={labelStyle}>Practice Code (from your office manager)</label>
+                  <input
+                    value={practiceCode}
+                    onChange={e => setPracticeCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. ABC123"
+                    maxLength={6}
+                    style={{ ...inputStyle, letterSpacing: 4, textAlign: "center", fontSize: 18, fontWeight: 800 }}
+                  />
+                  <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>
+                    Ask your practice owner for this 6-character code
+                  </div>
+                </div>
+              )}
             </>
           )}
           <div style={{ marginBottom: 16 }}>
