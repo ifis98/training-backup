@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
-import { scrollTop } from '@/lib/helpers';
+import { scrollTop, computeKnowledgeScore, getScoreLabel, getScoreColor, getRecommendations, getImprovementAreas } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
@@ -102,6 +102,17 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const projectedRev = revPatients * (projectedClose / 100) * revPrice;
 
   const isOwnerOrManager = sRoles.some(r => r.id === 'owner' || r.id === 'om');
+
+  // Knowledge Score
+  const knowledgeScore = useMemo(() => computeKnowledgeScore(s.blScore, dN, myM.length, s.simP), [s.blScore, dN, myM.length, s.simP]);
+  const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
+  const scoreLabelKey = getScoreLabel(knowledgeScore);
+
+  // Recommendations
+  const recommendations = useMemo(() => getRecommendations(s.done, myM, myPH, 5), [s.done, myM, myPH]);
+
+  // Improvement Areas
+  const improvementAreas = useMemo(() => getImprovementAreas(s.done, myM, myPH), [s.done, myM, myPH]);
 
   const kpiCard = (label: string, value: string | number, sub: string, color: string, gradient: string) => (
     <div style={{
