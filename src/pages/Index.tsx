@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useAppState } from '@/hooks/useAppState';
+import { useAuth } from '@/hooks/useAuth';
 import Splash from '@/screens/Splash';
 import RoleSelect from '@/screens/RoleSelect';
 import Baseline from '@/screens/Baseline';
 import BaselineResults from '@/screens/BaselineResults';
 import Dashboard from '@/screens/Dashboard';
+import StaffDashboard from '@/screens/StaffDashboard';
 import ModuleView from '@/screens/ModuleView';
 import Simulation from '@/screens/Simulation';
 import SimulationSummary from '@/screens/SimulationSummary';
@@ -15,6 +17,7 @@ import { Lang } from '@/data/translations';
 
 const Index = () => {
   const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset } = useAppState();
+  const { isStaff, isAdmin } = useAuth();
   const lang = (s.lang || "en") as Lang;
   const [showCoach, setShowCoach] = useState(false);
   const [coachMode, setCoachMode] = useState("general");
@@ -36,6 +39,7 @@ const Index = () => {
     if (s.phase === "simulation") return <Simulation s={s} u={u} lang={lang} />;
     if (s.phase === "simSummary") return <SimulationSummary s={s} u={u} lang={lang} />;
     if (s.phase === "report") return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
+    if (isStaff && !isAdmin) return <StaffDashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
     return <Dashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
   };
 
