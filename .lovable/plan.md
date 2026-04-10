@@ -1,40 +1,32 @@
 
 
-# Fix Language Translations in Dashboard + Staff Dashboard
+# Add Knowledge Score, Training Recommendations & Improvement Tips to Dashboards
 
-## Problem
+## What Gets Added
 
-The language switcher works (it updates `s.lang` in state), but the recently redesigned dashboards have ~30+ hardcoded English strings that bypass the `T()` translation function. When you switch to Spanish, only the strings that use `T()` update — the new KPI cards, chart labels, revenue calculator, goals/notes, and section headers stay in English.
+### Knowledge Score Calculation
+Derive a "Knowledge Score" from existing data: baseline score (`s.blScore`), module quiz performance (can be computed from completed modules and XP), and simulation performance (`s.simP`). Display as a prominent radial gauge on both dashboards.
 
-## What to Fix
+Formula: weighted average of baseline score (30%), module completion rate (40%), simulation score (30%). Displayed as 0–100.
 
-### 1. Add ~30 new translation keys to `src/data/translations.ts`
+### Training Recommendations Engine
+Analyze which phases/modules are incomplete and which quiz topics were weak. Generate personalized recommendations like "Complete Phase 3 — Product Knowledge" or "Review patient communication techniques." Shown as a prioritized card list with action buttons that navigate to the relevant module.
 
-New keys needed for all 5 languages (en, es, pt, fr, zh):
-
-- `kpi_training_progress`, `kpi_xp_earned`, `kpi_experience_points`, `kpi_modules_done`, `kpi_of_total`, `kpi_ai_simulations`, `kpi_patient_encounters`
-- `modules_by_phase`, `staff_training_progress`, `overall_completion`, `complete_label`
-- `training_modules_label`
-- `revenue_calculator`, `patients_per_month`, `avg_case_price`, `current_close_rate`, `current_monthly`, `with_bytesense`, `projected_close`, `potential_uplift`
-- `goals_label`, `notes_label`, `add_goal_placeholder`, `notes_placeholder`
-- `done_label`, `remaining_label`
-- Staff-specific: `kpi_progress`, `kpi_points_earned`, `kpi_baseline`, `kpi_initial_score`, `kpi_simulations`, `kpi_completed`
-
-### 2. Update `src/screens/Dashboard.tsx`
-
-Replace all hardcoded English strings with `T("key")` calls. Approximately 25 replacements across KPI cards, chart titles, revenue calculator labels, goals/notes headers, and inline text.
-
-### 3. Update `src/screens/StaffDashboard.tsx`
-
-Same treatment — replace hardcoded KPI card labels, chart titles, section headers with `T()` calls. Approximately 10 replacements.
-
-### 4. Fix ResponsiveContainer warning
-
-The console shows `ResponsiveContainer` warnings for the PieChart (lines 225-231 in Dashboard). Replace `<ResponsiveContainer width={180} height={180}>` with a plain `<div>` wrapper since fixed dimensions don't need ResponsiveContainer.
+### Areas Needing Improvement + Tips
+Based on incomplete phases and low-score areas, show categorized improvement cards (e.g., "Sales Techniques", "Patient Communication", "Product Knowledge") with specific tips pulled from module content. Each card has a color-coded priority indicator (red/yellow/green).
 
 ## Files Changed
 
-1. `src/data/translations.ts` — Add ~30 new keys across all 5 languages
-2. `src/screens/Dashboard.tsx` — Replace hardcoded strings with `T()` calls + fix ResponsiveContainer
-3. `src/screens/StaffDashboard.tsx` — Replace hardcoded strings with `T()` calls
+1. **`src/screens/Dashboard.tsx`** — Add Knowledge Score gauge, recommendations section, improvement tips section (owner sees their own + aggregate staff view)
+2. **`src/screens/StaffDashboard.tsx`** — Add personal Knowledge Score gauge, personalized recommendations, improvement areas with tips
+3. **`src/data/translations.ts`** — Add ~15 new keys: `knowledge_score`, `training_recommendations`, `areas_to_improve`, `improvement_tips`, `recommended_next`, `priority_high/medium/low`, `score_excellent/good/needs_work`
+4. **`src/lib/helpers.ts`** — Add `computeKnowledgeScore()` and `getRecommendations()` utility functions that both dashboards share
+
+## Implementation Details
+
+**Knowledge Score** — New KPI card with a circular progress ring (SVG-based, not recharts) showing the computed score with color coding: green (80+), gold (50-79), red (below 50).
+
+**Recommendations** — Glass card with ordered list. Each item shows phase icon, module title, estimated time, and a "Start" button. Limited to top 3-5 most impactful recommendations.
+
+**Improvement Areas** — Grid of glass cards grouped by category (Communication, Product, Sales, Operations, Advanced). Each shows completion % for that category, 2-3 specific tips, and links to relevant modules. Uses the phase color coding from constants.
 
