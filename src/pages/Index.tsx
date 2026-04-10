@@ -17,6 +17,7 @@ import { Lang } from '@/data/translations';
 
 const Index = () => {
   const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset } = useAppState();
+  const { isStaff, isAdmin } = useAuth();
   const lang = (s.lang || "en") as Lang;
   const [showCoach, setShowCoach] = useState(false);
   const [coachMode, setCoachMode] = useState("general");
