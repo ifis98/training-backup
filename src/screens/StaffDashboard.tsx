@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { C, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
-import { scrollTop } from '@/lib/helpers';
+import { scrollTop, computeKnowledgeScore, getScoreLabel, getScoreColor, getRecommendations, getImprovementAreas } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
@@ -69,6 +69,13 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   ];
 
   const tooltipStyle = { background: C.glass, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12 };
+
+  // Knowledge Score
+  const knowledgeScore = useMemo(() => computeKnowledgeScore(s.blScore, dN, myM.length, s.simP), [s.blScore, dN, myM.length, s.simP]);
+  const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
+  const scoreLabelKey = getScoreLabel(knowledgeScore);
+  const recommendations = useMemo(() => getRecommendations(s.done, myM, myPH, 5), [s.done, myM, myPH]);
+  const improvementAreas = useMemo(() => getImprovementAreas(s.done, myM, myPH), [s.done, myM, myPH]);
 
   const kpiCard = (label: string, value: string | number, sub: string, color: string, gradient: string) => (
     <div style={{
