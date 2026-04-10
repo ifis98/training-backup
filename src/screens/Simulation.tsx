@@ -1,0 +1,171 @@
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { C, ROLES } from '@/data/constants';
+import { scrollTop, startSTT } from '@/lib/helpers';
+import { AppState } from '@/hooks/useAppState';
+
+interface SimulationProps {
+  s: AppState;
+  u: (d: Partial<AppState>) => void;
+}
+
+const SUCCESS_REGEX = /(interested|next step|sign me up|let's do it|schedule|sounds good|i'm in)/i;
+
+const SIM_SYSTEM = `You are Jordan, 38, marketing manager at a dental appointment. Told you grind. Jaw sore sometimes. Partner hears it. Apple Watch wearer. Health-conscious, budget-aware.
+
+RULES: - Real patient. Ask questions, show doubt. - Start skeptical. Warm up ONLY if educated well. - Raise 2-3 objections naturally. - If they say "night guard"/"mouthguard": "Wait, so it's basically a night guard?" - After 6-8 good exchanges: "Okay, I'm interested — what's the next step?" - If pushy/vague: "I'll pass for now." - 1-3 sentences max per response. - NEVER break character.`;
+
+export default function Simulation({ s, u }: SimulationProps) {
+  const [loading, setLoading] = useState(false);
+  const chatEnd = useRef<HTMLDivElement>(null);
+  const sRoles = ROLES.filter(r => s.roles.includes(r.id));
+
+  useEffect(() => {
+    chatEnd.current?.scrollIntoView({ behavior: "smooth" });
+  }, [s.simMsgs]);
+
+  const sendMessage = useCallback(async (overrideText?: string) => {
+    const msg = (overrideText || s.simIn).trim();
+    if (!msg || loading) return;
+    const msgs = [...s.simMsgs, { r: "user", t: msg }];
+    u({ simMsgs: msgs, simIn: "" });
+    setLoading(true);
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      const resp = await fetch(`${supabaseUrl}/functions/v1/patient-sim`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })),
+          systemPrompt: SIM_SYSTEM,
+        }),
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      const aiText = data.reply || "I'm not sure what to say to that.";
+
+      let newSimP = s.simP;
+      let newXp = s.xp;
+      if (SUCCESS_REGEX.test(aiText) && s.simP < 3) {
+        newSimP = s.simP + 1;
+        newXp = s.xp + 150;
+      }
+
+      u({ simMsgs: [...msgs, { r: "ai", t: aiText }], simP: newSimP, xp: newXp });
+    } catch (e: any) {
+      u({ simMsgs: [...msgs, { r: "ai", t: `[Error: ${e.message}. The AI simulation requires Lovable Cloud to be enabled.]` }] });
+    } finally {
+      setLoading(false);
+    }
+  }, [s.simMsgs, s.simIn, s.simP, s.xp, loading, u]);
+
+  const handleMic = () => {
+    if (s.lst) {
+      u({ lst: false });
+      return;
+    }
+    u({ lst: true });
+    startSTT((text: string) => {
+      u({ lst: false, simIn: text });
+      setTimeout(() => sendMessage(text), 300);
+    });
+  };
+
+  return (
+    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <div style={{ padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
+        <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}
+          style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>← Back</button>
+        <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>Patient Simulation</div>
+        <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700 }}>{s.simP}/3</div>
+      </div>
+
+      {/* Patient Card */}
+      <div style={{ background: C.dark2, padding: "14px 24px", margin: "0 24px", marginTop: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>Patient: Jordan, 38</div>
+        <div style={{ fontSize: 12, color: C.ash }}>Marketing manager. Grinds. Jaw sore. Apple Watch. Budget-aware.</div>
+      </div>
+
+      {/* Chat Area */}
+      <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto", minHeight: 200 }}>
+        {s.simMsgs.length === 0 && (
+          <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
+            Start the conversation. Type or tap mic.
+          </div>
+        )}
+        {s.simMsgs.map((msg, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: msg.r === "user" ? "flex-end" : "flex-start", marginBottom: 10 }}>
+            <div style={{
+              maxWidth: "75%",
+              background: msg.r === "user" ? C.teal : C.dark2,
+              color: C.white,
+              padding: "10px 14px",
+              borderRadius: msg.r === "user" ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+              fontSize: 13, lineHeight: 1.6,
+            }}>
+              <div style={{ fontSize: 9, color: msg.r === "user" ? "rgba(255,255,255,0.7)" : C.ash, marginBottom: 4 }}>
+                {msg.r === "user" ? `You (${sRoles.map(r => r.short).join(", ")})` : "Jordan"}
+              </div>
+              {msg.t}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
+            <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>Typing...</div>
+          </div>
+        )}
+        <div ref={chatEnd} />
+      </div>
+
+      {/* Success Banner */}
+      {s.simP >= 3 && (
+        <div style={{ background: C.green, color: C.white, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>3 patients guided!</span>
+          <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}
+            style={{ background: "rgba(255,255,255,0.2)", color: C.white, border: "none", padding: "8px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
+            Return →
+          </button>
+        </div>
+      )}
+
+      {/* New Patient Button */}
+      {s.simMsgs.length >= 14 && s.simP < 3 && (
+        <div style={{ padding: "8px 24px", textAlign: "center" }}>
+          <button onClick={() => u({ simMsgs: [] })}
+            style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
+            New Patient
+          </button>
+        </div>
+      )}
+
+      {/* Input Bar */}
+      <div style={{ padding: "12px 24px", borderTop: `1px solid ${C.borderD}`, display: "flex", gap: 8, alignItems: "center" }}>
+        <button onClick={handleMic}
+          style={{ width: 40, height: 40, background: s.lst ? C.red : C.dark2, border: "none", borderRadius: "50%", fontSize: 18, cursor: "pointer", flexShrink: 0 }}>🎤</button>
+        <input
+          value={s.simIn}
+          onChange={e => u({ simIn: e.target.value })}
+          onKeyDown={e => e.key === "Enter" && sendMessage()}
+          placeholder="Type or tap mic..."
+          style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: "10px 14px", fontSize: 14, fontFamily: C.fn, outline: "none" }}
+        />
+        <button onClick={() => sendMessage()}
+          style={{ background: C.teal, color: C.white, border: "none", padding: "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}
