@@ -311,7 +311,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "ref_not_nightguard": "ByteSense不是夜间护齿器——它是健康智能平台",
     "ref_sensors": "6个传感器：心率/HRV、肌电/力度、呼吸、温度、运动、血氧(SpO2)",
     "ref_data": "数据通过bitely应用提供每日byteSense评分",
-    "ref_never_say": "绝不要说："夜间护齿器"、"护齿套"、"诊断"、"FDA批准的医疗设备"",
+    "ref_never_say": "绝不要说：'夜间护齿器'、'护齿套'、'诊断'、'FDA批准的医疗设备'",
     "ref_support": "支持：Natasha Blake — 909-527-9602",
     "ref_tech": "技术：support@bytesense.ai",
     "ref_lab": "实验室：Florida Oral Labs — info@floridaorallabs.com",
