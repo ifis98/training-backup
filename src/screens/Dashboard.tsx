@@ -241,6 +241,28 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const revenueGoal = practiceGoals?.monthly_revenue_goal || 0;
   const filteredCases = caseFilter === 'all' ? cases : cases.filter(c => c.status === caseFilter);
 
+  // Case analytics chart data
+  const caseAnalyticsData = useMemo(() => {
+    const byMonth: Record<string, { total: number; converted: number; revenue: number }> = {};
+    cases.forEach(c => {
+      const d = new Date(c.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!byMonth[key]) byMonth[key] = { total: 0, converted: 0, revenue: 0 };
+      byMonth[key].total++;
+      if (c.status === 'converted') {
+        byMonth[key].converted++;
+        byMonth[key].revenue += Number(c.case_value) || 0;
+      }
+    });
+    return Object.entries(byMonth).sort().slice(-6).map(([month, d]) => ({
+      month: month.slice(5),
+      conversionRate: d.total > 0 ? Math.round((d.converted / d.total) * 100) : 0,
+      revenue: d.revenue,
+      total: d.total,
+      converted: d.converted,
+    }));
+  }, [cases]);
+
   const caseStatusIcon = (status: string) => {
     switch (status) {
       case 'converted': return <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} />;
