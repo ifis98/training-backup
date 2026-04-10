@@ -1,6 +1,6 @@
 import { C, PH, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
-import { Logo, LogoText } from '@/components/ByteSenseLogo';
+import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 
@@ -27,8 +27,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Logo size={22} />
-              <LogoText size={16} />
+              <Logo size={28} />
             </div>
             <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); }}
               style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>Change Roles</button>
