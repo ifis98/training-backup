@@ -28,6 +28,7 @@ export interface AppState {
   xp: number;
   spk: boolean;
   signed: boolean;
+  lang: string;
 }
 
 const defaultState: AppState = {
