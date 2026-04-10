@@ -197,7 +197,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           {kpiCard(T("kpi_training_progress"), `${pr}%`, `${dN} ${T("kpi_of_total").replace("{n}", String(myM.length))}`, C.teal, C.gradTeal)}
           {kpiCard(T("kpi_xp_earned"), s.xp, T("kpi_experience_points"), C.gold, C.gradGold)}
           {kpiCard(T("kpi_modules_done"), dN, T("kpi_of_total").replace("{n}", String(myM.length)), C.blue, C.gradBlue)}
-          {kpiCard(T("kpi_ai_simulations"), `${s.simP}/3`, T("kpi_patient_encounters"), C.red, C.gradRed)}
+          <div onClick={() => { u({ phase: "simulation" }); scrollTop(); }} style={{ cursor: "pointer", flex: 1, minWidth: 120 }}>
+            {kpiCard(T("kpi_ai_simulations"), `${s.simP}/3`, T("kpi_patient_encounters"), C.red, C.gradRed)}
+          </div>
         </div>
 
         {/* Knowledge Score + Recommendations Row */}

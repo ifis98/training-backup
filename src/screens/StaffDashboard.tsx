@@ -149,7 +149,9 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           {kpiCard(T("kpi_progress"), `${pr}%`, `${dN}/${myM.length} ${T("modules")}`, C.teal, C.gradTeal)}
           {kpiCard(T("xp"), s.xp, T("kpi_points_earned"), C.gold, C.gradGold)}
           {kpiCard(T("kpi_baseline"), s.blScore ?? '—', T("kpi_initial_score"), C.blue, C.gradBlue)}
-          {kpiCard(T("kpi_simulations"), `${s.simP}/3`, T("kpi_completed"), C.red, C.gradRed)}
+          <div onClick={() => { u({ phase: "simulation" }); scrollTop(); }} style={{ cursor: "pointer", flex: 1, minWidth: 120 }}>
+            {kpiCard(T("kpi_simulations"), `${s.simP}/3`, T("kpi_completed"), C.red, C.gradRed)}
+          </div>
         </div>
 
         {/* Knowledge Score + Recommendations Row */}
