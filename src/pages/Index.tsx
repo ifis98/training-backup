@@ -39,6 +39,7 @@ const Index = () => {
     if (s.phase === "simulation") return <Simulation s={s} u={u} lang={lang} />;
     if (s.phase === "simSummary") return <SimulationSummary s={s} u={u} lang={lang} />;
     if (s.phase === "report") return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
+    if (isStaff && !isAdmin) return <StaffDashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
     return <Dashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
   };
 
