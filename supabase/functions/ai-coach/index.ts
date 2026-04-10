@@ -121,7 +121,7 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = MODE_PROMPTS[mode] || MODE_PROMPTS.general;
+    const systemPrompt = (MODE_PROMPTS[mode] || MODE_PROMPTS.general) + langInstruction;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
