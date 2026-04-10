@@ -99,6 +99,106 @@ export function stopSpeech() {
   window.speechSynthesis?.cancel();
 }
 
+// Knowledge Score Engine
+export function computeKnowledgeScore(
+  blScore: number | null,
+  doneCount: number,
+  totalModules: number,
+  simPatients: number,
+): number {
+  const baselineNorm = Math.min(((blScore ?? 0) / 50) * 100, 100); // baseline 0-50 mapped to 0-100
+  const moduleRate = totalModules > 0 ? (doneCount / totalModules) * 100 : 0;
+  const simRate = Math.min((simPatients / 3) * 100, 100);
+  return Math.round(baselineNorm * 0.3 + moduleRate * 0.4 + simRate * 0.3);
+}
+
+export function getScoreLabel(score: number): string {
+  if (score >= 80) return "score_excellent";
+  if (score >= 50) return "score_good";
+  return "score_needs_work";
+}
+
+export function getScoreColor(score: number, colors: { green: string; gold: string; red: string }): string {
+  if (score >= 80) return colors.green;
+  if (score >= 50) return colors.gold;
+  return colors.red;
+}
+
+export interface Recommendation {
+  phaseId: string;
+  phaseLabel: string;
+  moduleId: string;
+  moduleTitle: string;
+  time: string;
+  priority: "high" | "medium" | "low";
+  color: string;
+}
+
+export function getRecommendations(
+  done: string[],
+  myM: { id: string; phase: string; title: string; time: string }[],
+  phases: { id: string; label: string; color: string }[],
+  max = 5,
+): Recommendation[] {
+  const incomplete = myM.filter(m => !done.includes(m.id));
+  return incomplete.slice(0, max).map((m, i) => {
+    const ph = phases.find(p => p.id === m.phase);
+    return {
+      phaseId: m.phase,
+      phaseLabel: ph?.label || m.phase,
+      moduleId: m.id,
+      moduleTitle: m.title,
+      time: m.time,
+      priority: i < 2 ? "high" : i < 4 ? "medium" : "low",
+      color: ph?.color || "#888",
+    };
+  });
+}
+
+export interface ImprovementArea {
+  category: string;
+  phaseId: string;
+  completion: number;
+  tips: string[];
+  color: string;
+}
+
+export function getImprovementAreas(
+  done: string[],
+  myM: { id: string; phase: string; title: string }[],
+  phases: { id: string; label: string; color: string; desc: string }[],
+): ImprovementArea[] {
+  const TIPS: Record<string, string[]> = {
+    beginner: ["Practice the 30-second elevator pitch", "Role-play introductions with a colleague"],
+    core: ["Review grinding signs checklist before each shift", "Study the damage progression timeline"],
+    product: ["Memorize the 6 sensor capabilities", "Practice explaining the byteSense Score"],
+    sales: ["Use Cialdini's reciprocity in your next case", "Practice the 'Feel-Felt-Found' objection framework"],
+    financial: ["Rehearse the value-first price reveal", "Frame cost as daily investment, not lump sum"],
+    operations: ["Review scan quality criteria before next scan", "Practice the app setup flow until under 5 minutes"],
+    advanced: ["Master the warm handoff script", "Identify 2 trust micro-moments per patient visit"],
+    flywheel: ["Ask for a review at the 2-week follow-up", "Create a referral tracking system"],
+    "role-specific": ["Review your role's monthly goals weekly", "Shadow a top performer in your role"],
+  };
+
+  return phases
+    .map(ph => {
+      const pm = myM.filter(m => m.phase === ph.id);
+      if (!pm.length) return null;
+      const doneCount = pm.filter(m => done.includes(m.id)).length;
+      const completion = Math.round((doneCount / pm.length) * 100);
+      if (completion === 100) return null;
+      const categoryName = ph.label.replace(/Phase \d+ — /, '');
+      return {
+        category: categoryName,
+        phaseId: ph.id,
+        completion,
+        tips: TIPS[ph.id] || ["Complete remaining modules in this phase"],
+        color: ph.color,
+      };
+    })
+    .filter(Boolean) as ImprovementArea[];
+}
+
 export function startSTT(cb: (text: string) => void, onEnd?: () => void) {
   const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   if (!SR) return null;
