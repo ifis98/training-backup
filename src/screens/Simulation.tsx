@@ -10,10 +10,6 @@ interface SimulationProps {
 
 const SUCCESS_REGEX = /(interested|next step|sign me up|let's do it|schedule|sounds good|i'm in)/i;
 
-const SIM_SYSTEM = `You are Jordan, 38, marketing manager at a dental appointment. Told you grind. Jaw sore sometimes. Partner hears it. Apple Watch wearer. Health-conscious, budget-aware.
-
-RULES: - Real patient. Ask questions, show doubt. - Start skeptical. Warm up ONLY if educated well. - Raise 2-3 objections naturally. - If they say "night guard"/"mouthguard": "Wait, so it's basically a night guard?" - After 6-8 good exchanges: "Okay, I'm interested — what's the next step?" - If pushy/vague: "I'll pass for now." - 1-3 sentences max per response. - NEVER break character.`;
-
 export default function Simulation({ s, u }: SimulationProps) {
   const [loading, setLoading] = useState(false);
   const chatEnd = useRef<HTMLDivElement>(null);
@@ -42,7 +38,6 @@ export default function Simulation({ s, u }: SimulationProps) {
         },
         body: JSON.stringify({
           messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })),
-          systemPrompt: SIM_SYSTEM,
         }),
       });
 

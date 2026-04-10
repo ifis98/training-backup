@@ -1,22 +1,11 @@
 import { C } from '@/data/constants';
 
 export const Logo = ({ size = 36 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-    <path d="M16 1L29 8.5V23.5L16 31L3 23.5V8.5L16 1Z" fill="url(#rg)" />
-    <path d="M16 8L23 12V20L16 24L9 20V12L16 8Z" fill="white" />
-    <defs>
-      <linearGradient id="rg" x1="3" y1="1" x2="29" y2="31">
-        <stop stopColor="#FF3030" />
-        <stop offset="1" stopColor="#990000" />
-      </linearGradient>
-    </defs>
-  </svg>
+  <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: size, width: "auto" }} />
 );
 
 export const LogoText = ({ size = 24 }: { size?: number }) => (
-  <span style={{ fontSize: size, fontWeight: 800, fontFamily: C.fn }}>
-    byte<span style={{ color: C.redL }}>Sense</span>
-  </span>
+  <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: size, width: "auto" }} />
 );
 
 export const ContentRenderer = ({ text }: { text: string }) => (
