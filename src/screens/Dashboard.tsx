@@ -693,7 +693,45 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         )}
 
-        {/* Report & Certificate Access */}
+        {/* Case Analytics Charts */}
+        {isOwnerOrManager && caseAnalyticsData.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
+            <div style={{ ...glass, padding: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("conversion_rate")}
+              </div>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={caseAnalyticsData}>
+                  <defs>
+                    <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={C.teal} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={C.teal} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="month" tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                  <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} formatter={(v: number) => [`${v}%`, T("conversion_rate")]} />
+                  <Area type="monotone" dataKey="conversionRate" stroke={C.teal} fill="url(#convGrad)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div style={{ ...glass, padding: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} /> {T("revenue_trend")}
+              </div>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={caseAnalyticsData} barSize={20}>
+                  <XAxis dataKey="month" tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} formatter={(v: number) => [`$${v.toLocaleString()}`, T("revenue_label")]} />
+                  <Bar dataKey="revenue" fill={C.gold} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+
         {(allComplete || s.signed) && (
           <div style={{ ...glass, padding: 22, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
