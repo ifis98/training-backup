@@ -39,7 +39,7 @@ export default function Welcome() {
       {/* Stats */}
       <div style={{ display: "flex", justifyContent: "center", gap: 48, padding: "40px 24px", flexWrap: "wrap" }}>
         {[
-          { n: "5", l: "Medical-Grade Sensors" },
+          { n: "6", l: "Medical-Grade Sensors" },
           { n: "100", l: "Daily Health Score" },
           { n: "0", l: "Cost Marketing Flywheel" },
           { n: "∞", l: "Patient Advocacy Potential" },
