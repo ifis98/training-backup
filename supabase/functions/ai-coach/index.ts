@@ -101,7 +101,10 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, mode = "general" } = await req.json();
+    const { messages, mode = "general", lang = "en" } = await req.json();
+
+    const LANG_NAMES: Record<string, string> = { en: "English", es: "Spanish", pt: "Portuguese", fr: "French", zh: "Chinese" };
+    const langInstruction = lang !== "en" ? `\n\nIMPORTANT: Respond entirely in ${LANG_NAMES[lang] || "English"}. All advice, scripts, templates, and content must be in ${LANG_NAMES[lang] || "English"}.` : "";
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages required" }), {
@@ -118,7 +121,7 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = MODE_PROMPTS[mode] || MODE_PROMPTS.general;
+    const systemPrompt = (MODE_PROMPTS[mode] || MODE_PROMPTS.general) + langInstruction;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

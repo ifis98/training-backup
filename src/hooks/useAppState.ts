@@ -28,6 +28,7 @@ export interface AppState {
   xp: number;
   spk: boolean;
   signed: boolean;
+  lang: string;
 }
 
 const defaultState: AppState = {
@@ -51,6 +52,7 @@ const defaultState: AppState = {
   xp: 0,
   spk: false,
   signed: false,
+  lang: "en",
 };
 
 export function useAppState() {

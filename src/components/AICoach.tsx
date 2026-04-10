@@ -1,22 +1,26 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { C } from '@/data/constants';
+import { t, Lang } from '@/data/translations';
 
 interface AICoachProps {
   onClose: () => void;
   initialMode?: string;
+  lang?: Lang;
 }
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const MODES = [
-  { id: "general", label: "💬 Ask Anything", desc: "General advice & training Q&A" },
-  { id: "followup", label: "✉️ Follow-Up", desc: "Generate SMS, email, letters" },
-  { id: "treatment", label: "📋 Treatment Plan", desc: "Scripts & presentations" },
-  { id: "objections", label: "🛡️ Objections", desc: "Handle tough situations" },
-  { id: "educational", label: "📚 Education", desc: "Patient-facing materials" },
-];
+export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachProps) {
+  const T = (key: string) => t(lang, key);
 
-export default function AICoach({ onClose, initialMode }: AICoachProps) {
+  const MODES = [
+    { id: "general", label: T("ask_anything"), desc: T("ask_anything_desc") },
+    { id: "followup", label: T("followup_label"), desc: T("followup_mode_desc") },
+    { id: "treatment", label: T("treatment_label"), desc: T("treatment_mode_desc") },
+    { id: "objections", label: T("objections_label"), desc: T("objections_mode_desc") },
+    { id: "educational", label: T("education_label"), desc: T("education_mode_desc") },
+  ];
+
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,6 +53,7 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
         body: JSON.stringify({
           messages: newMsgs.map(m => ({ role: m.role, content: m.content })),
           mode,
+          lang,
         }),
       });
 
@@ -64,12 +69,14 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
     } finally {
       setLoading(false);
     }
-  }, [messages, input, loading, mode]);
+  }, [messages, input, loading, mode, lang]);
 
   const handleModeChange = (newMode: string) => {
     setMode(newMode);
     setMessages([]);
   };
+
+  const hintKey = `coach_${mode}_hint`;
 
   return (
     <div style={{
@@ -80,7 +87,7 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
       {/* Header */}
       <div style={{ padding: "14px 20px", borderBottom: `1px solid ${C.borderD}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>AI Coach</div>
+          <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("ai_coach")}</div>
           <div style={{ fontSize: 11, color: C.ash }}>{MODES.find(m => m.id === mode)?.desc}</div>
         </div>
         <button onClick={onClose} style={{ background: "none", border: "none", color: C.ash, fontSize: 20, cursor: "pointer", fontFamily: C.fn }}>✕</button>
@@ -106,13 +113,9 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
         {messages.length === 0 && (
           <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
             <div style={{ fontSize: 28, marginBottom: 12 }}>🧠</div>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>ByteSense AI Coach</div>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>{T("coach_welcome")}</div>
             <div style={{ fontSize: 12, maxWidth: 300, margin: "0 auto", lineHeight: 1.6 }}>
-              {mode === "general" && "Ask me anything about ByteSense, patient handling, objections, or training concepts."}
-              {mode === "followup" && "Describe the patient situation and I'll generate a follow-up message (SMS, email, or letter)."}
-              {mode === "treatment" && "Tell me about the patient and I'll create a presentation script and talking points."}
-              {mode === "objections" && "Describe the objection and I'll give you a word-for-word script to handle it."}
-              {mode === "educational" && "Tell me what you need — brochures, FAQs, social posts, or patient handouts."}
+              {T(hintKey)}
             </div>
           </div>
         )}
@@ -128,7 +131,7 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
               fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap",
             }}>
               {msg.role === "assistant" && (
-                <div style={{ fontSize: 9, color: C.gold, marginBottom: 4, fontWeight: 700 }}>AI COACH</div>
+                <div style={{ fontSize: 9, color: C.gold, marginBottom: 4, fontWeight: 700 }}>{T("ai_coach").toUpperCase()}</div>
               )}
               {msg.content}
             </div>
@@ -138,7 +141,7 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
             <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>
-              Thinking...
+              {T("thinking")}
             </div>
           </div>
         )}
@@ -151,12 +154,12 @@ export default function AICoach({ onClose, initialMode }: AICoachProps) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder="Ask your AI Coach..."
+          placeholder={T("coach_placeholder")}
           style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: "10px 14px", fontSize: 14, fontFamily: C.fn, outline: "none" }}
         />
         <button onClick={() => sendMessage()}
           style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
-          Send
+          {T("send")}
         </button>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
 import AICoach from '@/components/AICoach';
+import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 
 interface DashboardProps {
   s: AppState;
@@ -24,6 +25,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const allComplete = allModsDone && s.simP >= 3;
   const [showCoach, setShowCoach] = useState(false);
   const [coachMode, setCoachMode] = useState("general");
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const lang = (s.lang || "en") as Lang;
+  const T = (key: string) => t(lang, key);
 
   const openCoach = (mode: string) => {
     setCoachMode(mode);
@@ -45,11 +49,28 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Logo size={28} light />
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {/* Language Selector */}
+              <div style={{ position: "relative" }}>
+                <button onClick={() => setShowLangMenu(!showLangMenu)}
+                  style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4 }}>
+                  {LANG_OPTIONS.find(l => l.id === lang)?.flag} {LANG_OPTIONS.find(l => l.id === lang)?.label}
+                </button>
+                {showLangMenu && (
+                  <div style={{ position: "absolute", top: "100%", right: 0, background: C.dark2, border: `1px solid ${C.borderD}`, zIndex: 50, minWidth: 140, marginTop: 4 }}>
+                    {LANG_OPTIONS.map(l => (
+                      <div key={l.id} onClick={() => { u({ lang: l.id }); setShowLangMenu(false); }}
+                        style={{ padding: "8px 12px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? C.dark3 : "transparent" }}>
+                        {l.flag} {l.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); }}
-                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>Change Roles</button>
+                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>{T("change_roles")}</button>
               <button onClick={handleSignOut}
-                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>Sign Out</button>
+                style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn }}>{T("sign_out")}</button>
             </div>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
@@ -61,18 +82,18 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             </div>
             <div style={{ background: C.dark2, padding: "8px 12px", textAlign: "center" }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{s.xp}</div>
-              <div style={{ fontSize: 8, color: C.ash }}>XP</div>
+              <div style={{ fontSize: 8, color: C.ash }}>{T("xp")}</div>
             </div>
             <div style={{ background: C.dark2, padding: "8px 12px", textAlign: "center" }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.teal }}>{pr}%</div>
-              <div style={{ fontSize: 8, color: C.ash }}>DONE</div>
+              <div style={{ fontSize: 8, color: C.ash }}>{T("done")}</div>
             </div>
           </div>
           <div style={{ marginTop: 8 }}>
             <div style={{ height: 4, background: C.dark3 }}>
               <div style={{ height: "100%", width: `${pr}%`, background: `linear-gradient(90deg, ${C.teal}, ${C.green})`, transition: "width 0.5s" }} />
             </div>
-            <div style={{ fontSize: 10, color: C.ash, marginTop: 3 }}>{dN}/{myM.length} sections · {myPH.length} phases</div>
+            <div style={{ fontSize: 10, color: C.ash, marginTop: 3 }}>{dN}/{myM.length} {T("sections")} · {myPH.length} {T("phases")}</div>
           </div>
         </div>
       </div>
@@ -89,7 +110,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <div style={{ width: 8, height: 8, background: pc ? C.green : phase.color, borderRadius: "50%" }} />
                 <span style={{ fontSize: 13, fontWeight: 800, color: C.charcoal }}>{phase.label}</span>
-                {pc && <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>COMPLETE</span>}
+                {pc && <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>{T("complete")}</span>}
               </div>
               <div style={{ fontSize: 12, color: C.slate, paddingLeft: 16, marginBottom: 8 }}>{phase.desc}</div>
               {pm.map(mod => {
@@ -117,8 +138,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <div style={{ width: 8, height: 8, background: C.gold, borderRadius: "50%" }} />
-            <span style={{ fontSize: 13, fontWeight: 800, color: C.charcoal }}>Final Phase — AI Patient Practice</span>
-            {s.simP >= 3 && <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>COMPLETE</span>}
+            <span style={{ fontSize: 13, fontWeight: 800, color: C.charcoal }}>{T("final_phase")}</span>
+            {s.simP >= 3 && <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>{T("complete")}</span>}
           </div>
           <div
             onClick={() => { if (allModsDone) { u({ phase: "simulation" }); scrollTop(); } }}
@@ -127,8 +148,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               {s.simP >= 3 ? "✓" : ""}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.charcoal }}>AI Patient Simulation</div>
-              <div style={{ fontSize: 11, color: C.ash }}>{s.simP}/3 patients</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.charcoal }}>{T("ai_patient_sim")}</div>
+              <div style={{ fontSize: 11, color: C.ash }}>{s.simP}/3 {T("patients")}</div>
             </div>
             <span style={{ color: C.ash, fontSize: 14 }}>→</span>
           </div>
@@ -137,29 +158,29 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Completion Banners */}
         {allComplete && (
           <div style={{ background: `linear-gradient(135deg, ${C.goldBg}, ${C.tealBg})`, border: `1.5px solid ${C.gold}`, padding: 20, textAlign: "center", marginBottom: 16 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: C.charcoal, marginBottom: 8 }}>All Assignments Complete</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: C.charcoal, marginBottom: 8 }}>{T("all_complete")}</div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
               style={{ background: C.red, color: "#fff", border: "none", padding: "14px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-              Complete Onboarding →
+              {T("complete_onboarding")}
             </button>
           </div>
         )}
 
         {allModsDone && !allComplete && (
           <div style={{ background: C.teal, color: C.white, padding: 16, textAlign: "center", marginBottom: 16, fontSize: 14, fontWeight: 700 }}>
-            Training Complete! Start AI simulations above.
+            {T("training_complete")}
           </div>
         )}
 
         {/* Quick Tools */}
         <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: C.charcoal, marginBottom: 8 }}>🛠️ Quick Tools</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: C.charcoal, marginBottom: 8 }}>{T("quick_tools")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {[
-              { mode: "followup", icon: "✉️", label: "Patient Follow-Up", desc: "Generate SMS, email, letters" },
-              { mode: "treatment", icon: "📋", label: "Treatment Plan", desc: "Scripts & presentations" },
-              { mode: "objections", icon: "🛡️", label: "Handle Objections", desc: "Word-for-word scripts" },
-              { mode: "educational", icon: "📚", label: "Educational Material", desc: "Patient-facing content" },
+              { mode: "followup", icon: "✉️", label: T("patient_followup"), desc: T("followup_desc") },
+              { mode: "treatment", icon: "📋", label: T("treatment_plan"), desc: T("treatment_desc") },
+              { mode: "objections", icon: "🛡️", label: T("handle_objections"), desc: T("objections_desc") },
+              { mode: "educational", icon: "📚", label: T("educational_material"), desc: T("educational_desc") },
             ].map(tool => (
               <div key={tool.mode} onClick={() => openCoach(tool.mode)}
                 style={{ background: C.white, border: `1.5px solid ${C.border}`, padding: "14px 12px", cursor: "pointer", transition: "border-color 0.2s" }}>
@@ -173,24 +194,24 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Quick Reference */}
         <div style={{ background: C.white, border: `1.5px solid ${C.border}`, marginBottom: 16 }}>
-          <div style={{ background: C.red, color: C.white, padding: "10px 16px", fontSize: 13, fontWeight: 700 }}>Quick Reference</div>
+          <div style={{ background: C.red, color: C.white, padding: "10px 16px", fontSize: 13, fontWeight: 700 }}>{T("quick_reference")}</div>
           <div style={{ padding: 16, fontSize: 12, color: C.slate, lineHeight: 1.8 }}>
-            <div>· ByteSense is NOT a night guard — it's a wellness health intelligence platform</div>
-            <div>· 6 sensors: HR/HRV, EMG/Force, Respiratory, Temperature, Motion, Blood Oxygen (SpO2)</div>
-            <div>· Data flows to the bitely app with daily byteSense Score</div>
-            <div>· NEVER say: "night guard," "mouthguard," "diagnoses," "FDA approved medical device"</div>
-            <div>· Support: Natasha Blake — 909-527-9602</div>
-            <div>· Tech: support@bytesense.ai</div>
-            <div>· Lab: Florida Oral Labs — info@floridaorallabs.com</div>
+            <div>· {T("ref_not_nightguard")}</div>
+            <div>· {T("ref_sensors")}</div>
+            <div>· {T("ref_data")}</div>
+            <div>· {T("ref_never_say")}</div>
+            <div>· {T("ref_support")}</div>
+            <div>· {T("ref_tech")}</div>
+            <div>· {T("ref_lab")}</div>
           </div>
         </div>
 
         {/* Support */}
         <div style={{ background: C.ivory, padding: 20, textAlign: "center", marginBottom: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.charcoal, marginBottom: 8 }}>Need help?</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.charcoal, marginBottom: 8 }}>{T("need_help")}</div>
           <button onClick={() => window.open("https://calendly.com", "_blank")}
             style={{ background: C.teal, color: "#fff", border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-            Schedule Support Call
+            {T("schedule_call")}
           </button>
         </div>
 
@@ -198,12 +219,12 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ textAlign: "center" }}>
           <button onClick={reset}
             style={{ background: "transparent", color: C.slate, border: `1px solid ${C.border}`, padding: "10px 20px", fontSize: 12, fontFamily: C.fn, cursor: "pointer" }}>
-            Reset All Progress
+            {T("reset_progress")}
           </button>
         </div>
 
         <div style={{ textAlign: "center", fontSize: 10, color: C.ash, marginTop: 24 }}>
-          byteSense Inc. · Proprietary · Confidential
+          {T("confidential")}
         </div>
       </div>
 
@@ -219,7 +240,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       </button>
 
       {/* AI Coach Panel */}
-      {showCoach && <AICoach onClose={() => setShowCoach(false)} initialMode={coachMode} />}
+      {showCoach && <AICoach onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />}
     </div>
   );
 }
