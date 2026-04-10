@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { C } from '@/data/constants';
 
@@ -9,7 +8,7 @@ export default function Welcome() {
     <div style={{ fontFamily: C.fn, background: C.dark, color: C.white, minHeight: "100vh" }}>
       {/* Hero */}
       <div style={{ textAlign: "center", padding: "60px 24px 40px", maxWidth: 800, margin: "0 auto" }}>
-        <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: 48, marginBottom: 32 }} />
+        <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: 48, marginBottom: 32, filter: "brightness(0) invert(1)" }} />
         <div style={{ fontSize: 11, letterSpacing: 5, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 20 }}>
           Welcome to the Family
         </div>

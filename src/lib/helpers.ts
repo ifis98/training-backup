@@ -24,11 +24,75 @@ export function shuffleQuestion(q: CheckQuestion, seed: number): ShuffledQuestio
   return { q: q.q, opts: sh.map(x => x.t), correct: sh.findIndex(x => x.c) };
 }
 
+// Preferred voices ranked by naturalness
+const PREFERRED_VOICES = [
+  "Google UK English Female",
+  "Google US English",
+  "Microsoft Zira",
+  "Samantha",
+  "Karen",
+  "Daniel",
+  "Moira",
+  "Tessa",
+  "Google UK English Male",
+];
+
+let cachedVoice: SpeechSynthesisVoice | null = null;
+
+function getBestVoice(): SpeechSynthesisVoice | null {
+  if (cachedVoice) return cachedVoice;
+  const voices = window.speechSynthesis?.getVoices() || [];
+  for (const pref of PREFERRED_VOICES) {
+    const match = voices.find(v => v.name.includes(pref));
+    if (match) { cachedVoice = match; return match; }
+  }
+  // Fallback: any English voice
+  const eng = voices.find(v => v.lang.startsWith('en'));
+  if (eng) { cachedVoice = eng; return eng; }
+  return voices[0] || null;
+}
+
+// Load voices (they may load async)
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => { cachedVoice = null; };
+}
+
+function cleanTextForSpeech(text: string): string {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/^- /gm, '')
+    .replace(/^· /gm, '')
+    .replace(/\n{2,}/g, '. ')
+    .replace(/\n/g, '. ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 export function speak(text: string) {
   window.speechSynthesis?.cancel();
-  const u = new SpeechSynthesisUtterance(text.replace(/\*\*/g, "").replace(/\n/g, ". "));
-  u.rate = 0.95;
-  window.speechSynthesis?.speak(u);
+  const cleaned = cleanTextForSpeech(text);
+
+  // Split into sentences for more natural pacing
+  const sentences = cleaned.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+
+  const voice = getBestVoice();
+
+  sentences.forEach((sentence, i) => {
+    const u = new SpeechSynthesisUtterance(sentence);
+    u.rate = 0.92;
+    u.pitch = 1.05;
+    if (voice) u.voice = voice;
+
+    // Small pause between sentences by adding silence
+    if (i > 0) {
+      const pause = new SpeechSynthesisUtterance('');
+      pause.rate = 0.1;
+      if (voice) pause.voice = voice;
+      window.speechSynthesis?.speak(pause);
+    }
+
+    window.speechSynthesis?.speak(u);
+  });
 }
 
 export function stopSpeech() {

@@ -1,11 +1,11 @@
 import { C } from '@/data/constants';
 
-export const Logo = ({ size = 36 }: { size?: number }) => (
-  <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: size, width: "auto" }} />
+export const Logo = ({ size = 36, light = false }: { size?: number; light?: boolean }) => (
+  <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: size, width: "auto", filter: light ? "brightness(0) invert(1)" : undefined }} />
 );
 
-export const LogoText = ({ size = 24 }: { size?: number }) => (
-  <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: size, width: "auto" }} />
+export const LogoText = ({ size = 24, light = false }: { size?: number; light?: boolean }) => (
+  <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: size, width: "auto", filter: light ? "brightness(0) invert(1)" : undefined }} />
 );
 
 export const ContentRenderer = ({ text }: { text: string }) => (

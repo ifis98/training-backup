@@ -13,7 +13,7 @@ export default function Splash({ s, u }: SplashProps) {
     <div style={{ fontFamily: C.fn, background: C.white, minHeight: "100vh" }}>
       <div style={{ background: C.dark, color: C.white, padding: "48px 24px 52px", textAlign: "center" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-          <Logo size={40} />
+          <Logo size={40} light />
         </div>
         <div style={{ fontSize: 10, letterSpacing: 4, color: C.ash, marginBottom: 24, textTransform: "uppercase" }}>Practice Onboarding</div>
         <h1 style={{ fontSize: "clamp(26px, 5vw, 38px)", fontWeight: 800, letterSpacing: "-0.5px", lineHeight: 1.15, marginBottom: 14 }}>
