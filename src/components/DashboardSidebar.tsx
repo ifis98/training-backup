@@ -53,8 +53,8 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
       <div style={{ padding: collapsed ? "20px 10px" : "20px 16px", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between", borderBottom: `1px solid ${C.glassBorder}` }}>
         {!collapsed && <Logo size={24} light />}
         <button onClick={() => setCollapsed(!collapsed)}
-          style={{ background: "none", border: "none", color: C.ash, cursor: "pointer", fontSize: 14, padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {collapsed ? "▶" : "◀"}
+          style={{ background: "none", border: "none", color: C.ash, cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {collapsed ? <ChevronRight size={16} strokeWidth={1.5} /> : <ChevronLeft size={16} strokeWidth={1.5} />}
         </button>
       </div>
 
