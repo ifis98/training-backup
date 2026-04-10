@@ -1,89 +1,120 @@
 
 
-# ByteSense — Missing Modules, Landing Page, Auth & Admin System
+# ByteSense — Multi-Patient Sim, Logo Fix, TTS Improvement, DB Sync & Practice Join
 
 ## Summary
-Three major additions: (1) add 12 missing training modules + the "operations" phase, (2) build a landing/welcome page with authentication, (3) build an admin dashboard for practice owners to manage staff, track progress, and reprint certificates.
+Seven changes: (1) randomize AI patient scenarios instead of always Jordan, (2) fix logo visibility on dark backgrounds, (3) improve TTS quality, (4) sync training state to database, (5) prevent duplicate email registration, (6) allow employees to request joining an existing practice, (7) admin staff removal.
 
 ---
 
-## Part 1: Add Missing Modules & Operations Phase
+## 1. Random Patient Scenarios in AI Simulation
 
-The uploaded V6_2 JSX has 12 new modules not in the current codebase:
+**Current**: Only one patient — Jordan, 38, marketing manager.
 
-| ID | Phase | Title | Roles |
-|----|-------|-------|-------|
-| b3 | beginner | Reading a Health History | all |
-| p4 | product | The bitely App Walkthrough | all |
-| p5 | product | ByteSense vs. The Competition | all |
-| s4 | sales | The Pricing Moment | all |
-| o3 | operations | The Consent Form Process | all |
-| o4 | operations | Morning Huddle Protocol | all |
-| o5 | operations | Video Testimonials | all |
-| o6 | operations | Handling Device Issues | all |
-| r_assoc1 | role-specific | Associate: 30-Second Recommendation | associate |
-| r_tc2 | role-specific | TC: 48-Hour Follow-Up System | tc |
-| fw3 | flywheel | Social Media & Patient Content | all |
-| r_hyg2 | role-specific | Hygienist: Handling First Objections | hygienist |
+**Change**: Create a pool of 6+ distinct patient personas in the edge function. When "New Patient" is clicked or a new conversation starts, the client sends a `patientIndex` (0–5, randomized). The edge function picks the matching persona.
 
-The "operations" phase already exists in `PH` in constants.ts. All module content and quiz questions will be transferred word-for-word from the uploaded file.
+Patient pool (all dental-relevant, varied demographics/objections):
+| # | Name | Age | Occupation | Scenario | Key Objections |
+|---|------|-----|-----------|----------|---------------|
+| 0 | Jordan | 38 | Marketing Manager | Grinding, jaw sore | Budget, "isn't it a night guard?" |
+| 1 | Maria | 52 | School Teacher | TMJ pain, headaches | Insurance coverage, skepticism |
+| 2 | Devon | 28 | Software Engineer | Partner complains about grinding | "I feel fine", tech-curious |
+| 3 | Patricia | 65 | Retired Nurse | Broken teeth history, dentist recommended | Already tried a night guard, medical knowledge |
+| 4 | Marcus | 44 | Construction Foreman | Sleep apnea concerns, jaw clenching | Time off work, cost |
+| 5 | Aisha | 33 | New Mom | Stress grinding since pregnancy | Baby budget, "will it work?" |
 
----
+- Update `supabase/functions/patient-sim/index.ts` — add personas array, accept `patientIndex` in request body
+- Update `Simulation.tsx` — randomize patientIndex on mount and on "New Patient", display current patient name/details in the card, show patient name in chat bubbles
+- Update `AppState` — add `simPatientIdx` field
 
-## Part 2: Welcome Landing Page + Authentication
+## 2. Fix ByteSense Logo Visibility on Dark Backgrounds
 
-**Landing Page** (pre-login, public):
-- Full-screen dark hero with ByteSense logo and tagline
-- Messaging that makes practices feel exclusive, empowered, and part of something big: "You're not just adopting a product — you're joining a movement in health intelligence"
-- Key stats/value props (5 sensors, daily health score, zero-cost marketing flywheel)
-- Clear CTA: "Join the ByteSense Family" → registration
+The logo PNG has dark text that's invisible on dark backgrounds.
 
-**Authentication** (email + password via Lovable Cloud):
-- Registration page: name, email, practice name, password
-- Login page for returning users
-- Email verification (standard, not auto-confirm)
-- Google OAuth as secondary option
-- After login, users land on their personalized dashboard
+**Fix**: Add a CSS `filter: brightness(0) invert(1)` on the `<img>` tags when used on dark backgrounds. Update:
+- `ByteSenseLogo.tsx` — add optional `light` prop to Logo/LogoText components
+- `Splash.tsx` — use `<Logo light />` in dark header
+- `Dashboard.tsx` — use `<Logo light />` in dark header
+- `Simulation.tsx` — already text-based, no logo needed
+- `Report.tsx` — logo on white bg is fine, no change
+- `Welcome.tsx` — add filter to logo img
+- `Auth.tsx` — add filter to logo img
+- `AdminDashboard.tsx` — add filter to logo img on dark bg
 
-**Database tables needed:**
-- `profiles` — user_id (FK auth.users), full_name, practice_id, role (app-level: "admin" or "staff"), created_at
-- `practices` — id, name, created_at, owner_id
-- `staff_invitations` — id, practice_id, email, invited_by, status (pending/accepted/revoked), created_at
-- `training_progress` — id, user_id, practice_id, roles (text[]), baseline_score, done_modules (text[]), xp, sim_patients, signed, completed_at
+## 3. Improve TTS Voice Quality
 
-RLS policies: users see only their own practice's data. Admins see all staff in their practice.
+**Current**: Uses Web SpeechSynthesis API with `rate: 0.95`. Sounds robotic/choppy.
 
----
+**Fix**: 
+- Select a higher-quality voice — prefer "Google UK English Female" or similar natural voice when available
+- Add `pitch: 1.0` and wait for `voiceschanged` event before speaking
+- Add sentence-level chunking with small pauses for natural flow
+- Clean markdown more thoroughly (strip bullets, headers formatting) before speaking
+- Update `speak()` in `src/lib/helpers.ts`
 
-## Part 3: Admin Dashboard
+Note: Browser TTS quality varies by platform. For truly smooth speech, ElevenLabs would be ideal but requires an API key. We'll optimize the free browser API first and note the upgrade path.
 
-For practice owners/admins:
-- **Staff Management**: Invite staff via email, view pending/accepted invitations, remove terminated staff
-- **Progress Tracking**: See each staff member's training completion %, XP, modules done, simulation status
-- **Reports & Certificates**: Reprint any staff member's completion report and certificate as PDF
-- **Practice Certificate**: Generate/view "Official ByteSense Location" certificate for the practice itself (gold-bordered, printable)
+## 4. Database Persistence for Training State
+
+**Current**: Training state lives in `localStorage` only.
+
+**Change**: On login, check for existing `training_progress` row. If found, hydrate app state from DB. On every state change, debounce-sync to DB.
+
+- Update `useAppState.ts` — add `syncToDb()` function that upserts to `training_progress`
+- Update `Index.tsx` — load from DB on mount when user is authenticated
+- Pass `user` context into the app state hook
+
+## 5. Prevent Duplicate Email Registration
+
+**Current**: Supabase Auth already prevents duplicate emails at the auth level. But we should also show a clear error message.
+
+**Change**: In `Auth.tsx`, catch the specific "User already registered" error and show a friendly toast directing them to sign in instead.
+
+## 6. Employee Practice Join Request
+
+**Current**: Employees can only join a practice if invited by admin.
+
+**Change**: After registration, if an employee doesn't have a practice, show a "Request to Join Practice" flow:
+- New screen/modal after login where unpracticed users can search by practice name or enter a practice code
+- Creates a row in `staff_invitations` with `status: 'requested'` (reversed flow)
+- Admin sees requests in their Invitations tab and can approve/deny
+- On approval, employee's profile gets `practice_id` set
+
+Database changes:
+- Add `'requested'` as valid status in `staff_invitations`
+- Add RLS policy for authenticated users to insert their own join requests
+- Add `practice_code` column to `practices` table (short unique code for lookup)
+
+## 7. Admin Staff Removal
+
+**Current**: Admin can revoke invitations but can't remove active staff.
+
+**Change**: Add "Remove" button on each staff card in admin dashboard. Removes:
+- Clears `practice_id` from profile
+- Deletes `training_progress` for that user in this practice
+- Shows confirmation dialog before removal
 
 ---
 
 ## Implementation Order
 
-1. **Database migration** — Create `practices`, `profiles`, `staff_invitations`, `training_progress` tables with RLS
-2. **Auth pages** — Landing page, Register, Login (with Google OAuth)
-3. **Add 12 missing modules** to `src/data/modules.ts`
-4. **Connect training state to database** — Replace localStorage with Supabase persistence, sync on login
-5. **Admin dashboard** — Staff invite flow (sends email), progress overview, reprint reports/certificates
-6. **Practice certificate** — "Official ByteSense Location" certificate generator
-7. **Edge function for invitations** — Send invitation emails to staff
+1. Database migration — add `practice_code` to practices, update staff_invitations RLS for self-requests
+2. Fix logo visibility (light mode prop)
+3. Random patient personas in edge function + Simulation UI
+4. TTS voice improvement
+5. DB sync for training state
+6. Duplicate email handling
+7. Practice join request flow (UI + admin approval)
+8. Admin staff removal
+9. Deploy edge function + test end-to-end
 
 ---
 
 ## Technical Details
 
-- Auth: Supabase Auth with email+password + Google OAuth via Lovable Cloud
-- Database: 4 new tables with RLS policies scoped to practice_id
-- Invitation flow: Admin enters staff email → row in `staff_invitations` → email sent via edge function → staff registers with that email → auto-linked to practice
-- Training state moves from localStorage to `training_progress` table
-- Landing page is a new public route (`/welcome`) that becomes the default for unauthenticated users
-- Authenticated users route to `/` (dashboard)
-- Admin vs staff distinction stored in `user_roles` table (per security guidelines)
+- **Edge function**: `patient-sim` updated with 6 persona system prompts, selected by `patientIndex` param
+- **Logo**: CSS filter approach avoids needing a second logo asset
+- **TTS**: `window.speechSynthesis.getVoices()` with preference ranking; sentence chunking via regex split on `.!?`
+- **DB sync**: Debounced (2s) upsert to `training_progress` table on state changes
+- **Practice code**: 6-char alphanumeric generated on practice creation, used for join requests
 
