@@ -5,8 +5,7 @@ import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
-import AICoach from '@/components/AICoach';
-import { t, Lang, LANG_OPTIONS } from '@/data/translations';
+import { t, Lang } from '@/data/translations';
 
 interface DashboardProps {
   s: AppState;
@@ -18,21 +17,15 @@ interface DashboardProps {
   pr: number;
   allD: boolean;
   reset: () => void;
+  openCoach: (mode: string) => void;
 }
 
-export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset }: DashboardProps) {
+export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: DashboardProps) {
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
-  const [showCoach, setShowCoach] = useState(false);
-  const [coachMode, setCoachMode] = useState("general");
   const [showLangMenu, setShowLangMenu] = useState(false);
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
-
-  const openCoach = (mode: string) => {
-    setCoachMode(mode);
-    setShowCoach(true);
-  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -54,11 +47,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <div style={{ position: "relative" }}>
                 <button onClick={() => setShowLangMenu(!showLangMenu)}
                   style={{ background: "none", border: `1px solid ${C.borderD}`, color: C.ash, padding: "5px 10px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4 }}>
-                  {LANG_OPTIONS.find(l => l.id === lang)?.flag} {LANG_OPTIONS.find(l => l.id === lang)?.label}
+                  {LANG_OPTIONS.find((l: any) => l.id === lang)?.flag} {LANG_OPTIONS.find((l: any) => l.id === lang)?.label}
                 </button>
                 {showLangMenu && (
                   <div style={{ position: "absolute", top: "100%", right: 0, background: C.dark2, border: `1px solid ${C.borderD}`, zIndex: 50, minWidth: 140, marginTop: 4 }}>
-                    {LANG_OPTIONS.map(l => (
+                    {LANG_OPTIONS.map((l: any) => (
                       <div key={l.id} onClick={() => { u({ lang: l.id }); setShowLangMenu(false); }}
                         style={{ padding: "8px 12px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? C.dark3 : "transparent" }}>
                         {l.flag} {l.label}
@@ -227,20 +220,6 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           {T("confidential")}
         </div>
       </div>
-
-      {/* Floating AI Coach Button */}
-      <button onClick={() => openCoach("general")}
-        style={{
-          position: "fixed", bottom: 24, right: 24, width: 56, height: 56,
-          borderRadius: "50%", background: C.gold, border: "none",
-          fontSize: 24, cursor: "pointer", boxShadow: "0 4px 20px rgba(201,168,76,0.4)",
-          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
-        }}>
-        🧠
-      </button>
-
-      {/* AI Coach Panel */}
-      {showCoach && <AICoach onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />}
     </div>
   );
 }
