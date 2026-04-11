@@ -423,7 +423,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
 
         {/* Practice Performance — Goals vs Actuals */}
-        {isOwnerOrManager && (
+        {(isOwnerOrManager || practiceGoals) && (
           <div style={{ marginBottom: 28 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
               <div style={{ fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", gap: 10 }}>
