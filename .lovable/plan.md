@@ -1,40 +1,39 @@
 
 
-# Case Analytics Charts + Practice Goals Editor + Training Complete Button Fix
+# Enhanced Practice Goals + Auto-Revenue Calculation + Prominent Display
 
-## Changes
+## What changes
 
-### 1. Practice Goals Editor (Dashboard.tsx)
-Add an inline editor in the Practice Performance section that lets owner/managers set and save `monthly_case_goal` and `monthly_revenue_goal` directly. Shows edit icon next to goal values; clicking opens small inline inputs that save to the `practice_goals` table via upsert.
+### 1. Redesign Goals Editor with Auto-Revenue Calculation
+The current editor has two separate inputs: case goal and revenue goal. Replace with:
+- **Monthly Case Goal** input (number of cases)
+- **Price Per Case** input (dollar amount per case)
+- **Revenue Goal** auto-calculates as `cases × price` (displayed live, not editable)
+- Save all three values to `practice_goals` table
 
-### 2. Case Analytics Charts (Dashboard.tsx)
-Add two new charts below the Case Pipeline section (owner/manager only):
-- **Conversion Rate Over Time** — AreaChart showing monthly conversion rate (converted / total cases per month)
-- **Revenue Trend by Month** — BarChart showing monthly case revenue from converted cases
+This requires a database migration to add a `price_per_case` column to `practice_goals`.
 
-Both charts derive data from the existing `cases` state, grouped by month using `created_at`.
+### 2. Make Practice Performance More Prominent
+Move the Practice Performance section higher and make it visually bolder:
+- Larger card height with bigger numbers
+- Add a subtle glow/shadow effect to the container
+- Show the auto-calculated revenue goal prominently with a "= $X" display next to the inputs
+- When not editing, show the goals in a clear, bold format at the top
 
-### 3. "Training Complete" Banner → Clickable Button (Dashboard.tsx + StaffDashboard.tsx)
-Line 653-657: The static div saying "Training Complete! Start AI simulations above" becomes a clickable button that navigates to the simulation phase (`u({ phase: "simulation" }); scrollTop()`). Same treatment in StaffDashboard.
+### 3. Case Analytics Charts
+Already implemented — conversion rate AreaChart and revenue trend BarChart exist and are working. No changes needed here.
 
-### 4. End-to-End Testing
-After implementation, browser-test:
-- Sidebar navigation (each item, collapse/expand)
-- Chart tooltip hover (no white box)
-- Logo click → dashboard
-- Training Complete button → simulation
-- Practice goals editing
-- Login persistence (name/practice remembered)
+## Database changes
+**Migration**: Add `price_per_case` numeric column (default 0) to `practice_goals` table.
 
 ## Files changed
-1. `src/screens/Dashboard.tsx` — goals editor UI, analytics charts, training complete button fix
-2. `src/screens/StaffDashboard.tsx` — training complete button fix
-3. `src/data/translations.ts` — new keys for goals editing and chart labels
+1. **Database migration** — add `price_per_case` to `practice_goals`
+2. **`src/screens/Dashboard.tsx`** — redesign goals editor with 2 inputs + auto-calculated revenue, make the section more prominent with larger styling
+3. **`src/data/translations.ts`** — add keys: `price_per_case`, `auto_calculated`, `monthly_target`
 
 ## Implementation order
-1. Fix training complete banner → clickable button (both dashboards)
-2. Add practice goals inline editor
-3. Add case analytics charts
+1. Database migration
+2. Update goals editor UI with auto-calculation
+3. Make Practice Performance section more prominent
 4. Add translation keys
-5. Browser testing
 
