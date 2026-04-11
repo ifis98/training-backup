@@ -1,0 +1,1 @@
+ALTER TABLE public.practice_goals ADD COLUMN price_per_case numeric NOT NULL DEFAULT 0;
