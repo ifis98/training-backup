@@ -621,7 +621,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {/* Support */}
         <div style={{ ...glass, padding: 22, textAlign: "center", marginBottom: 24 }}>
           <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>{T("need_help")}</div>
-          <button onClick={() => window.open("https://calendly.com", "_blank")}
+          <button onClick={() => setShowBooking(true)}
             style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "11px 24px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>
             {T("schedule_call")}
           </button>
