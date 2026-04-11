@@ -53,6 +53,9 @@ const translations: Record<Lang, Record<string, string>> = {
     "sidebar_coach": "AI Coach",
     "sidebar_report": "Report & Certificates",
     "sidebar_contact_support": "Contact Support",
+    "goals_save_error": "Failed to save goals. Please try again.",
+    "goals_saved": "Practice goals saved!",
+    "daily_breakdown": "That's just {cpd} case(s) per day (5-day work week × 4 weeks) at {price} each = {revenue}/mo in added revenue",
     // Badges
     "badge_certified": "Certified Advisor",
     "badge_top_performer": "Top Performer",
