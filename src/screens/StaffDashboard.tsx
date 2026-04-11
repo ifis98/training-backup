@@ -632,6 +632,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         </div>
       </div>
       </div>
+      <BookingModal open={showBooking} onClose={() => setShowBooking(false)} lang={lang} />
     </div>
   );
 }
