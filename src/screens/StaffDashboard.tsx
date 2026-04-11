@@ -79,6 +79,56 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     window.location.href = '/welcome';
   };
 
+  const handleAddCase = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
+    const { data, error } = await supabase.from('cases').insert({
+      user_id: user.id,
+      practice_id: profile?.practice_id,
+      patient_name: newCase.patient_name,
+      status: newCase.status,
+      case_value: newCase.case_value,
+      notes: newCase.notes,
+    }).select().single();
+    if (data) {
+      setCases([data, ...cases]);
+      setNewCase({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
+      setShowAddCase(false);
+    }
+  };
+
+  const handleUpdateCaseStatus = async (caseId: string, newStatus: string) => {
+    const { error } = await supabase.from('cases').update({ status: newStatus }).eq('id', caseId);
+    if (!error) {
+      setCases(cases.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
+      if (newStatus === 'follow_up') {
+        const caseData = cases.find(c => c.id === caseId);
+        if (caseData) {
+          supabase.functions.invoke('notify-case-followup', {
+            body: { caseId, patientName: caseData.patient_name },
+          }).catch(() => {});
+        }
+      }
+    }
+  };
+
+  const caseStatusIcon = (status: string) => {
+    switch (status) {
+      case 'converted': return <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} />;
+      case 'follow_up': return <Clock size={14} strokeWidth={1.5} color={C.gold} />;
+      case 'rejected': return <XCircle size={14} strokeWidth={1.5} color={C.red} />;
+      default: return <Clock size={14} strokeWidth={1.5} color={C.ash} />;
+    }
+  };
+
+  const caseStatusColor = (status: string) => {
+    switch (status) { case 'converted': return C.green; case 'follow_up': return C.gold; case 'rejected': return C.red; default: return C.ash; }
+  };
+
+  const convertedCases = cases.filter(c => c.status === 'converted');
+  const filteredCases = caseFilter === 'all' ? cases : cases.filter(c => c.status === caseFilter);
+
   const phaseChartData = myPH.map(ph => {
     const pm = myM.filter(m => m.phase === ph.id);
     const done = pm.filter(m => s.done.includes(m.id)).length;
