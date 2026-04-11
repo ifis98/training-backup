@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Tooltip } from 'recharts';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import BookingModal from '@/components/BookingModal';
 import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save } from 'lucide-react';
 
 interface DashboardProps {
@@ -62,6 +63,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const [editingGoals, setEditingGoals] = useState(false);
   const [editCaseGoal, setEditCaseGoal] = useState(0);
   const [editPricePerCase, setEditPricePerCase] = useState(0);
+  const [showBooking, setShowBooking] = useState(false);
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
@@ -131,6 +133,15 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     const { error } = await supabase.from('cases').update({ status: newStatus }).eq('id', caseId);
     if (!error) {
       setCases(cases.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
+      // Trigger email notification for follow-up status
+      if (newStatus === 'follow_up') {
+        const caseData = cases.find(c => c.id === caseId);
+        if (caseData) {
+          supabase.functions.invoke('notify-case-followup', {
+            body: { caseId, patientName: caseData.patient_name },
+          }).catch(() => {}); // fire-and-forget
+        }
+      }
     }
   };
 
@@ -977,7 +988,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ display: "flex", gap: 14, marginBottom: 24 }}>
           <div style={{ flex: 1, ...glass, padding: 22, textAlign: "center" }}>
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>{T("need_help")}</div>
-            <button onClick={() => window.open("https://calendly.com", "_blank")}
+            <button onClick={() => setShowBooking(true)}
               style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "11px 24px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>
               {T("schedule_call")}
             </button>
@@ -997,6 +1008,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </div>
       </div>
       </div>
+      <BookingModal open={showBooking} onClose={() => setShowBooking(false)} lang={lang} />
     </div>
   );
 }
