@@ -61,7 +61,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
   const [editingGoals, setEditingGoals] = useState(false);
   const [editCaseGoal, setEditCaseGoal] = useState(0);
-  const [editRevenueGoal, setEditRevenueGoal] = useState(0);
+  const [editPricePerCase, setEditPricePerCase] = useState(0);
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
@@ -139,11 +139,13 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     if (!user) return;
     const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
     if (!profile?.practice_id) return;
+    const autoRevenue = editCaseGoal * editPricePerCase;
     const { data, error } = await supabase.from('practice_goals').upsert({
       practice_id: profile.practice_id,
       monthly_case_goal: editCaseGoal,
-      monthly_revenue_goal: editRevenueGoal,
-    }, { onConflict: 'practice_id' }).select().single();
+      monthly_revenue_goal: autoRevenue,
+      price_per_case: editPricePerCase,
+    } as any, { onConflict: 'practice_id' }).select().single();
     if (data) {
       setPracticeGoals(data);
       setEditingGoals(false);
@@ -152,7 +154,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
   const startEditGoals = () => {
     setEditCaseGoal(practiceGoals?.monthly_case_goal || 0);
-    setEditRevenueGoal(practiceGoals?.monthly_revenue_goal || 0);
+    setEditPricePerCase((practiceGoals as any)?.price_per_case || 0);
     setEditingGoals(true);
   };
 
