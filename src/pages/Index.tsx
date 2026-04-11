@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuth } from '@/hooks/useAuth';
 import Splash from '@/screens/Splash';
@@ -52,10 +53,11 @@ const Index = () => {
           style={{
             position: "fixed", bottom: 80, right: 24, width: 56, height: 56,
             borderRadius: "50%", background: C.gold, border: "none",
-            fontSize: 24, cursor: "pointer", boxShadow: "0 4px 20px rgba(201,168,76,0.4)",
+            cursor: "pointer", boxShadow: "0 4px 20px rgba(201,168,76,0.4)",
             display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+            color: C.dark,
           }}>
-          🧠
+          <Sparkles size={24} strokeWidth={2} />
         </button>
       )}
 

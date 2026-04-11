@@ -4,7 +4,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useState } from 'react';
-import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight, Briefcase } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight, Briefcase, Mail } from 'lucide-react';
 
 interface DashboardSidebarProps {
   s: AppState;
