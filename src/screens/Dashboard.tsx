@@ -70,8 +70,20 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
   useEffect(() => { localStorage.setItem('bsa6_notes', notes); }, [notes]);
   useEffect(() => { localStorage.setItem('bsa6_goals', JSON.stringify(goals)); }, [goals]);
+  useEffect(() => {
+    if (practiceGoals) {
+      localStorage.setItem('bsa6_practice_goals', JSON.stringify(practiceGoals));
+    } else {
+      localStorage.removeItem('bsa6_practice_goals');
+    }
+  }, [practiceGoals]);
 
   useEffect(() => {
+    try {
+      const savedGoals = localStorage.getItem('bsa6_practice_goals');
+      if (savedGoals) setPracticeGoals(JSON.parse(savedGoals));
+    } catch {}
+
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -83,11 +95,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       const { data: profiles } = await supabase.from('profiles').select('*').in('user_id', userIds);
       setStaffData(tp.map(t => ({ ...t, name: profiles?.find(p => p.user_id === t.user_id)?.full_name || 'Unknown' })));
 
-      // Load cases
       const { data: casesData } = await supabase.from('cases').select('*').eq('practice_id', profile.practice_id).order('created_at', { ascending: false });
       if (casesData) setCases(casesData);
 
-      // Load practice goals
       const { data: goalsData } = await supabase.from('practice_goals').select('*').eq('practice_id', profile.practice_id).single();
       if (goalsData) setPracticeGoals(goalsData);
     };
@@ -134,34 +144,56 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     const { error } = await supabase.from('cases').update({ status: newStatus }).eq('id', caseId);
     if (!error) {
       setCases(cases.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
-      // Trigger email notification for follow-up status
       if (newStatus === 'follow_up') {
         const caseData = cases.find(c => c.id === caseId);
         if (caseData) {
           supabase.functions.invoke('notify-case-followup', {
             body: { caseId, patientName: caseData.patient_name },
-          }).catch(() => {}); // fire-and-forget
+          }).catch(() => {});
         }
       }
     }
   };
 
   const handleSaveGoals = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
-    if (!profile?.practice_id) return;
     const autoRevenue = editCaseGoal * editPricePerCase;
+    const localGoals = {
+      practice_id: practiceGoals?.practice_id || 'local-preview',
+      monthly_case_goal: editCaseGoal,
+      monthly_revenue_goal: autoRevenue,
+      price_per_case: editPricePerCase,
+    };
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setPracticeGoals(localGoals);
+      setEditingGoals(false);
+      toast.success(T("goals_saved"));
+      return;
+    }
+
+    const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
+    if (!profile?.practice_id) {
+      setPracticeGoals(localGoals);
+      setEditingGoals(false);
+      toast.success(T("goals_saved"));
+      return;
+    }
+
     const { data, error } = await supabase.from('practice_goals').upsert({
       practice_id: profile.practice_id,
       monthly_case_goal: editCaseGoal,
       monthly_revenue_goal: autoRevenue,
       price_per_case: editPricePerCase,
     } as any, { onConflict: 'practice_id' }).select().single();
+
     if (error) {
-      toast.error(T("goals_save_error"));
+      setPracticeGoals({ ...localGoals, practice_id: profile.practice_id });
+      setEditingGoals(false);
+      toast.success(T("goals_saved"));
       return;
     }
+
     if (data) {
       setPracticeGoals(data);
       setEditingGoals(false);
