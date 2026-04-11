@@ -1,27 +1,41 @@
 
 
-# Fix Practice Goals Save + Add Daily Breakdown Insight
+# Fix Sidebar Translations + American Voice + Goals Save Test + Translation Keys
 
-## Problem 1: Save button doesn't work
-The RLS policy on `practice_goals` requires `has_role(auth.uid(), 'admin')` — checking the `user_roles` table. But practice owners never get an `admin` row inserted into `user_roles` during registration. Only `bytesense_admin` exists. The save silently fails because the upsert is rejected by RLS.
+## What's wrong
 
-**Fix**: When a user creates a practice (becomes owner), automatically insert an `admin` role into `user_roles`. Also add a database migration to backfill existing practice owners who are missing the role. Additionally, add error handling in `handleSaveGoals` so failures are surfaced via a toast instead of silently swallowed.
+1. **Sidebar labels don't translate** — The keys `sidebar_dashboard`, `sidebar_training`, `sidebar_simulations`, `sidebar_coach`, `sidebar_report`, `sidebar_contact_support` only exist in the English (`en`) section. The `t()` function falls back to English, so they always show in English regardless of language selection.
 
-## Problem 2: Add daily breakdown insight line
-After setting goals (e.g., 20 cases at $650), show a motivational breakdown line below the goals:
+2. **Voice has a British accent** — The `PREFERRED_VOICES` list in `src/lib/helpers.ts` prioritizes `"Google UK English Female"` first. This gives a British accent. Need to reorder to prioritize American English female voices.
 
-> "That's just 1 case per day (5-day work week × 4 weeks) at $650 each = $13,000/mo in added revenue"
+3. **Missing translation keys** — `goals_save_error`, `goals_saved`, and `daily_breakdown` also only exist in English. Need translations for es, pt, fr, zh.
 
-The math: `casesPerDay = Math.ceil(caseGoal / 20)` (20 working days per month). Revenue = `caseGoal × pricePerCase`. Show this both in edit mode (live preview) and in the static display when goals are saved.
+## Changes
+
+### 1. `src/data/translations.ts` — Add missing keys to all 4 non-English languages
+
+Add to each language section:
+- `sidebar_dashboard`, `sidebar_training`, `sidebar_simulations`, `sidebar_coach`, `sidebar_report`, `sidebar_contact_support`
+- `goals_save_error`, `goals_saved`, `daily_breakdown`
+
+### 2. `src/lib/helpers.ts` — Reorder voice preferences for American accent
+
+Change `PREFERRED_VOICES` to prioritize American English female voices:
+- Move `"Google US English"` to the top
+- Add `"Microsoft Aria"` and `"Samantha"` (macOS American female) near the top
+- Push UK voices lower in the priority list
+
+### 3. Browser test — Goals save flow
+
+Navigate to the dashboard, click Edit Goals, set values, save, and verify the toast appears and the daily breakdown insight displays correctly.
 
 ## Files changed
-1. **Database migration** — backfill `admin` role for existing practice owners; add a trigger on `practices` insert to auto-assign `admin` role to the owner
-2. **`src/screens/Dashboard.tsx`** — add error toast on save failure; add daily breakdown insight text below the goals editor and below the static KPI display
-3. **`src/data/translations.ts`** — add key for the breakdown text template
+1. **`src/data/translations.ts`** — Add ~9 missing keys × 4 languages = 36 new translation entries
+2. **`src/lib/helpers.ts`** — Reorder `PREFERRED_VOICES` array to prioritize American female voices
+3. **Browser test** — E2E test of goals save flow
 
 ## Implementation order
-1. Database migration (backfill + trigger)
-2. Add error handling to `handleSaveGoals`
-3. Add daily breakdown insight line
-4. Add translation keys
+1. Add all missing translations
+2. Fix voice preference order
+3. Test goals save flow in browser
 
