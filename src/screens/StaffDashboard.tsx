@@ -508,7 +508,79 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           </div>
         </div>
 
-        {/* Quick Tools */}
+        {/* Case Pipeline — Staff */}
+        <div style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
+          <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Briefcase size={16} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
+            </span>
+            <button onClick={() => setShowAddCase(!showAddCase)}
+              style={{ background: C.gradTeal, color: C.white, border: "none", padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4 }}>
+              <Plus size={12} strokeWidth={2} /> {T("add_case")}
+            </button>
+          </div>
+          {showAddCase && (
+            <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(255,255,255,0.02)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <input value={newCase.patient_name} onChange={e => setNewCase({ ...newCase, patient_name: e.target.value })} placeholder={T("patient_name")}
+                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                <select value={newCase.status} onChange={e => setNewCase({ ...newCase, status: e.target.value })}
+                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }}>
+                  <option value="pending" style={{ background: C.dark2, color: C.white }}>{T("status_pending")}</option>
+                  <option value="follow_up" style={{ background: C.dark2, color: C.white }}>{T("status_follow_up")}</option>
+                  <option value="converted" style={{ background: C.dark2, color: C.white }}>{T("status_converted")}</option>
+                  <option value="rejected" style={{ background: C.dark2, color: C.white }}>{T("status_rejected")}</option>
+                </select>
+                <input type="number" value={newCase.case_value} onChange={e => setNewCase({ ...newCase, case_value: +e.target.value })} placeholder={T("case_value")}
+                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                <button onClick={handleAddCase} disabled={!newCase.patient_name}
+                  style={{ background: newCase.patient_name ? C.gradTeal : "rgba(255,255,255,0.05)", color: C.white, border: "none", padding: "8px 14px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: newCase.patient_name ? "pointer" : "not-allowed", borderRadius: C.radiusXs }}>
+                  {T("save")}
+                </button>
+              </div>
+              <input value={newCase.notes} onChange={e => setNewCase({ ...newCase, notes: e.target.value })} placeholder={T("case_notes")}
+                style={{ width: "100%", background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${C.glassBorder}` }}>
+            {[
+              { id: 'all', label: T("all"), count: cases.length },
+              { id: 'follow_up', label: T("status_follow_up"), count: cases.filter(c => c.status === 'follow_up').length },
+              { id: 'converted', label: T("status_converted"), count: convertedCases.length },
+              { id: 'rejected', label: T("status_rejected"), count: cases.filter(c => c.status === 'rejected').length },
+              { id: 'pending', label: T("status_pending"), count: cases.filter(c => c.status === 'pending').length },
+            ].map(tab => (
+              <button key={tab.id} onClick={() => setCaseFilter(tab.id)}
+                style={{ padding: "10px 16px", fontSize: 11, fontWeight: caseFilter === tab.id ? 700 : 400, color: caseFilter === tab.id ? C.teal : C.ash, background: "transparent", border: "none", borderBottom: caseFilter === tab.id ? `2px solid ${C.teal}` : "2px solid transparent", cursor: "pointer", fontFamily: C.fn, transition: "all 0.2s", display: "flex", gap: 4, alignItems: "center" }}>
+                {tab.label} <span style={{ fontSize: 9, background: "rgba(255,255,255,0.06)", padding: "1px 6px", borderRadius: 999 }}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
+          {filteredCases.length === 0 ? (
+            <div style={{ padding: 30, textAlign: "center", fontSize: 12, color: C.ash }}>{T("no_cases")}</div>
+          ) : (
+            filteredCases.slice(0, 10).map(c => (
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 22px", borderBottom: `1px solid ${C.glassBorder}`, transition: "background 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                {caseStatusIcon(c.status)}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>{c.patient_name}</div>
+                  {c.notes && <div style={{ fontSize: 10, color: C.ash, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.notes}</div>}
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>{c.case_value > 0 ? `$${Number(c.case_value).toLocaleString()}` : ''}</span>
+                <select value={c.status} onChange={e => handleUpdateCaseStatus(c.id, e.target.value)}
+                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: caseStatusColor(c.status), padding: "4px 8px", fontSize: 10, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, fontWeight: 700 }}>
+                  <option value="pending" style={{ background: C.dark2, color: C.white }}>{T("status_pending")}</option>
+                  <option value="follow_up" style={{ background: C.dark2, color: C.white }}>{T("status_follow_up")}</option>
+                  <option value="converted" style={{ background: C.dark2, color: C.white }}>{T("status_converted")}</option>
+                  <option value="rejected" style={{ background: C.dark2, color: C.white }}>{T("status_rejected")}</option>
+                </select>
+              </div>
+            ))
+          )}
+        </div>
+
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
             <Zap size={14} strokeWidth={1.5} color={C.teal} /> {T("quick_tools")}
