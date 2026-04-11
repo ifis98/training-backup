@@ -266,6 +266,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "needs_attention": "Needs attention",
     "rejected_cases": "Rejected",
     "this_month": "This month",
+    "practice_performance": "Practice Performance",
+    "edit_goals": "Edit Goals",
+    "case_goal": "Case Goal",
+    "revenue_goal": "Revenue Goal",
+    "conversion_rate": "Conversion Rate",
+    "revenue_trend": "Revenue by Month",
+    "revenue_label": "Revenue",
   },
 
   es: {
@@ -488,6 +495,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "needs_attention": "Necesita atención",
     "rejected_cases": "Rechazados",
     "this_month": "Este mes",
+    "practice_performance": "Rendimiento de la Práctica",
+    "edit_goals": "Editar Metas",
+    "case_goal": "Meta de Casos",
+    "revenue_goal": "Meta de Ingresos",
+    "conversion_rate": "Tasa de Conversión",
+    "revenue_trend": "Ingresos por Mes",
+    "revenue_label": "Ingresos",
   },
 
   pt: {
@@ -710,6 +724,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "needs_attention": "Precisa de atenção",
     "rejected_cases": "Rejeitados",
     "this_month": "Este mês",
+    "practice_performance": "Desempenho da Prática",
+    "edit_goals": "Editar Metas",
+    "case_goal": "Meta de Casos",
+    "revenue_goal": "Meta de Receita",
+    "conversion_rate": "Taxa de Conversão",
+    "revenue_trend": "Receita por Mês",
+    "revenue_label": "Receita",
   },
 
   fr: {
@@ -932,6 +953,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "needs_attention": "Nécessite attention",
     "rejected_cases": "Rejetés",
     "this_month": "Ce mois",
+    "practice_performance": "Performance du Cabinet",
+    "edit_goals": "Modifier les Objectifs",
+    "case_goal": "Objectif de Cas",
+    "revenue_goal": "Objectif de Revenus",
+    "conversion_rate": "Taux de Conversion",
+    "revenue_trend": "Revenus par Mois",
+    "revenue_label": "Revenus",
   },
 
   zh: {
@@ -1154,6 +1182,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "needs_attention": "需要关注",
     "rejected_cases": "已拒绝",
     "this_month": "本月",
+    "practice_performance": "诊所业绩",
+    "edit_goals": "编辑目标",
+    "case_goal": "案例目标",
+    "revenue_goal": "收入目标",
+    "conversion_rate": "转化率",
+    "revenue_trend": "月度收入",
+    "revenue_label": "收入",
   },
 };
 
