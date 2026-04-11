@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2 } from 'lucide-react';
+import BookingModal from '@/components/BookingModal';
+import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2, Plus, Briefcase, Clock, XCircle } from 'lucide-react';
 
 interface StaffDashboardProps {
   s: AppState;
