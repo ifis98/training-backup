@@ -423,7 +423,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
 
         {/* Practice Performance — Goals vs Actuals */}
-        {isOwnerOrManager && (
+        {(isOwnerOrManager || practiceGoals) && (
           <div style={{ marginBottom: 28 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
               <div style={{ fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", gap: 10 }}>
@@ -706,7 +706,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Case Pipeline — Owner/Manager */}
         {isOwnerOrManager && (
-          <div style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
+          <div id="section-cases" style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
             <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Briefcase size={16} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
@@ -871,7 +871,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         )}
 
         {/* Training Modules Accordion */}
-        <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
+        <div id="section-training" style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
           <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <ClipboardList size={16} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}

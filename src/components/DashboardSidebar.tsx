@@ -27,10 +27,18 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   const T = (key: string) => t(lang, key);
   const [collapsed, setCollapsed] = useState(false);
 
+  const scrollToSection = (sectionId: string) => {
+    u({ phase: "dashboard" });
+    setTimeout(() => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
   const navItems = [
-    { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), phase: "dashboard" },
-    { id: "training", icon: BookOpen, label: T("sidebar_training"), phase: "dashboard" },
-    { id: "cases", icon: Briefcase, label: T("sidebar_cases"), phase: "dashboard" },
+    { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), phase: "dashboard", action: () => { u({ phase: "dashboard" }); scrollTop(); } },
+    { id: "training", icon: BookOpen, label: T("sidebar_training"), action: () => scrollToSection("section-training") },
+    { id: "cases", icon: Briefcase, label: T("sidebar_cases"), action: () => scrollToSection("section-cases") },
     { id: "simulations", icon: Bot, label: T("sidebar_simulations"), phase: "simulation" },
     { id: "coach", icon: Brain, label: T("sidebar_coach"), action: () => openCoach("general") },
     { id: "report", icon: FileText, label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
