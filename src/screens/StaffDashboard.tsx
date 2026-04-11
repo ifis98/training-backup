@@ -39,6 +39,11 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   const [practiceName, setPracticeName] = useState("");
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [simReviews, setSimReviews] = useState<any[]>([]);
+  const [cases, setCases] = useState<any[]>([]);
+  const [caseFilter, setCaseFilter] = useState('all');
+  const [showAddCase, setShowAddCase] = useState(false);
+  const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
+  const [showBooking, setShowBooking] = useState(false);
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
@@ -50,6 +55,9 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
       if (profile?.practice_id) {
         const { data: practice } = await supabase.from('practices').select('name').eq('id', profile.practice_id).single();
         if (practice) setPracticeName(practice.name);
+        // Load cases for this practice
+        const { data: casesData } = await supabase.from('cases').select('*').eq('practice_id', profile.practice_id).order('created_at', { ascending: false });
+        if (casesData) setCases(casesData);
       }
     };
     fetchPractice();
