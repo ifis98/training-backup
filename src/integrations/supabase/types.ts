@@ -128,6 +128,7 @@ export type Database = {
           monthly_case_goal: number
           monthly_revenue_goal: number
           practice_id: string
+          price_per_case: number
           updated_at: string
         }
         Insert: {
@@ -136,6 +137,7 @@ export type Database = {
           monthly_case_goal?: number
           monthly_revenue_goal?: number
           practice_id: string
+          price_per_case?: number
           updated_at?: string
         }
         Update: {
@@ -144,6 +146,7 @@ export type Database = {
           monthly_case_goal?: number
           monthly_revenue_goal?: number
           practice_id?: string
+          price_per_case?: number
           updated_at?: string
         }
         Relationships: [
