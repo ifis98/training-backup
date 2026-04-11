@@ -52,6 +52,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "sidebar_simulations": "AI Simulations",
     "sidebar_coach": "AI Coach",
     "sidebar_report": "Report & Certificates",
+    "sidebar_contact_support": "Contact Support",
     // Badges
     "badge_certified": "Certified Advisor",
     "badge_top_performer": "Top Performer",

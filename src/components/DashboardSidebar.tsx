@@ -4,7 +4,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useState } from 'react';
-import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight, Briefcase } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight, Briefcase, Mail } from 'lucide-react';
 
 interface DashboardSidebarProps {
   s: AppState;
@@ -34,6 +34,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     { id: "simulations", icon: Bot, label: T("sidebar_simulations"), phase: "simulation" },
     { id: "coach", icon: Brain, label: T("sidebar_coach"), action: () => openCoach("general") },
     { id: "report", icon: FileText, label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
+    { id: "contact", icon: Mail, label: T("sidebar_contact_support") || "Contact Support", action: () => window.location.href = "mailto:support@bytesense.ai" },
     { id: "signout", icon: LogOut, label: T("sign_out"), action: onSignOut },
   ];
 
