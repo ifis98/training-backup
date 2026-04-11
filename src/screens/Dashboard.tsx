@@ -1008,6 +1008,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </div>
       </div>
       </div>
+      <BookingModal open={showBooking} onClose={() => setShowBooking(false)} lang={lang} />
     </div>
   );
 }
