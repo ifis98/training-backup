@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
@@ -157,9 +158,14 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       monthly_revenue_goal: autoRevenue,
       price_per_case: editPricePerCase,
     } as any, { onConflict: 'practice_id' }).select().single();
+    if (error) {
+      toast.error(T("goals_save_error"));
+      return;
+    }
     if (data) {
       setPracticeGoals(data);
       setEditingGoals(false);
+      toast.success(T("goals_saved"));
     }
   };
 
@@ -434,10 +440,30 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                     </button>
                   </div>
                 </div>
+                {editCaseGoal > 0 && editPricePerCase > 0 && (
+                  <div style={{ marginTop: 12, padding: "10px 14px", background: "rgba(20,184,166,0.08)", borderRadius: C.radiusXs, border: `1px solid ${C.teal}30` }}>
+                    <p style={{ fontSize: 12, color: C.teal, lineHeight: 1.6, margin: 0 }}>
+                      💡 {T("daily_breakdown")
+                        .replace("{cpd}", String(Math.ceil(editCaseGoal / 20)))
+                        .replace("{price}", `$${editPricePerCase.toLocaleString()}`)
+                        .replace("{revenue}", `$${(editCaseGoal * editPricePerCase).toLocaleString()}`)}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Goals KPI Cards */}
+            {practiceGoals && (practiceGoals as any)?.price_per_case > 0 && !editingGoals && (
+              <div style={{ marginBottom: 14, padding: "10px 14px", background: "rgba(20,184,166,0.08)", borderRadius: C.radiusXs, border: `1px solid ${C.teal}30` }}>
+                <p style={{ fontSize: 12, color: C.teal, lineHeight: 1.6, margin: 0 }}>
+                  💡 {T("daily_breakdown")
+                    .replace("{cpd}", String(Math.ceil((practiceGoals?.monthly_case_goal || 0) / 20)))
+                    .replace("{price}", `$${((practiceGoals as any)?.price_per_case || 0).toLocaleString()}`)
+                    .replace("{revenue}", `$${(practiceGoals?.monthly_revenue_goal || 0).toLocaleString()}`)}
+                </p>
+              </div>
+            )}
             {(practiceGoals || cases.length > 0) && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14 }}>
               <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: C.glow(C.teal, 0.06) }}>
