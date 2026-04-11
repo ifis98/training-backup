@@ -541,6 +541,15 @@ const translations: Record<Lang, Record<string, string>> = {
     "booking_loading": "Reservando...",
     "no_slots_available": "No hay horarios disponibles en esta fecha",
     "close": "Cerrar",
+    "sidebar_dashboard": "Panel",
+    "sidebar_training": "Entrenamiento",
+    "sidebar_simulations": "Simulaciones",
+    "sidebar_coach": "Entrenador IA",
+    "sidebar_report": "Informe",
+    "sidebar_contact_support": "Contactar Soporte",
+    "goals_save_error": "Error al guardar las metas. Intente de nuevo.",
+    "goals_saved": "¡Metas guardadas exitosamente!",
+    "daily_breakdown": "💡 Son solo {cpd} caso(s) por día a ${price} cada uno = ${revenue}/mes en ingresos adicionales",
   },
 
   pt: {
@@ -787,6 +796,15 @@ const translations: Record<Lang, Record<string, string>> = {
     "booking_loading": "Agendando...",
     "no_slots_available": "Nenhum horário disponível nesta data",
     "close": "Fechar",
+    "sidebar_dashboard": "Painel",
+    "sidebar_training": "Treinamento",
+    "sidebar_simulations": "Simulações",
+    "sidebar_coach": "Treinador IA",
+    "sidebar_report": "Relatório",
+    "sidebar_contact_support": "Contatar Suporte",
+    "goals_save_error": "Erro ao salvar metas. Tente novamente.",
+    "goals_saved": "Metas salvas com sucesso!",
+    "daily_breakdown": "💡 São apenas {cpd} caso(s) por dia a ${price} cada = ${revenue}/mês em receita adicional",
   },
 
   fr: {
@@ -1033,6 +1051,15 @@ const translations: Record<Lang, Record<string, string>> = {
     "booking_loading": "Réservation...",
     "no_slots_available": "Aucun créneau disponible à cette date",
     "close": "Fermer",
+    "sidebar_dashboard": "Tableau de bord",
+    "sidebar_training": "Formation",
+    "sidebar_simulations": "Simulations",
+    "sidebar_coach": "Coach IA",
+    "sidebar_report": "Rapport",
+    "sidebar_contact_support": "Contacter le Support",
+    "goals_save_error": "Erreur lors de la sauvegarde. Réessayez.",
+    "goals_saved": "Objectifs sauvegardés !",
+    "daily_breakdown": "💡 C'est seulement {cpd} cas par jour à ${price} chacun = ${revenue}/mois de revenus supplémentaires",
   },
 
   zh: {
@@ -1279,6 +1306,15 @@ const translations: Record<Lang, Record<string, string>> = {
     "booking_loading": "预约中...",
     "no_slots_available": "该日期无可用时段",
     "close": "关闭",
+    "sidebar_dashboard": "仪表板",
+    "sidebar_training": "培训",
+    "sidebar_simulations": "模拟",
+    "sidebar_coach": "AI教练",
+    "sidebar_report": "报告",
+    "sidebar_contact_support": "联系支持",
+    "goals_save_error": "保存目标失败，请重试。",
+    "goals_saved": "目标已成功保存！",
+    "daily_breakdown": "💡 每天只需 {cpd} 个案例，每个 ${price} = 每月 ${revenue} 额外收入",
   },
 };
 

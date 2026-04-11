@@ -26,10 +26,12 @@ export function shuffleQuestion(q: CheckQuestion, seed: number): ShuffledQuestio
 
 // Preferred voices ranked by naturalness
 const PREFERRED_VOICES = [
-  "Google UK English Female",
   "Google US English",
+  "Microsoft Aria",
   "Microsoft Zira",
   "Samantha",
+  "Alex",
+  "Google UK English Female",
   "Karen",
   "Daniel",
   "Moira",
