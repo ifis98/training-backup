@@ -706,7 +706,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Case Pipeline — Owner/Manager */}
         {isOwnerOrManager && (
-          <div style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
+          <div id="section-cases" style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
             <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Briefcase size={16} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
@@ -871,7 +871,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         )}
 
         {/* Training Modules Accordion */}
-        <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
+        <div id="section-training" style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
           <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <ClipboardList size={16} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
