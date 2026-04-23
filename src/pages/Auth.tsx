@@ -151,9 +151,16 @@ export default function AuthPage({ mode }: AuthPageProps) {
           }
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate('/');
+
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id);
+
+        const isByteSenseAdmin = roleData?.some(r => r.role === 'bytesense_admin') ?? false;
+        navigate(isByteSenseAdmin ? '/bytesense-admin' : '/');
       }
     } catch (err: any) {
       toast.error(err.message || 'Something went wrong');
