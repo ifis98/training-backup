@@ -13,7 +13,9 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, loading, isByteSenseAdmin } = useAuth();
+
+  const defaultAuthenticatedRoute = isByteSenseAdmin ? "/bytesense-admin" : "/";
 
   if (loading) {
     return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0C0C0E", color: "#9898A8", fontFamily: "'Outfit', sans-serif" }}>Loading...</div>;
@@ -21,11 +23,11 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/welcome" element={!user ? <Welcome /> : <Navigate to="/" />} />
-      <Route path="/login" element={!user ? <AuthPage mode="login" /> : <Navigate to="/" />} />
-      <Route path="/register" element={!user ? <AuthPage mode="register" /> : <Navigate to="/" />} />
+      <Route path="/welcome" element={!user ? <Welcome /> : <Navigate to={defaultAuthenticatedRoute} />} />
+      <Route path="/login" element={!user ? <AuthPage mode="login" /> : <Navigate to={defaultAuthenticatedRoute} />} />
+      <Route path="/register" element={!user ? <AuthPage mode="register" /> : <Navigate to={defaultAuthenticatedRoute} />} />
       <Route path="/bytesense-admin" element={<ByteSenseAdmin />} />
-      <Route path="/" element={user ? <Index /> : <Navigate to="/welcome" />} />
+      <Route path="/" element={user ? (isByteSenseAdmin ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/welcome" />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
