@@ -758,6 +758,109 @@ export default function ByteSenseAdmin() {
             </>
           )}
 
+          {/* ALERTS */}
+          {tab === 'alerts' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: C.white }}>Health Alerts</div>
+                <span style={{ fontSize: 11, color: C.slate }}>{alerts.filter(a => a.status === 'open').length} open</span>
+                <button onClick={runHealthMonitor} disabled={runningMonitor} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: `1px solid ${C.teal}40`, color: C.teal, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: C.fn, cursor: runningMonitor ? 'wait' : 'pointer', borderRadius: C.radiusSm, opacity: runningMonitor ? 0.6 : 1 }}>
+                  <RefreshCw size={13} style={{ animation: runningMonitor ? 'spin 1s linear infinite' : 'none' }} /> Run scan now
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                {pill(alertFilter === 'open', C.red, 'Open', alerts.filter(a => a.status === 'open').length, () => setAlertFilter('open'))}
+                {pill(alertFilter === 'snoozed', C.amber, 'Snoozed', alerts.filter(a => a.status === 'snoozed').length, () => setAlertFilter('snoozed'))}
+                {pill(alertFilter === 'resolved', C.green, 'Resolved', alerts.filter(a => a.status === 'resolved').length, () => setAlertFilter('resolved'))}
+                {pill(alertFilter === 'all', C.white, 'All', alerts.length, () => setAlertFilter('all'))}
+              </div>
+              {alerts.filter(a => alertFilter === 'all' || a.status === alertFilter).length === 0 && (
+                <div style={{ ...glass, padding: 40, textAlign: 'center', color: C.slate, fontSize: 13 }}>
+                  No alerts. Click "Run scan now" to check health across all practices.
+                </div>
+              )}
+              {alerts.filter(a => alertFilter === 'all' || a.status === alertFilter).map(a => {
+                const sevColor = a.severity === 'high' ? C.red : a.severity === 'medium' ? C.amber : C.teal;
+                const practice = practices.find((p: any) => p.id === a.practice_id);
+                return (
+                  <div key={a.id} onClick={() => setSelectedAlert(a)} style={{ ...glass, padding: 14, marginBottom: 8, cursor: 'pointer', borderLeft: `3px solid ${sevColor}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 9, fontWeight: 800, color: sevColor, textTransform: 'uppercase', letterSpacing: 1.5, background: `${sevColor}15`, padding: '2px 8px', borderRadius: 999 }}>{a.type.replace(/_/g, ' ')}</span>
+                          <span style={{ fontSize: 9, color: C.slate, textTransform: 'uppercase', letterSpacing: 1 }}>{a.status}</span>
+                          {practice && <span style={{ fontSize: 11, color: C.ash }}>· {practice.name}</span>}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>{a.title}</div>
+                        <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>{a.body}</div>
+                      </div>
+                      <div style={{ fontSize: 10, color: C.slate, whiteSpace: 'nowrap' }}>{new Date(a.created_at).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
+
+          {/* SUPPORT INBOX */}
+          {tab === 'support' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>Support Inbox</div>
+                <span style={{ fontSize: 11, color: C.slate }}>{bookings.length} bookings · {unassignedBookings} unassigned</span>
+              </div>
+              {bookings.length === 0 && (
+                <div style={{ ...glass, padding: 40, textAlign: 'center', color: C.slate, fontSize: 13 }}>No support bookings yet.</div>
+              )}
+              {bookings.map(b => {
+                const ageHours = (Date.now() - new Date(b.created_at).getTime()) / 3_600_000;
+                const slaColor = ageHours > 48 ? C.red : ageHours > 24 ? C.amber : C.teal;
+                const slaLabel = ageHours > 48 ? 'SLA missed' : ageHours > 24 ? `${Math.round(48 - ageHours)}h left` : `${Math.round(48 - ageHours)}h SLA`;
+                return (
+                  <div key={b.id} style={{ ...glass, padding: 16, marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 10 }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{b.name || '(no name)'} <span style={{ color: C.slate, fontWeight: 400 }}>· {b.email}</span></div>
+                        <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>Booked: {b.booking_date} at {b.booking_time}</div>
+                        <div style={{ fontSize: 10, color: C.slate, marginTop: 2 }}>Created {new Date(b.created_at).toLocaleString()}</div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: slaColor, background: `${slaColor}15`, padding: '3px 10px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: 1 }}>{slaLabel}</span>
+                        <span style={{ fontSize: 10, color: C.slate, textTransform: 'uppercase', letterSpacing: 1 }}>{b.triage_status}</span>
+                      </div>
+                    </div>
+                    {b.notes && <div style={{ fontSize: 12, color: C.ash, marginBottom: 10, padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: C.radiusSm }}>{b.notes}</div>}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Assign to</label>
+                        <select value={b.assigned_to ?? ''} onChange={e => updateBooking(b.id, { assigned_to: e.target.value || null, triage_status: e.target.value ? 'in_progress' : b.triage_status })} style={{ ...inputStyle, marginTop: 4 }}>
+                          <option value="">Unassigned</option>
+                          {admins.map((a: any) => <option key={a.user_id} value={a.user_id}>{a.full_name || a.user_id.slice(0, 8)}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Status</label>
+                        <select value={b.triage_status} onChange={e => updateBooking(b.id, { triage_status: e.target.value })} style={{ ...inputStyle, marginTop: 4 }}>
+                          <option value="new">New</option>
+                          <option value="in_progress">In progress</option>
+                          <option value="waiting">Waiting on practice</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
+                      </div>
+                    </div>
+                    <textarea
+                      defaultValue={b.admin_notes}
+                      onBlur={e => e.target.value !== b.admin_notes && updateBooking(b.id, { admin_notes: e.target.value })}
+                      placeholder="Internal notes…"
+                      rows={2}
+                      style={{ ...inputStyle, fontSize: 12, fontFamily: C.fn, resize: 'vertical' }}
+                    />
+                  </div>
+                );
+              })}
+            </>
+          )}
+
           {/* SETTINGS */}
           {tab === 'settings' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
