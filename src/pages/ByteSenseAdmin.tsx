@@ -330,8 +330,12 @@ export default function ByteSenseAdmin() {
 
   const statusColor = (s: string) => s === 'active' ? C.green : s === 'used' ? C.teal : s === 'expired' ? C.amber : s === 'revoked' ? C.red : s === 'new' ? C.amber : s === 'contacted' ? C.teal : s === 'converted' ? C.green : s === 'rejected' ? C.slate : C.ash;
 
-  const navItems: Array<{ id: TabId; label: string; icon: any }> = [
+  const openAlertCount = alerts.filter(a => a.status === 'open').length;
+  const unassignedBookings = bookings.filter(b => !b.assigned_to && b.triage_status !== 'resolved').length;
+  const navItems: Array<{ id: ExtendedTab; label: string; icon: any; badge?: number }> = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'alerts', label: 'Alerts', icon: AlertTriangle, badge: openAlertCount },
+    { id: 'support', label: 'Support Inbox', icon: LifeBuoy, badge: unassignedBookings },
     { id: 'codes', label: 'Codes', icon: KeyRound },
     { id: 'practices', label: 'Practices', icon: Building2 },
     { id: 'demos', label: 'Demos', icon: Inbox },
