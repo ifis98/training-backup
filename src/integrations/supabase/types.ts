@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_alerts: {
+        Row: {
+          admin_notes: string
+          assigned_to: string | null
+          body: string
+          created_at: string
+          dedupe_key: string | null
+          follow_up_at: string | null
+          id: string
+          next_step: string
+          practice_id: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          target_user_id: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string
+          assigned_to?: string | null
+          body?: string
+          created_at?: string
+          dedupe_key?: string | null
+          follow_up_at?: string | null
+          id?: string
+          next_step?: string
+          practice_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          target_user_id?: string | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string
+          assigned_to?: string | null
+          body?: string
+          created_at?: string
+          dedupe_key?: string | null
+          follow_up_at?: string | null
+          id?: string
+          next_step?: string
+          practice_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          target_user_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_alerts_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cases: {
         Row: {
           assigned_to: string | null
@@ -162,6 +227,41 @@ export type Database = {
           },
         ]
       }
+      practice_schedule: {
+        Row: {
+          closed_days: string[]
+          created_at: string
+          holidays: string[]
+          id: string
+          practice_id: string
+          updated_at: string
+        }
+        Insert: {
+          closed_days?: string[]
+          created_at?: string
+          holidays?: string[]
+          id?: string
+          practice_id: string
+          updated_at?: string
+        }
+        Update: {
+          closed_days?: string[]
+          created_at?: string
+          holidays?: string[]
+          id?: string
+          practice_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_schedule_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: true
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practices: {
         Row: {
           created_at: string
@@ -197,6 +297,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          last_seen_at: string | null
           practice_id: string | null
           updated_at: string
           user_id: string
@@ -205,6 +306,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          last_seen_at?: string | null
           practice_id?: string | null
           updated_at?: string
           user_id: string
@@ -213,6 +315,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          last_seen_at?: string | null
           practice_id?: string | null
           updated_at?: string
           user_id?: string
@@ -362,38 +465,50 @@ export type Database = {
       }
       support_bookings: {
         Row: {
+          admin_notes: string
+          assigned_to: string | null
           booking_date: string
           booking_time: string
           created_at: string
           email: string
+          follow_up_at: string | null
           id: string
           name: string
           notes: string
           status: string
+          triage_status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string
+          assigned_to?: string | null
           booking_date: string
           booking_time: string
           created_at?: string
           email?: string
+          follow_up_at?: string | null
           id?: string
           name?: string
           notes?: string
           status?: string
+          triage_status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string
+          assigned_to?: string | null
           booking_date?: string
           booking_time?: string
           created_at?: string
           email?: string
+          follow_up_at?: string | null
           id?: string
           name?: string
           notes?: string
           status?: string
+          triage_status?: string
           updated_at?: string
           user_id?: string
         }

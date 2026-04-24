@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pi
 import {
   LayoutDashboard, KeyRound, Building2, Inbox, Settings, LogOut,
   Search, Copy, Download, ChevronRight, Activity, Trophy, Mail, Shield, X,
+  AlertTriangle, LifeBuoy, RefreshCw,
 } from 'lucide-react';
 
 interface RegCode {
@@ -32,6 +33,20 @@ const copyToClipboard = (text: string, label = 'Copied') => {
 };
 
 type TabId = 'overview' | 'codes' | 'practices' | 'demos' | 'settings';
+type ExtendedTab = TabId | 'alerts' | 'support';
+
+interface AdminAlert {
+  id: string; type: string; severity: string; title: string; body: string;
+  status: string; practice_id: string | null; target_user_id: string | null;
+  assigned_to: string | null; admin_notes: string; next_step: string;
+  follow_up_at: string | null; created_at: string; resolved_at: string | null;
+}
+interface SupportBooking {
+  id: string; user_id: string; name: string; email: string;
+  booking_date: string; booking_time: string; notes: string;
+  status: string; triage_status: string; assigned_to: string | null;
+  admin_notes: string; follow_up_at: string | null; created_at: string;
+}
 
 export default function ByteSenseAdmin() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -41,13 +56,18 @@ export default function ByteSenseAdmin() {
   const appDashboardPath = SUPER_USERS.includes(email) ? '/owner' : '/';
   const [isBSAdmin, setIsBSAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState<TabId>('overview');
+  const [tab, setTab] = useState<ExtendedTab>('overview');
   const [globalSearch, setGlobalSearch] = useState('');
 
   const [codes, setCodes] = useState<RegCode[]>([]);
   const [practices, setPractices] = useState<any[]>([]);
   const [demos, setDemos] = useState<DemoReq[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<AdminAlert[]>([]);
+  const [bookings, setBookings] = useState<SupportBooking[]>([]);
+  const [selectedAlert, setSelectedAlert] = useState<AdminAlert | null>(null);
+  const [alertFilter, setAlertFilter] = useState<'all' | 'open' | 'snoozed' | 'resolved'>('open');
+  const [runningMonitor, setRunningMonitor] = useState(false);
 
   // Codes form
   const [newPracticeName, setNewPracticeName] = useState('');
@@ -81,14 +101,18 @@ export default function ByteSenseAdmin() {
   }, [user, authLoading, navigate]);
 
   const loadData = useCallback(async () => {
-    const [codesRes, practicesRes, demosRes, adminRolesRes] = await Promise.all([
+    const [codesRes, practicesRes, demosRes, adminRolesRes, alertsRes, bookingsRes] = await Promise.all([
       supabase.from('registration_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('practices').select('*, profiles(user_id, full_name, created_at), training_progress(user_id, done_modules, xp, completed_at, updated_at)').order('created_at', { ascending: false }),
       supabase.from('demo_requests').select('*').order('created_at', { ascending: false }),
       supabase.from('user_roles').select('user_id').eq('role', 'bytesense_admin'),
+      supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }),
+      supabase.from('support_bookings').select('*').order('created_at', { ascending: false }),
     ]);
     if (codesRes.data) setCodes(codesRes.data as RegCode[]);
     if (practicesRes.data) setPractices(practicesRes.data);
+    if (alertsRes.data) setAlerts(alertsRes.data as AdminAlert[]);
+    if (bookingsRes.data) setBookings(bookingsRes.data as SupportBooking[]);
     if (demosRes.data) {
       setDemos(demosRes.data as DemoReq[]);
       const notes: Record<string, string> = {};
@@ -105,6 +129,50 @@ export default function ByteSenseAdmin() {
   }, []);
 
   useEffect(() => { if (isBSAdmin) loadData(); }, [isBSAdmin, loadData]);
+
+  // Realtime subscription on admin_alerts
+  useEffect(() => {
+    if (!isBSAdmin) return;
+    const channel = supabase.channel('admin_alerts_live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'admin_alerts' }, () => {
+        supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+          if (data) setAlerts(data as AdminAlert[]);
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isBSAdmin]);
+
+  const runHealthMonitor = async () => {
+    setRunningMonitor(true);
+    try {
+      const { error } = await supabase.functions.invoke('health-monitor');
+      if (error) throw error;
+      toast.success('Health scan complete');
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Scan failed');
+    } finally {
+      setRunningMonitor(false);
+    }
+  };
+
+  const updateAlert = async (id: string, patch: Partial<AdminAlert>) => {
+    const { error } = await supabase.from('admin_alerts').update(patch).eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    setAlerts(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a));
+    if (selectedAlert?.id === id) setSelectedAlert(prev => prev ? { ...prev, ...patch } as AdminAlert : prev);
+  };
+
+  const resolveAlert = (id: string) => updateAlert(id, { status: 'resolved', resolved_at: new Date().toISOString() } as any);
+  const snoozeAlert = (id: string) => updateAlert(id, { status: 'snoozed' });
+  const reopenAlert = (id: string) => updateAlert(id, { status: 'open', resolved_at: null } as any);
+
+  const updateBooking = async (id: string, patch: Partial<SupportBooking>) => {
+    const { error } = await supabase.from('support_bookings').update(patch).eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
+  };
 
   const generateCodes = async () => {
     if (!newPracticeName.trim()) { toast.error('Practice name required'); return; }
@@ -262,8 +330,12 @@ export default function ByteSenseAdmin() {
 
   const statusColor = (s: string) => s === 'active' ? C.green : s === 'used' ? C.teal : s === 'expired' ? C.amber : s === 'revoked' ? C.red : s === 'new' ? C.amber : s === 'contacted' ? C.teal : s === 'converted' ? C.green : s === 'rejected' ? C.slate : C.ash;
 
-  const navItems: Array<{ id: TabId; label: string; icon: any }> = [
+  const openAlertCount = alerts.filter(a => a.status === 'open').length;
+  const unassignedBookings = bookings.filter(b => !b.assigned_to && b.triage_status !== 'resolved').length;
+  const navItems: Array<{ id: ExtendedTab; label: string; icon: any; badge?: number }> = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'alerts', label: 'Alerts', icon: AlertTriangle, badge: openAlertCount },
+    { id: 'support', label: 'Support Inbox', icon: LifeBuoy, badge: unassignedBookings },
     { id: 'codes', label: 'Codes', icon: KeyRound },
     { id: 'practices', label: 'Practices', icon: Building2 },
     { id: 'demos', label: 'Demos', icon: Inbox },
@@ -309,7 +381,10 @@ export default function ByteSenseAdmin() {
               borderLeft: active ? `2px solid ${C.red}` : '2px solid transparent',
             }}>
               <Icon size={16} />
-              {n.label}
+              <span style={{ flex: 1 }}>{n.label}</span>
+              {n.badge && n.badge > 0 ? (
+                <span style={{ background: C.red, color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 999, minWidth: 18, textAlign: 'center' }}>{n.badge}</span>
+              ) : null}
             </button>
           );
         })}
@@ -359,10 +434,33 @@ export default function ByteSenseAdmin() {
                 {kpiCard('Practice Codes Used (30d)', codesUsed30d, C.teal, C.gradTeal)}
                 {kpiCard('ByteSense Staff', admins.length, C.red, C.gradRed)}
                 {kpiCard('Conversion Rate', `${conversionRate}%`, C.green, `linear-gradient(135deg, ${C.green}, ${C.teal})`)}
+                {kpiCard('Open Alerts', openAlertCount, C.red, C.gradRed)}
+                {kpiCard('Unassigned Support', unassignedBookings, C.amber, `linear-gradient(135deg, ${C.amber}, ${C.gold})`)}
               </div>
               <div style={{ fontSize: 10, color: C.slate, marginTop: -16, marginBottom: 24, fontStyle: 'italic' }}>
                 Note: ByteSense staff (@bytesense.ai) bypass code redemption — they're auto-assigned admin roles.
               </div>
+
+              {openAlertCount > 0 && (
+                <div style={{ ...glass, padding: 22, marginBottom: 16, borderLeft: `3px solid ${C.red}` }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <AlertTriangle size={14} style={{ color: C.red }} /> Needs Attention
+                    <button onClick={() => setTab('alerts')} style={{ marginLeft: 'auto', fontSize: 11, color: C.teal, background: 'none', border: 'none', cursor: 'pointer', fontFamily: C.fn }}>View all →</button>
+                  </div>
+                  {alerts.filter(a => a.status === 'open').slice(0, 5).map(a => {
+                    const sevColor = a.severity === 'high' ? C.red : a.severity === 'medium' ? C.amber : C.teal;
+                    return (
+                      <div key={a.id} onClick={() => { setTab('alerts'); setSelectedAlert(a); }} style={{ padding: '8px 0', borderBottom: `1px solid ${C.glassBorder}`, cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}>
+                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: sevColor }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, color: C.white, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.title}</div>
+                          <div style={{ fontSize: 10, color: C.slate }}>{a.type.replace(/_/g, ' ')} · {new Date(a.created_at).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16, marginBottom: 16 }}>
                 {/* Recent activity */}
@@ -683,6 +781,109 @@ export default function ByteSenseAdmin() {
             </>
           )}
 
+          {/* ALERTS */}
+          {tab === 'alerts' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: C.white }}>Health Alerts</div>
+                <span style={{ fontSize: 11, color: C.slate }}>{alerts.filter(a => a.status === 'open').length} open</span>
+                <button onClick={runHealthMonitor} disabled={runningMonitor} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: `1px solid ${C.teal}40`, color: C.teal, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: C.fn, cursor: runningMonitor ? 'wait' : 'pointer', borderRadius: C.radiusSm, opacity: runningMonitor ? 0.6 : 1 }}>
+                  <RefreshCw size={13} style={{ animation: runningMonitor ? 'spin 1s linear infinite' : 'none' }} /> Run scan now
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                {pill(alertFilter === 'open', C.red, 'Open', alerts.filter(a => a.status === 'open').length, () => setAlertFilter('open'))}
+                {pill(alertFilter === 'snoozed', C.amber, 'Snoozed', alerts.filter(a => a.status === 'snoozed').length, () => setAlertFilter('snoozed'))}
+                {pill(alertFilter === 'resolved', C.green, 'Resolved', alerts.filter(a => a.status === 'resolved').length, () => setAlertFilter('resolved'))}
+                {pill(alertFilter === 'all', C.white, 'All', alerts.length, () => setAlertFilter('all'))}
+              </div>
+              {alerts.filter(a => alertFilter === 'all' || a.status === alertFilter).length === 0 && (
+                <div style={{ ...glass, padding: 40, textAlign: 'center', color: C.slate, fontSize: 13 }}>
+                  No alerts. Click "Run scan now" to check health across all practices.
+                </div>
+              )}
+              {alerts.filter(a => alertFilter === 'all' || a.status === alertFilter).map(a => {
+                const sevColor = a.severity === 'high' ? C.red : a.severity === 'medium' ? C.amber : C.teal;
+                const practice = practices.find((p: any) => p.id === a.practice_id);
+                return (
+                  <div key={a.id} onClick={() => setSelectedAlert(a)} style={{ ...glass, padding: 14, marginBottom: 8, cursor: 'pointer', borderLeft: `3px solid ${sevColor}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontSize: 9, fontWeight: 800, color: sevColor, textTransform: 'uppercase', letterSpacing: 1.5, background: `${sevColor}15`, padding: '2px 8px', borderRadius: 999 }}>{a.type.replace(/_/g, ' ')}</span>
+                          <span style={{ fontSize: 9, color: C.slate, textTransform: 'uppercase', letterSpacing: 1 }}>{a.status}</span>
+                          {practice && <span style={{ fontSize: 11, color: C.ash }}>· {practice.name}</span>}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>{a.title}</div>
+                        <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>{a.body}</div>
+                      </div>
+                      <div style={{ fontSize: 10, color: C.slate, whiteSpace: 'nowrap' }}>{new Date(a.created_at).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
+
+          {/* SUPPORT INBOX */}
+          {tab === 'support' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>Support Inbox</div>
+                <span style={{ fontSize: 11, color: C.slate }}>{bookings.length} bookings · {unassignedBookings} unassigned</span>
+              </div>
+              {bookings.length === 0 && (
+                <div style={{ ...glass, padding: 40, textAlign: 'center', color: C.slate, fontSize: 13 }}>No support bookings yet.</div>
+              )}
+              {bookings.map(b => {
+                const ageHours = (Date.now() - new Date(b.created_at).getTime()) / 3_600_000;
+                const slaColor = ageHours > 48 ? C.red : ageHours > 24 ? C.amber : C.teal;
+                const slaLabel = ageHours > 48 ? 'SLA missed' : ageHours > 24 ? `${Math.round(48 - ageHours)}h left` : `${Math.round(48 - ageHours)}h SLA`;
+                return (
+                  <div key={b.id} style={{ ...glass, padding: 16, marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 10 }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{b.name || '(no name)'} <span style={{ color: C.slate, fontWeight: 400 }}>· {b.email}</span></div>
+                        <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>Booked: {b.booking_date} at {b.booking_time}</div>
+                        <div style={{ fontSize: 10, color: C.slate, marginTop: 2 }}>Created {new Date(b.created_at).toLocaleString()}</div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: slaColor, background: `${slaColor}15`, padding: '3px 10px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: 1 }}>{slaLabel}</span>
+                        <span style={{ fontSize: 10, color: C.slate, textTransform: 'uppercase', letterSpacing: 1 }}>{b.triage_status}</span>
+                      </div>
+                    </div>
+                    {b.notes && <div style={{ fontSize: 12, color: C.ash, marginBottom: 10, padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: C.radiusSm }}>{b.notes}</div>}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Assign to</label>
+                        <select value={b.assigned_to ?? ''} onChange={e => updateBooking(b.id, { assigned_to: e.target.value || null, triage_status: e.target.value ? 'in_progress' : b.triage_status })} style={{ ...inputStyle, marginTop: 4 }}>
+                          <option value="">Unassigned</option>
+                          {admins.map((a: any) => <option key={a.user_id} value={a.user_id}>{a.full_name || a.user_id.slice(0, 8)}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Status</label>
+                        <select value={b.triage_status} onChange={e => updateBooking(b.id, { triage_status: e.target.value })} style={{ ...inputStyle, marginTop: 4 }}>
+                          <option value="new">New</option>
+                          <option value="in_progress">In progress</option>
+                          <option value="waiting">Waiting on practice</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
+                      </div>
+                    </div>
+                    <textarea
+                      defaultValue={b.admin_notes}
+                      onBlur={e => e.target.value !== b.admin_notes && updateBooking(b.id, { admin_notes: e.target.value })}
+                      placeholder="Internal notes…"
+                      rows={2}
+                      style={{ ...inputStyle, fontSize: 12, fontFamily: C.fn, resize: 'vertical' }}
+                    />
+                  </div>
+                );
+              })}
+            </>
+          )}
+
           {/* SETTINGS */}
           {tab === 'settings' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16 }}>
@@ -731,6 +932,68 @@ export default function ByteSenseAdmin() {
           )}
         </div>
       </div>
+      {/* ALERT DETAIL DRAWER */}
+      {selectedAlert && (
+        <div onClick={() => setSelectedAlert(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: 480, maxWidth: '100%', height: '100vh', background: '#141420', borderLeft: `1px solid ${C.glassBorder}`, padding: 28, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+              <div>
+                <div style={{ fontSize: 9, fontWeight: 800, color: selectedAlert.severity === 'high' ? C.red : C.amber, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 }}>{selectedAlert.type.replace(/_/g, ' ')} · {selectedAlert.severity}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: C.white }}>{selectedAlert.title}</div>
+              </div>
+              <button onClick={() => setSelectedAlert(null)} style={{ background: 'none', border: 'none', color: C.slate, cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ fontSize: 13, color: C.ash, lineHeight: 1.6, marginBottom: 20 }}>{selectedAlert.body}</div>
+            {(() => {
+              const practice = practices.find((p: any) => p.id === selectedAlert.practice_id);
+              return practice ? (
+                <div style={{ ...glass, padding: 14, marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4, fontWeight: 600 }}>Practice</div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{practice.name}</div>
+                  <div style={{ fontSize: 10, color: C.slate, marginTop: 2 }}>Code {practice.practice_code} · {practice.profiles?.length || 0} staff</div>
+                </div>
+              ) : null;
+            })()}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Assigned to</label>
+              <select value={selectedAlert.assigned_to ?? ''} onChange={e => updateAlert(selectedAlert.id, { assigned_to: e.target.value || null })} style={inputStyle}>
+                <option value="">Unassigned</option>
+                {admins.map((a: any) => <option key={a.user_id} value={a.user_id}>{a.full_name || a.user_id.slice(0, 8)}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Next step</label>
+              <input defaultValue={selectedAlert.next_step} onBlur={e => e.target.value !== selectedAlert.next_step && updateAlert(selectedAlert.id, { next_step: e.target.value })} placeholder="e.g. Call practice owner Monday" style={inputStyle} />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Follow-up date</label>
+              <input type="datetime-local" defaultValue={selectedAlert.follow_up_at ? selectedAlert.follow_up_at.slice(0, 16) : ''} onBlur={e => updateAlert(selectedAlert.id, { follow_up_at: e.target.value ? new Date(e.target.value).toISOString() : null } as any)} style={inputStyle} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Notes</label>
+              <textarea defaultValue={selectedAlert.admin_notes} onBlur={e => e.target.value !== selectedAlert.admin_notes && updateAlert(selectedAlert.id, { admin_notes: e.target.value })} rows={5} placeholder="What did you do? Plans, observations…" style={{ ...inputStyle, fontSize: 12, fontFamily: C.fn, resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {selectedAlert.status !== 'resolved' && (
+                <button onClick={() => { resolveAlert(selectedAlert.id); setSelectedAlert(null); }} style={{ background: C.gradTeal, border: 'none', color: '#fff', padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, flex: 1 }}>Resolve</button>
+              )}
+              {selectedAlert.status === 'open' && (
+                <button onClick={() => { snoozeAlert(selectedAlert.id); setSelectedAlert(null); }} style={{ background: 'transparent', border: `1px solid ${C.amber}40`, color: C.amber, padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>Snooze</button>
+              )}
+              {selectedAlert.status !== 'open' && (
+                <button onClick={() => { reopenAlert(selectedAlert.id); }} style={{ background: 'transparent', border: `1px solid ${C.red}40`, color: C.red, padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>Re-open</button>
+              )}
+            </div>
+            <div style={{ fontSize: 10, color: C.slate, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.glassBorder}` }}>
+              Created {new Date(selectedAlert.created_at).toLocaleString()}
+              {selectedAlert.resolved_at && <> · Resolved {new Date(selectedAlert.resolved_at).toLocaleString()}</>}
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
