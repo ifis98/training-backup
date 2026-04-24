@@ -15,6 +15,9 @@ async function loadUserAccess(userId: string) {
       .eq('user_id', userId),
   ]);
 
+  // Update last_seen_at (fire and forget)
+  supabase.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('user_id', userId).then(() => {});
+
   return {
     profile: profileData,
     isAdmin: roleData?.some(r => r.role === 'admin') ?? false,
