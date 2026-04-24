@@ -7,6 +7,10 @@ export default function DashboardSwitcher() {
   const nav = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const goTo = (path: string) => {
+    setOpen(false);
+    nav(path, { replace: false });
+  };
 
   const items = [
     { label: 'Owner Dashboard', path: '/owner', icon: LayoutDashboard, match: pathname === '/owner' || pathname === '/' },
@@ -25,7 +29,7 @@ export default function DashboardSwitcher() {
           {items.map(i => {
             const Icon = i.icon;
             return (
-              <button key={i.path} onClick={() => { nav(i.path); setOpen(false); }}
+              <button key={i.path} type="button" onClick={() => goTo(i.path)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, width: '100%',
                   padding: '12px 14px', background: i.match ? 'rgba(204,16,16,0.15)' : 'transparent',
@@ -39,7 +43,7 @@ export default function DashboardSwitcher() {
           })}
         </div>
       )}
-      <button onClick={() => setOpen(!open)}
+      <button type="button" onClick={() => setOpen(!open)}
         style={{
           display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
           background: C.gradRed, color: '#fff', border: 'none', borderRadius: 999,
