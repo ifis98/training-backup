@@ -9,7 +9,7 @@ export default function DashboardSwitcher() {
   const [open, setOpen] = useState(false);
 
   const items = [
-    { label: 'Owner Dashboard', path: '/', icon: LayoutDashboard, match: pathname === '/' },
+    { label: 'Owner Dashboard', path: '/owner', icon: LayoutDashboard, match: pathname === '/owner' || pathname === '/' },
     { label: 'Staff View', path: '/staff', icon: Users, match: pathname === '/staff' },
     { label: 'ByteSense Admin', path: '/bytesense-admin', icon: Shield, match: pathname === '/bytesense-admin' },
   ];
