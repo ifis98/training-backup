@@ -35,6 +35,7 @@ function AppRoutes() {
         <Route path="/register" element={!user ? <AuthPage mode="register" /> : <Navigate to={defaultAuthenticatedRoute} />} />
         <Route path="/bytesense-admin" element={<ByteSenseAdmin />} />
         <Route path="/staff" element={user ? <Index forceView="staff" /> : <Navigate to="/welcome" />} />
+        <Route path="/owner" element={user ? <Index forceView="owner" /> : <Navigate to="/welcome" />} />
         <Route path="/" element={user ? ((isByteSenseAdmin && !isSuperUser) ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/welcome" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

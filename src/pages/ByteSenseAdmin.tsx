@@ -95,7 +95,7 @@ export default function ByteSenseAdmin() {
     if (adminRolesRes.data) {
       const ids = adminRolesRes.data.map(r => r.user_id);
       if (ids.length) {
-        const { data: profs } = await supabase.from('profiles').select('user_id, full_name').in('user_id', ids);
+        const { data: profs } = await supabase.from('profiles').select('user_id, full_name, created_at').in('user_id', ids);
         setAdmins(profs || []);
       }
     }
@@ -213,8 +213,9 @@ export default function ByteSenseAdmin() {
     codes.filter(c => c.used_at).slice(0, 10).forEach(c => events.push({ ts: c.used_at!, type: 'used', label: `Code ${c.code} used`, color: C.teal }));
     demos.slice(0, 10).forEach(d => events.push({ ts: d.created_at, type: 'demo', label: `Demo request from ${d.name}${d.practice_name ? ' (' + d.practice_name + ')' : ''}`, color: C.amber }));
     practices.slice(0, 10).forEach((p: any) => events.push({ ts: p.created_at, type: 'practice', label: `Practice "${p.name}" registered`, color: C.green }));
+    admins.slice(0, 10).forEach((a: any) => { if (a.created_at) events.push({ ts: a.created_at, type: 'staff', label: `ByteSense staff joined: ${a.full_name || 'Admin'}`, color: C.red }); });
     return events.sort((a, b) => +new Date(b.ts) - +new Date(a.ts)).slice(0, 10);
-  }, [codes, demos, practices]);
+  }, [codes, demos, practices, admins]);
 
   const topPractices = useMemo(() => {
     return practices
@@ -352,8 +353,12 @@ export default function ByteSenseAdmin() {
                 {kpiCard('Active Codes', activeCodes, C.gold, C.gradGold)}
                 {kpiCard('Pending Demos', pendingDemos, C.amber, `linear-gradient(135deg, ${C.amber}, ${C.gold})`)}
                 {kpiCard('Total Staff', totalStaff, C.blue, C.gradBlue)}
-                {kpiCard('Codes Used (30d)', codesUsed30d, C.teal, C.gradTeal)}
+                {kpiCard('Practice Codes Used (30d)', codesUsed30d, C.teal, C.gradTeal)}
+                {kpiCard('ByteSense Staff', admins.length, C.red, C.gradRed)}
                 {kpiCard('Conversion Rate', `${conversionRate}%`, C.green, `linear-gradient(135deg, ${C.green}, ${C.teal})`)}
+              </div>
+              <div style={{ fontSize: 10, color: C.slate, marginTop: -16, marginBottom: 24, fontStyle: 'italic' }}>
+                Note: ByteSense staff (@bytesense.ai) bypass code redemption — they're auto-assigned admin roles.
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16, marginBottom: 16 }}>
