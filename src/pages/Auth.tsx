@@ -273,24 +273,58 @@ export default function AuthPage({ mode }: AuthPageProps) {
         {/* LOGIN */}
         {mode === 'login' && (
           <>
+            {forgotMode ? (
+              <>
+                <form onSubmit={handleForgotPassword}>
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={labelStyle}>Email</label>
+                    <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required style={inputStyle} placeholder="you@example.com" />
+                    <div style={{ fontSize: 11, color: C.ash, marginTop: 6 }}>
+                      We'll email you a secure link to reset your password.
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading} style={btnStyle(C.red)}>
+                    {loading ? 'Sending…' : 'Send reset link'}
+                  </button>
+                </form>
+                <button onClick={() => setForgotMode(false)} type="button"
+                  style={{ marginTop: 12, background: 'none', border: 'none', color: C.ash, fontSize: 13, cursor: 'pointer', fontFamily: C.fn, width: '100%' }}>
+                  ← Back to sign in
+                </button>
+                <div style={{ textAlign: 'center', fontSize: 11, color: C.slate, marginTop: 24, lineHeight: 1.6 }}>
+                  Forgot which email you used?<br />Contact <a href="mailto:support@bytesense.ai" style={{ color: C.teal, textDecoration: 'none' }}>support@bytesense.ai</a>
+                </div>
+              </>
+            ) : (
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: 16 }}>
                 <label style={labelStyle}>Email</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
               </div>
-              <div style={{ marginBottom: 24 }}>
-                <label style={labelStyle}>Password</label>
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
+                  <button type="button" onClick={() => { setForgotEmail(email); setForgotMode(true); }}
+                    style={{ background: 'none', border: 'none', color: C.teal, fontSize: 11, cursor: 'pointer', fontFamily: C.fn, fontWeight: 600 }}>
+                    Forgot password?
+                  </button>
+                </div>
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} style={inputStyle} />
               </div>
-              <button type="submit" disabled={loading} style={btnStyle(C.red)}>
+              <button type="submit" disabled={loading} style={{ ...btnStyle(C.red), marginTop: 16 }}>
                 {loading ? 'Please wait...' : 'Sign In'}
               </button>
             </form>
+            )}
+            {!forgotMode && (
+            <>
             <Divider />
             <GoogleButton onClick={handleGoogleSignIn} />
             <div style={{ textAlign: "center", fontSize: 13, color: C.ash, marginTop: 24 }}>
               New to ByteSense? <a href="/register" style={{ color: C.teal, textDecoration: "none" }}>Create account</a>
             </div>
+            </>
+            )}
           </>
         )}
 
