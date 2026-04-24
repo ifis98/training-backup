@@ -381,7 +381,10 @@ export default function ByteSenseAdmin() {
               borderLeft: active ? `2px solid ${C.red}` : '2px solid transparent',
             }}>
               <Icon size={16} />
-              {n.label}
+              <span style={{ flex: 1 }}>{n.label}</span>
+              {n.badge && n.badge > 0 ? (
+                <span style={{ background: C.red, color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 999, minWidth: 18, textAlign: 'center' }}>{n.badge}</span>
+              ) : null}
             </button>
           );
         })}
