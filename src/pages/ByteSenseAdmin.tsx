@@ -101,14 +101,18 @@ export default function ByteSenseAdmin() {
   }, [user, authLoading, navigate]);
 
   const loadData = useCallback(async () => {
-    const [codesRes, practicesRes, demosRes, adminRolesRes] = await Promise.all([
+    const [codesRes, practicesRes, demosRes, adminRolesRes, alertsRes, bookingsRes] = await Promise.all([
       supabase.from('registration_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('practices').select('*, profiles(user_id, full_name, created_at), training_progress(user_id, done_modules, xp, completed_at, updated_at)').order('created_at', { ascending: false }),
       supabase.from('demo_requests').select('*').order('created_at', { ascending: false }),
       supabase.from('user_roles').select('user_id').eq('role', 'bytesense_admin'),
+      supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }),
+      supabase.from('support_bookings').select('*').order('created_at', { ascending: false }),
     ]);
     if (codesRes.data) setCodes(codesRes.data as RegCode[]);
     if (practicesRes.data) setPractices(practicesRes.data);
+    if (alertsRes.data) setAlerts(alertsRes.data as AdminAlert[]);
+    if (bookingsRes.data) setBookings(bookingsRes.data as SupportBooking[]);
     if (demosRes.data) {
       setDemos(demosRes.data as DemoReq[]);
       const notes: Record<string, string> = {};
@@ -125,6 +129,50 @@ export default function ByteSenseAdmin() {
   }, []);
 
   useEffect(() => { if (isBSAdmin) loadData(); }, [isBSAdmin, loadData]);
+
+  // Realtime subscription on admin_alerts
+  useEffect(() => {
+    if (!isBSAdmin) return;
+    const channel = supabase.channel('admin_alerts_live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'admin_alerts' }, () => {
+        supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+          if (data) setAlerts(data as AdminAlert[]);
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isBSAdmin]);
+
+  const runHealthMonitor = async () => {
+    setRunningMonitor(true);
+    try {
+      const { error } = await supabase.functions.invoke('health-monitor');
+      if (error) throw error;
+      toast.success('Health scan complete');
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Scan failed');
+    } finally {
+      setRunningMonitor(false);
+    }
+  };
+
+  const updateAlert = async (id: string, patch: Partial<AdminAlert>) => {
+    const { error } = await supabase.from('admin_alerts').update(patch).eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    setAlerts(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a));
+    if (selectedAlert?.id === id) setSelectedAlert(prev => prev ? { ...prev, ...patch } as AdminAlert : prev);
+  };
+
+  const resolveAlert = (id: string) => updateAlert(id, { status: 'resolved', resolved_at: new Date().toISOString() } as any);
+  const snoozeAlert = (id: string) => updateAlert(id, { status: 'snoozed' });
+  const reopenAlert = (id: string) => updateAlert(id, { status: 'open', resolved_at: null } as any);
+
+  const updateBooking = async (id: string, patch: Partial<SupportBooking>) => {
+    const { error } = await supabase.from('support_bookings').update(patch).eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
+  };
 
   const generateCodes = async () => {
     if (!newPracticeName.trim()) { toast.error('Practice name required'); return; }
