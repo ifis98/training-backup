@@ -36,6 +36,9 @@ type TabId = 'overview' | 'codes' | 'practices' | 'demos' | 'settings';
 export default function ByteSenseAdmin() {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const email = (user?.email || '').toLowerCase();
+  const SUPER_USERS = ['nbc1079@gmail.com', 'natasha@bytesense.ai', 'majid@bytesense.ai', 'john@bytesense.ai'];
+  const appDashboardPath = SUPER_USERS.includes(email) ? '/owner' : '/';
   const [isBSAdmin, setIsBSAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState<TabId>('overview');
@@ -312,7 +315,7 @@ export default function ByteSenseAdmin() {
         })}
         <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: `1px solid ${C.glassBorder}` }}>
           <div style={{ fontSize: 10, color: C.slate, padding: '0 8px 8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
-          <button onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 14px', background: 'transparent', border: 'none', color: C.ash, fontSize: 12, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
+          <button type="button" onClick={() => navigate(appDashboardPath)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 14px', background: 'transparent', border: 'none', color: C.ash, fontSize: 12, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
             ← App dashboard
           </button>
           <button onClick={signOut} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 14px', background: 'transparent', border: 'none', color: C.ash, fontSize: 12, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
