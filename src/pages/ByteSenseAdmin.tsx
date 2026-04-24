@@ -95,7 +95,7 @@ export default function ByteSenseAdmin() {
     if (adminRolesRes.data) {
       const ids = adminRolesRes.data.map(r => r.user_id);
       if (ids.length) {
-        const { data: profs } = await supabase.from('profiles').select('user_id, full_name').in('user_id', ids);
+        const { data: profs } = await supabase.from('profiles').select('user_id, full_name, created_at').in('user_id', ids);
         setAdmins(profs || []);
       }
     }
