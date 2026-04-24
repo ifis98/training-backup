@@ -34,24 +34,28 @@ export function useAuth() {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setLoading(true);
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          const access = await loadUserAccess(session.user.id);
-          setProfile(access.profile);
-          setIsAdmin(access.isAdmin);
-          setIsByteSenseAdmin(access.isByteSenseAdmin);
-          setIsStaff(access.isStaff);
+          // Defer Supabase calls to avoid deadlocking the auth callback
+          setTimeout(() => {
+            loadUserAccess(session.user.id).then(access => {
+              setProfile(access.profile);
+              setIsAdmin(access.isAdmin);
+              setIsByteSenseAdmin(access.isByteSenseAdmin);
+              setIsStaff(access.isStaff);
+              setLoading(false);
+            }).catch(() => setLoading(false));
+          }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
           setIsByteSenseAdmin(false);
           setIsStaff(false);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
