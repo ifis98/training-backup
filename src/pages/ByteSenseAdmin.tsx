@@ -213,8 +213,9 @@ export default function ByteSenseAdmin() {
     codes.filter(c => c.used_at).slice(0, 10).forEach(c => events.push({ ts: c.used_at!, type: 'used', label: `Code ${c.code} used`, color: C.teal }));
     demos.slice(0, 10).forEach(d => events.push({ ts: d.created_at, type: 'demo', label: `Demo request from ${d.name}${d.practice_name ? ' (' + d.practice_name + ')' : ''}`, color: C.amber }));
     practices.slice(0, 10).forEach((p: any) => events.push({ ts: p.created_at, type: 'practice', label: `Practice "${p.name}" registered`, color: C.green }));
+    admins.slice(0, 10).forEach((a: any) => { if (a.created_at) events.push({ ts: a.created_at, type: 'staff', label: `ByteSense staff joined: ${a.full_name || 'Admin'}`, color: C.red }); });
     return events.sort((a, b) => +new Date(b.ts) - +new Date(a.ts)).slice(0, 10);
-  }, [codes, demos, practices]);
+  }, [codes, demos, practices, admins]);
 
   const topPractices = useMemo(() => {
     return practices
