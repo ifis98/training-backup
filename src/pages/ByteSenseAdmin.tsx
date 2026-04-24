@@ -56,13 +56,18 @@ export default function ByteSenseAdmin() {
   const appDashboardPath = SUPER_USERS.includes(email) ? '/owner' : '/';
   const [isBSAdmin, setIsBSAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState<TabId>('overview');
+  const [tab, setTab] = useState<ExtendedTab>('overview');
   const [globalSearch, setGlobalSearch] = useState('');
 
   const [codes, setCodes] = useState<RegCode[]>([]);
   const [practices, setPractices] = useState<any[]>([]);
   const [demos, setDemos] = useState<DemoReq[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<AdminAlert[]>([]);
+  const [bookings, setBookings] = useState<SupportBooking[]>([]);
+  const [selectedAlert, setSelectedAlert] = useState<AdminAlert | null>(null);
+  const [alertFilter, setAlertFilter] = useState<'all' | 'open' | 'snoozed' | 'resolved'>('open');
+  const [runningMonitor, setRunningMonitor] = useState(false);
 
   // Codes form
   const [newPracticeName, setNewPracticeName] = useState('');
