@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pi
 import {
   LayoutDashboard, KeyRound, Building2, Inbox, Settings, LogOut,
   Search, Copy, Download, ChevronRight, Activity, Trophy, Mail, Shield, X,
+  AlertTriangle, LifeBuoy, RefreshCw,
 } from 'lucide-react';
 
 interface RegCode {
@@ -32,6 +33,20 @@ const copyToClipboard = (text: string, label = 'Copied') => {
 };
 
 type TabId = 'overview' | 'codes' | 'practices' | 'demos' | 'settings';
+type ExtendedTab = TabId | 'alerts' | 'support';
+
+interface AdminAlert {
+  id: string; type: string; severity: string; title: string; body: string;
+  status: string; practice_id: string | null; target_user_id: string | null;
+  assigned_to: string | null; admin_notes: string; next_step: string;
+  follow_up_at: string | null; created_at: string; resolved_at: string | null;
+}
+interface SupportBooking {
+  id: string; user_id: string; name: string; email: string;
+  booking_date: string; booking_time: string; notes: string;
+  status: string; triage_status: string; assigned_to: string | null;
+  admin_notes: string; follow_up_at: string | null; created_at: string;
+}
 
 export default function ByteSenseAdmin() {
   const { user, loading: authLoading, signOut } = useAuth();
