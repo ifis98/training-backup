@@ -434,10 +434,33 @@ export default function ByteSenseAdmin() {
                 {kpiCard('Practice Codes Used (30d)', codesUsed30d, C.teal, C.gradTeal)}
                 {kpiCard('ByteSense Staff', admins.length, C.red, C.gradRed)}
                 {kpiCard('Conversion Rate', `${conversionRate}%`, C.green, `linear-gradient(135deg, ${C.green}, ${C.teal})`)}
+                {kpiCard('Open Alerts', openAlertCount, C.red, C.gradRed)}
+                {kpiCard('Unassigned Support', unassignedBookings, C.amber, `linear-gradient(135deg, ${C.amber}, ${C.gold})`)}
               </div>
               <div style={{ fontSize: 10, color: C.slate, marginTop: -16, marginBottom: 24, fontStyle: 'italic' }}>
                 Note: ByteSense staff (@bytesense.ai) bypass code redemption — they're auto-assigned admin roles.
               </div>
+
+              {openAlertCount > 0 && (
+                <div style={{ ...glass, padding: 22, marginBottom: 16, borderLeft: `3px solid ${C.red}` }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <AlertTriangle size={14} style={{ color: C.red }} /> Needs Attention
+                    <button onClick={() => setTab('alerts')} style={{ marginLeft: 'auto', fontSize: 11, color: C.teal, background: 'none', border: 'none', cursor: 'pointer', fontFamily: C.fn }}>View all →</button>
+                  </div>
+                  {alerts.filter(a => a.status === 'open').slice(0, 5).map(a => {
+                    const sevColor = a.severity === 'high' ? C.red : a.severity === 'medium' ? C.amber : C.teal;
+                    return (
+                      <div key={a.id} onClick={() => { setTab('alerts'); setSelectedAlert(a); }} style={{ padding: '8px 0', borderBottom: `1px solid ${C.glassBorder}`, cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}>
+                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: sevColor }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, color: C.white, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.title}</div>
+                          <div style={{ fontSize: 10, color: C.slate }}>{a.type.replace(/_/g, ' ')} · {new Date(a.created_at).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16, marginBottom: 16 }}>
                 {/* Recent activity */}
