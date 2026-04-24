@@ -932,6 +932,68 @@ export default function ByteSenseAdmin() {
           )}
         </div>
       </div>
+      {/* ALERT DETAIL DRAWER */}
+      {selectedAlert && (
+        <div onClick={() => setSelectedAlert(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: 480, maxWidth: '100%', height: '100vh', background: '#141420', borderLeft: `1px solid ${C.glassBorder}`, padding: 28, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+              <div>
+                <div style={{ fontSize: 9, fontWeight: 800, color: selectedAlert.severity === 'high' ? C.red : C.amber, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 }}>{selectedAlert.type.replace(/_/g, ' ')} · {selectedAlert.severity}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: C.white }}>{selectedAlert.title}</div>
+              </div>
+              <button onClick={() => setSelectedAlert(null)} style={{ background: 'none', border: 'none', color: C.slate, cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ fontSize: 13, color: C.ash, lineHeight: 1.6, marginBottom: 20 }}>{selectedAlert.body}</div>
+            {(() => {
+              const practice = practices.find((p: any) => p.id === selectedAlert.practice_id);
+              return practice ? (
+                <div style={{ ...glass, padding: 14, marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4, fontWeight: 600 }}>Practice</div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{practice.name}</div>
+                  <div style={{ fontSize: 10, color: C.slate, marginTop: 2 }}>Code {practice.practice_code} · {practice.profiles?.length || 0} staff</div>
+                </div>
+              ) : null;
+            })()}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Assigned to</label>
+              <select value={selectedAlert.assigned_to ?? ''} onChange={e => updateAlert(selectedAlert.id, { assigned_to: e.target.value || null })} style={inputStyle}>
+                <option value="">Unassigned</option>
+                {admins.map((a: any) => <option key={a.user_id} value={a.user_id}>{a.full_name || a.user_id.slice(0, 8)}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Next step</label>
+              <input defaultValue={selectedAlert.next_step} onBlur={e => e.target.value !== selectedAlert.next_step && updateAlert(selectedAlert.id, { next_step: e.target.value })} placeholder="e.g. Call practice owner Monday" style={inputStyle} />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Follow-up date</label>
+              <input type="datetime-local" defaultValue={selectedAlert.follow_up_at ? selectedAlert.follow_up_at.slice(0, 16) : ''} onBlur={e => updateAlert(selectedAlert.id, { follow_up_at: e.target.value ? new Date(e.target.value).toISOString() : null } as any)} style={inputStyle} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Notes</label>
+              <textarea defaultValue={selectedAlert.admin_notes} onBlur={e => e.target.value !== selectedAlert.admin_notes && updateAlert(selectedAlert.id, { admin_notes: e.target.value })} rows={5} placeholder="What did you do? Plans, observations…" style={{ ...inputStyle, fontSize: 12, fontFamily: C.fn, resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {selectedAlert.status !== 'resolved' && (
+                <button onClick={() => { resolveAlert(selectedAlert.id); setSelectedAlert(null); }} style={{ background: C.gradTeal, border: 'none', color: '#fff', padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, flex: 1 }}>Resolve</button>
+              )}
+              {selectedAlert.status === 'open' && (
+                <button onClick={() => { snoozeAlert(selectedAlert.id); setSelectedAlert(null); }} style={{ background: 'transparent', border: `1px solid ${C.amber}40`, color: C.amber, padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>Snooze</button>
+              )}
+              {selectedAlert.status !== 'open' && (
+                <button onClick={() => { reopenAlert(selectedAlert.id); }} style={{ background: 'transparent', border: `1px solid ${C.red}40`, color: C.red, padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>Re-open</button>
+              )}
+            </div>
+            <div style={{ fontSize: 10, color: C.slate, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.glassBorder}` }}>
+              Created {new Date(selectedAlert.created_at).toLocaleString()}
+              {selectedAlert.resolved_at && <> · Resolved {new Date(selectedAlert.resolved_at).toLocaleString()}</>}
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
