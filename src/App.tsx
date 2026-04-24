@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import AuthPage from "./pages/Auth";
 import ByteSenseAdmin from "./pages/ByteSenseAdmin";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/welcome" element={!user ? <Welcome /> : <Navigate to={defaultAuthenticatedRoute} />} />
       <Route path="/login" element={!user ? <AuthPage mode="login" /> : <Navigate to={defaultAuthenticatedRoute} />} />
       <Route path="/register" element={!user ? <AuthPage mode="register" /> : <Navigate to={defaultAuthenticatedRoute} />} />

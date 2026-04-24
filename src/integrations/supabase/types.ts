@@ -63,6 +63,7 @@ export type Database = {
       }
       demo_requests: {
         Row: {
+          admin_notes: string
           created_at: string
           email: string
           goals: string[] | null
@@ -82,6 +83,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string
           created_at?: string
           email: string
           goals?: string[] | null
@@ -101,6 +103,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string
           created_at?: string
           email?: string
           goals?: string[] | null
@@ -163,6 +166,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_active: boolean
           name: string
           owner_id: string
           practice_code: string | null
@@ -171,6 +175,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_active?: boolean
           name: string
           owner_id: string
           practice_code?: string | null
@@ -179,6 +184,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_active?: boolean
           name?: string
           owner_id?: string
           practice_code?: string | null
