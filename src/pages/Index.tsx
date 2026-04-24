@@ -16,7 +16,8 @@ import AICoach from '@/components/AICoach';
 import { C } from '@/data/constants';
 import { Lang } from '@/data/translations';
 
-const Index = () => {
+interface IndexProps { forceView?: "staff" | "owner"; }
+const Index = ({ forceView }: IndexProps = {}) => {
   const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset } = useAppState();
   const { isStaff, isAdmin } = useAuth();
   const lang = (s.lang || "en") as Lang;
@@ -40,6 +41,7 @@ const Index = () => {
     if (s.phase === "simulation") return <Simulation s={s} u={u} lang={lang} />;
     if (s.phase === "simSummary") return <SimulationSummary s={s} u={u} lang={lang} />;
     if (s.phase === "report") return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
+    if (forceView === "staff") return <StaffDashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
     if (isStaff && !isAdmin) return <StaffDashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
     return <Dashboard s={s} u={u} sRoles={sRoles} myPH={myPH} myM={myM} dN={dN} pr={pr} allD={allD} reset={reset} openCoach={openCoach} />;
   };
