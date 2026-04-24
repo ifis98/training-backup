@@ -353,8 +353,12 @@ export default function ByteSenseAdmin() {
                 {kpiCard('Active Codes', activeCodes, C.gold, C.gradGold)}
                 {kpiCard('Pending Demos', pendingDemos, C.amber, `linear-gradient(135deg, ${C.amber}, ${C.gold})`)}
                 {kpiCard('Total Staff', totalStaff, C.blue, C.gradBlue)}
-                {kpiCard('Codes Used (30d)', codesUsed30d, C.teal, C.gradTeal)}
+                {kpiCard('Practice Codes Used (30d)', codesUsed30d, C.teal, C.gradTeal)}
+                {kpiCard('ByteSense Staff', admins.length, C.red, C.gradRed)}
                 {kpiCard('Conversion Rate', `${conversionRate}%`, C.green, `linear-gradient(135deg, ${C.green}, ${C.teal})`)}
+              </div>
+              <div style={{ fontSize: 10, color: C.slate, marginTop: -16, marginBottom: 24, fontStyle: 'italic' }}>
+                Note: ByteSense staff (@bytesense.ai) bypass code redemption — they're auto-assigned admin roles.
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16, marginBottom: 16 }}>
