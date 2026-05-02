@@ -4,6 +4,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { LayoutDashboard, BookOpen, Bot, Brain, FileText, LogOut, ChevronLeft, ChevronRight, Briefcase, Mail } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -25,6 +26,7 @@ const glass = {
 
 export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, onSignOut, lang }: DashboardSidebarProps) {
   const T = (key: string) => t(lang, key);
+  const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
 
   const scrollToSection = (sectionId: string) => {
@@ -46,6 +48,79 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     { id: "signout", icon: LogOut, label: T("sign_out"), action: onSignOut },
   ];
 
+  // Mobile: fixed bottom navigation bar
+  if (isMobile) {
+    const mobileItems = navItems.slice(0, 5); // show first 5 items on mobile bottom bar
+    return (
+      <div style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 58,
+        background: "rgba(14, 14, 20, 0.96)",
+        backdropFilter: C.blur,
+        WebkitBackdropFilter: C.blur,
+        borderTop: `1px solid ${C.glassBorder}`,
+        display: "flex",
+        alignItems: "stretch",
+        zIndex: 100,
+      }}>
+        {mobileItems.map(item => {
+          const isActive = item.phase && s.phase === item.phase;
+          const isDisabled = (item as any).disabled;
+          return (
+            <div
+              key={item.id}
+              onClick={() => {
+                if (isDisabled) return;
+                if (item.action) { item.action(); return; }
+                if (item.phase) { u({ phase: item.phase }); scrollTop(); }
+              }}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                cursor: isDisabled ? "not-allowed" : "pointer",
+                opacity: isDisabled ? 0.3 : 1,
+                color: isActive ? C.teal : C.ash,
+                borderTop: isActive ? `2px solid ${C.teal}` : "2px solid transparent",
+                background: isActive ? "rgba(20,184,166,0.08)" : "transparent",
+                transition: "all 0.2s",
+              }}
+            >
+              <item.icon size={20} strokeWidth={1.5} />
+              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.5, fontFamily: C.fn }}>{item.label}</span>
+            </div>
+          );
+        })}
+        {/* Sign out on far right */}
+        <div
+          onClick={onSignOut}
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            cursor: "pointer",
+            color: C.ash,
+            borderTop: "2px solid transparent",
+            transition: "all 0.2s",
+          }}
+        >
+          <LogOut size={20} strokeWidth={1.5} />
+          <span style={{ fontSize: 9, fontFamily: C.fn, letterSpacing: 0.5 }}>{T("sign_out")}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: side navigation
   return (
     <div style={{
       ...glass,
@@ -72,7 +147,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
       <div style={{ flex: 1, padding: "12px 0" }}>
         {navItems.map(item => {
           const isActive = item.phase && s.phase === item.phase;
-          const isDisabled = item.disabled;
+          const isDisabled = (item as any).disabled;
           return (
             <div
               key={item.id}

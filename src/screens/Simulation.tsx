@@ -4,6 +4,7 @@ import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop, startSTT } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SimulationProps {
   s: AppState;
@@ -39,6 +40,7 @@ function getRandomPatientIdx(exclude?: number): number {
 
 export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   const T = (key: string) => t(lang, key);
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(false);
   const [patientIdx, setPatientIdx] = useState(() => getRandomPatientIdx());
   const chatEnd = useRef<HTMLDivElement>(null);
@@ -90,22 +92,22 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
 
   return (
     <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Logo size={24} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
           <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
             style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("back")}</button>
         </div>
-        <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("patient_simulation")}</div>
+        <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("patient_simulation")}</div>
         <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700 }}>{s.simP}/3</div>
       </div>
 
-      <div style={{ background: C.dark2, padding: "14px 24px", margin: "0 24px", marginTop: 12 }}>
+      <div style={{ background: C.dark2, padding: isMobile ? "12px 16px" : "14px 24px", margin: isMobile ? "0 12px" : "0 24px", marginTop: 12 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{T("patient_label")} {patient.name}, {patient.age}</div>
         <div style={{ fontSize: 12, color: C.ash }}>{patient.card}</div>
       </div>
 
-      <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto", minHeight: 200 }}>
+      <div style={{ flex: 1, padding: isMobile ? "12px 12px" : "16px 24px", overflowY: "auto", minHeight: 200 }}>
         {s.simMsgs.length === 0 && (
           <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
             {T("start_conversation").replace("{name}", patient.name)}
@@ -115,7 +117,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
           if (msg.r === "user") {
             return (
               <div key={i} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-                <div style={{ maxWidth: "75%", background: C.teal, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 4px 14px", fontSize: 13, lineHeight: 1.6 }}>
+                <div style={{ maxWidth: isMobile ? "88%" : "75%", background: C.teal, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 4px 14px", fontSize: 13, lineHeight: 1.6 }}>
                   <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>{T("you_label")} ({sRoles.map(r => r.short).join(", ")})</div>
                   {msg.t}
                 </div>
@@ -126,13 +128,13 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
           return (
             <div key={i} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ maxWidth: "75%", background: C.dark2, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13, lineHeight: 1.6 }}>
+                <div style={{ maxWidth: isMobile ? "88%" : "75%", background: C.dark2, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13, lineHeight: 1.6 }}>
                   <div style={{ fontSize: 9, color: C.ash, marginBottom: 4 }}>{patient.name}</div>
                   {patientText}
                 </div>
               </div>
               {coachTip && (
-                <div style={{ marginTop: 8, marginLeft: 12, maxWidth: "80%", background: "rgba(212,175,55,0.08)", borderLeft: `3px solid ${C.gold}`, borderRadius: "0 8px 8px 0", padding: "10px 14px" }}>
+                <div style={{ marginTop: 8, marginLeft: 8, maxWidth: isMobile ? "92%" : "80%", background: "rgba(212,175,55,0.08)", borderLeft: `3px solid ${C.gold}`, borderRadius: "0 8px 8px 0", padding: "10px 14px" }}>
                   <div style={{ fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{T("training_tip")}</div>
                   <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>{coachTip}</div>
                 </div>
@@ -149,7 +151,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
       </div>
 
       {s.simP >= 3 && (
-        <div style={{ background: C.green, color: C.white, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ background: C.green, color: C.white, padding: isMobile ? "10px 16px" : "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontSize: 14, fontWeight: 700 }}>3 {T("patients_guided")}</span>
           <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}
             style={{ background: "rgba(255,255,255,0.2)", color: C.white, border: "none", padding: "8px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
@@ -159,7 +161,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
       )}
 
       {s.simMsgs.length >= 8 && s.simP < 3 && (
-        <div style={{ padding: "8px 24px", textAlign: "center" }}>
+        <div style={{ padding: isMobile ? "8px 16px" : "8px 24px", textAlign: "center" }}>
           <button onClick={handleNewPatient}
             style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
             {T("new_patient")}
@@ -167,7 +169,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         </div>
       )}
 
-      <div style={{ padding: "12px 24px", borderTop: `1px solid ${C.borderD}`, display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ padding: isMobile ? "10px 12px" : "12px 24px", borderTop: `1px solid ${C.borderD}`, display: "flex", gap: 8, alignItems: "center" }}>
         <button onClick={handleMic}
           style={{ width: 40, height: 40, background: s.lst ? C.red : C.dark2, border: "none", borderRadius: "50%", fontSize: 18, cursor: "pointer", flexShrink: 0 }}>🎤</button>
         <input
@@ -175,10 +177,10 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
           onChange={e => u({ simIn: e.target.value })}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
           placeholder={T("talk_to").replace("{name}", patient.name)}
-          style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: "10px 14px", fontSize: 14, fontFamily: C.fn, outline: "none" }}
+          style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: isMobile ? "10px 10px" : "10px 14px", fontSize: isMobile ? 13 : 14, fontFamily: C.fn, outline: "none", minWidth: 0 }}
         />
         <button onClick={() => sendMessage()}
-          style={{ background: C.teal, color: C.white, border: "none", padding: "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
+          style={{ background: C.teal, color: C.white, border: "none", padding: isMobile ? "10px 12px" : "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
           {T("send")}
         </button>
       </div>

@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# macOS resource fork files
+._*
+
+# Claude Code local config
+.claude/

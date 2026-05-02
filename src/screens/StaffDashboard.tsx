@@ -5,6 +5,7 @@ import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop, computeKnowledgeScore, getScoreLabel, getScoreColor, getRecommendations, getImprovementAreas } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import DashboardSidebar from '@/components/DashboardSidebar';
@@ -33,6 +34,7 @@ const glass = {
 } as React.CSSProperties;
 
 export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: StaffDashboardProps) {
+  const isMobile = useIsMobile();
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -211,7 +213,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: "100vh", color: C.white, display: "flex" }}>
       <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} lang={lang} />
 
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
       {/* Header */}
       <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid ${C.glassBorder}` }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>

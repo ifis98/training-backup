@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { C } from '@/data/constants';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const SCANNERS = ['Medit', 'iTero', '3Shape TRIOS', 'Planmeca', 'Carestream', 'Dentsply Sirona', 'Other'];
 const GOALS_LIST = [
@@ -17,6 +18,7 @@ const glass = {
 
 export default function Welcome() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [showDemo, setShowDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [demoData, setDemoData] = useState({
@@ -54,7 +56,7 @@ export default function Welcome() {
   };
 
   const inputStyle = {
-    width: "100%", padding: "14px 18px", fontSize: 15, fontFamily: C.fn,
+    width: "100%", padding: isMobile ? "12px 14px" : "14px 18px", fontSize: 15, fontFamily: C.fn,
     background: "rgba(255,255,255,0.04)", border: `1.5px solid ${C.glassBorder}`,
     color: C.white, outline: "none", marginBottom: 14, borderRadius: C.radiusSm,
     transition: "border-color 0.2s",
@@ -63,34 +65,34 @@ export default function Welcome() {
   return (
     <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #1a1a28, ${C.dark})`, color: C.white, minHeight: "100vh" }}>
       {/* Hero */}
-      <div style={{ textAlign: "center", padding: "70px 24px 50px", maxWidth: 840, margin: "0 auto", animation: "float-up 0.6s ease-out" }}>
-        <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: 50, marginBottom: 36, filter: "drop-shadow(0 0 1px rgba(255,255,255,0.9)) drop-shadow(0 0 2px rgba(255,255,255,0.5))" }} />
+      <div style={{ textAlign: "center", padding: isMobile ? "48px 16px 36px" : "70px 24px 50px", maxWidth: 840, margin: "0 auto", animation: "float-up 0.6s ease-out" }}>
+        <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: isMobile ? 40 : 50, marginBottom: isMobile ? 24 : 36, filter: "drop-shadow(0 0 1px rgba(255,255,255,0.9)) drop-shadow(0 0 2px rgba(255,255,255,0.5))" }} />
         <div style={{ fontSize: 11, letterSpacing: 6, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 22 }}>
           Welcome to the Family
         </div>
-        <h1 style={{ fontSize: "clamp(34px, 6vw, 58px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.08, marginBottom: 22 }}>
-          You're Not Just Adopting a Product.<br />
+        <h1 style={{ fontSize: "clamp(28px, 6vw, 58px)", fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1.08, marginBottom: 22 }}>
+          {isMobile ? "You're Not Just Adopting a Product. " : <>You're Not Just Adopting a Product.<br /></>}
           <span style={{ background: C.gradTeal, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>You're Joining a Movement.</span>
         </h1>
-        <p style={{ fontSize: 18, color: C.ash, maxWidth: 580, margin: "0 auto 40px", lineHeight: 1.7 }}>
+        <p style={{ fontSize: isMobile ? 15 : 18, color: C.ash, maxWidth: 580, margin: "0 auto 32px", lineHeight: 1.7 }}>
           ByteSense is redefining health intelligence — and your practice is now on the front line.
           Together, we're giving patients the power to understand what their body does while they sleep.
         </p>
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", flexDirection: isMobile ? "column" : "row", padding: isMobile ? "0 8px" : 0 }}>
           <button onClick={() => navigate('/register')}
-            style={{ background: C.gradRed, color: "#fff", border: "none", padding: "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", letterSpacing: 0.5, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3), transition: "all 0.3s" }}
+            style={{ background: C.gradRed, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", letterSpacing: 0.5, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3), transition: "all 0.3s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
             Join the ByteSense Family →
           </button>
           <button onClick={() => setShowDemo(true)}
-            style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "16px 32px", fontSize: 16, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), transition: "all 0.3s" }}
+            style={{ background: C.gradTeal, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), transition: "all 0.3s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
             Request a Demo
           </button>
           <button onClick={() => navigate('/login')}
-            style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "16px 32px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
+            style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
             onMouseEnter={e => e.currentTarget.style.borderColor = C.glassHover}
             onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
             Sign In
@@ -99,7 +101,7 @@ export default function Welcome() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 52, padding: "40px 24px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: isMobile ? 28 : 52, padding: isMobile ? "28px 16px" : "40px 24px", flexWrap: "wrap" }}>
         {[
           { n: "6", l: "Medical-Grade Sensors" },
           { n: "100", l: "Daily Health Score" },
@@ -114,14 +116,14 @@ export default function Welcome() {
       </div>
 
       {/* Revenue Calculator */}
-      <div style={{ maxWidth: 840, margin: "0 auto", padding: "40px 24px" }}>
-        <div style={{ ...glass, padding: 36 }}>
+      <div style={{ maxWidth: 840, margin: "0 auto", padding: isMobile ? "24px 16px" : "40px 24px" }}>
+        <div style={{ ...glass, padding: isMobile ? "20px 16px" : 36 }}>
           <div style={{ textAlign: "center", marginBottom: 28 }}>
             <div style={{ fontSize: 10, letterSpacing: 5, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 10 }}>Revenue Calculator</div>
-            <h2 style={{ fontSize: 30, fontWeight: 800, marginBottom: 8 }}>See Your <span style={{ background: C.gradTeal, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Revenue Potential</span></h2>
+            <h2 style={{ fontSize: isMobile ? 22 : 30, fontWeight: 800, marginBottom: 8 }}>See Your <span style={{ background: C.gradTeal, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Revenue Potential</span></h2>
             <p style={{ color: C.ash, fontSize: 14 }}>Adjust the sliders to see how ByteSense can impact your bottom line</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24, marginBottom: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: isMobile ? 20 : 24, marginBottom: 28 }}>
             {[
               { label: "Patients / Month", value: revPatients, min: 50, max: 800, step: 1, set: setRevPatients, color: C.teal, format: (v: number) => `${v}` },
               { label: "Avg Case Price ($)", value: revPrice, min: 500, max: 5000, step: 100, set: setRevPrice, color: C.gold, format: (v: number) => `$${v.toLocaleString()}` },
@@ -134,15 +136,15 @@ export default function Welcome() {
               </div>
             ))}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div style={{ background: "rgba(255,255,255,0.03)", padding: 24, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.glassBorder}` }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+            <div style={{ background: "rgba(255,255,255,0.03)", padding: isMobile ? 16 : 24, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.glassBorder}` }}>
               <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Current Monthly Revenue</div>
-              <div style={{ fontSize: 32, fontWeight: 800, color: C.ash }}>${currentRev.toLocaleString()}</div>
+              <div style={{ fontSize: isMobile ? 26 : 32, fontWeight: 800, color: C.ash }}>${currentRev.toLocaleString()}</div>
               <div style={{ fontSize: 12, color: C.slate, marginTop: 4 }}>{revClose}% close rate</div>
             </div>
-            <div style={{ background: `rgba(20,184,166,0.06)`, padding: 24, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: C.glow(C.teal, 0.08) }}>
+            <div style={{ background: `rgba(20,184,166,0.06)`, padding: isMobile ? 16 : 24, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: C.glow(C.teal, 0.08) }}>
               <div style={{ fontSize: 10, color: C.teal, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>With ByteSense</div>
-              <div style={{ fontSize: 32, fontWeight: 800, color: C.teal }}>${projectedRev.toLocaleString()}</div>
+              <div style={{ fontSize: isMobile ? 26 : 32, fontWeight: 800, color: C.teal }}>${projectedRev.toLocaleString()}</div>
               <div style={{ fontSize: 12, color: C.teal, marginTop: 4 }}>{projectedClose.toFixed(0)}% projected close rate</div>
             </div>
           </div>
@@ -153,7 +155,7 @@ export default function Welcome() {
       </div>
 
       {/* Value Props */}
-      <div style={{ maxWidth: 840, margin: "0 auto", padding: "40px 24px 60px" }}>
+      <div style={{ maxWidth: 840, margin: "0 auto", padding: isMobile ? "24px 16px 40px" : "40px 24px 60px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
           {[
             { icon: "◆", title: "Exclusive Partnership", desc: "You're one of a select group of practices chosen to bring health intelligence to your patients.", color: C.red },
@@ -173,21 +175,21 @@ export default function Welcome() {
       </div>
 
       {/* Empowerment */}
-      <div style={{ background: "rgba(20,20,28,0.5)", backdropFilter: C.blur, padding: "70px 24px", textAlign: "center" }}>
+      <div style={{ background: "rgba(20,20,28,0.5)", backdropFilter: C.blur, padding: isMobile ? "48px 16px" : "70px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 660, margin: "0 auto" }}>
           <div style={{ fontSize: 10, letterSpacing: 5, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 18 }}>
             Your Patients Are Counting on You
           </div>
-          <h2 style={{ fontSize: 30, fontWeight: 800, marginBottom: 18, lineHeight: 1.2 }}>
-            60–80% of people who grind their teeth<br />
+          <h2 style={{ fontSize: isMobile ? 22 : 30, fontWeight: 800, marginBottom: 18, lineHeight: 1.2 }}>
+            {isMobile ? "60–80% of people who grind their teeth " : <>60–80% of people who grind their teeth<br /></>}
             <span style={{ color: C.red }}>have no idea.</span>
           </h2>
-          <p style={{ color: C.ash, fontSize: 15, lineHeight: 1.8, marginBottom: 36 }}>
+          <p style={{ color: C.ash, fontSize: isMobile ? 14 : 15, lineHeight: 1.8, marginBottom: 36 }}>
             You have the power to change that. Every patient you educate, every conversation you start,
             every recommendation you make — you're protecting someone's health in a way no one else can.
           </p>
           <button onClick={() => navigate('/register')}
-            style={{ background: C.gradTeal, color: C.white, border: "none", padding: "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25) }}>
+            style={{ background: C.gradTeal, color: C.white, border: "none", padding: isMobile ? "14px 28px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), width: isMobile ? "100%" : "auto" }}>
             Start Your Training →
           </button>
         </div>
@@ -201,7 +203,7 @@ export default function Welcome() {
       {/* Full-Screen Demo Request Modal */}
       {showDemo && (
         <div style={{ position: "fixed", inset: 0, background: `radial-gradient(ellipse at top, #1a1a28, ${C.dark})`, zIndex: 1000, overflow: "auto" }}>
-          <div style={{ maxWidth: 660, margin: "0 auto", padding: "40px 24px", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+          <div style={{ maxWidth: 660, margin: "0 auto", padding: isMobile ? "24px 16px 48px" : "40px 24px", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36 }}>
               <img src="/bytesense-logo.png" alt="ByteSense" style={{ height: 34, filter: "drop-shadow(0 0 1px rgba(255,255,255,0.9))" }} />
               <button onClick={() => { setShowDemo(false); setDemoStep(0); }}
@@ -313,7 +315,7 @@ export default function Welcome() {
 
                 <div style={{ marginBottom: 24 }}>
                   <label style={{ fontSize: 13, color: C.white, fontWeight: 700, display: "block", marginBottom: 14 }}>What are your goals with ByteSense?</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
                     {GOALS_LIST.map(g => (
                       <div key={g} onClick={() => toggleGoal(g)}
                         style={{ padding: "13px 16px", background: demoData.goals.includes(g) ? `${C.teal}10` : "rgba(255,255,255,0.03)", border: `1.5px solid ${demoData.goals.includes(g) ? C.teal : C.glassBorder}`, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 10, borderRadius: C.radiusSm, transition: "all 0.2s" }}>

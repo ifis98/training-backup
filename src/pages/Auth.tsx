@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable/index';
 import { C } from '@/data/constants';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AuthPageProps {
   mode: 'login' | 'register';
@@ -11,6 +11,7 @@ interface AuthPageProps {
 
 export default function AuthPage({ mode }: AuthPageProps) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -214,19 +215,18 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin },
       });
-      if (result.error) {
-        toast.error(result.error.message || 'Google sign-in failed');
-      }
+      if (error) toast.error(error.message || 'Google sign-in failed');
     } catch (err: any) {
       toast.error(err.message || 'Google sign-in failed');
     }
   };
 
   const inputStyle = {
-    width: "100%", padding: "14px 16px", fontSize: 15, fontFamily: C.fn,
+    width: "100%", padding: isMobile ? "12px 14px" : "14px 16px", fontSize: 15, fontFamily: C.fn,
     border: `1.5px solid ${C.borderD}`, background: C.dark2, color: C.white,
     outline: "none", boxSizing: "border-box" as const,
   };
@@ -237,14 +237,14 @@ export default function AuthPage({ mode }: AuthPageProps) {
   };
 
   const btnStyle = (bg: string) => ({
-    background: bg, color: "#fff", border: "none", padding: "14px 28px",
+    background: bg, color: "#fff", border: "none", padding: isMobile ? "12px 20px" : "14px 28px",
     fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer",
     width: "100%", opacity: loading ? 0.6 : 1,
   });
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ maxWidth: 420, width: "100%", padding: "40px 24px" }}>
+    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "center" }}>
+      <div style={{ maxWidth: 420, width: "100%", padding: isMobile ? "32px 16px 48px" : "40px 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <img
             src="/bytesense-logo.png"
