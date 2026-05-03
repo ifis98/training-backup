@@ -372,9 +372,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
       {/* Subtle color dot accent */}
       <div style={{ width: 6, height: 6, borderRadius: "50%", background: color, marginBottom: 14, opacity: 0.85 }} />
-      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 8, fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 34, fontWeight: 700, color, lineHeight: 1, letterSpacing: "-0.02em" }}>{value}</div>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 7, letterSpacing: "0.02em" }}>{sub}</div>
+      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 10, fontWeight: 700 }}>{label}</div>
+      <div style={{ fontSize: 36, fontWeight: 800, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{value}</div>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 8, letterSpacing: "0.02em" }}>{sub}</div>
     </div>
   );
 
@@ -511,8 +511,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {(isOwnerOrManager || practiceGoals) && (
           <div style={{ marginBottom: 28 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", gap: 10 }}>
-                <TrendingUp size={18} strokeWidth={1.5} color={C.teal} /> {T("practice_performance")}
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 6 }}>
+                <TrendingUp size={12} strokeWidth={1.5} color={C.teal} /> {T("practice_performance")}
               </div>
               {!editingGoals && (
                 <button onClick={startEditGoals}
@@ -560,7 +560,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 {editCaseGoal > 0 && editPricePerCase > 0 && (
                   <div style={{ marginTop: 12, padding: "10px 14px", background: "rgba(20,184,166,0.08)", borderRadius: C.radiusXs, border: `1px solid ${C.teal}30` }}>
                     <p style={{ fontSize: 12, color: C.teal, lineHeight: 1.6, margin: 0 }}>
-                      💡 {T("daily_breakdown")
+                      {T("daily_breakdown")
                         .replace("{cpd}", String(Math.ceil(editCaseGoal / 20)))
                         .replace("{price}", `$${editPricePerCase.toLocaleString()}`)
                         .replace("{revenue}", `$${(editCaseGoal * editPricePerCase).toLocaleString()}`)}
@@ -582,7 +582,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               </div>
             )}
             {(practiceGoals || cases.length > 0) && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 14 }}>
               <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: C.glow(C.teal, 0.06) }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: C.gradTeal }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -678,8 +678,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
           {/* Training Recommendations */}
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, overflow: "hidden", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 18, display: "flex", alignItems: "center", gap: 8, letterSpacing: "-0.01em" }}>
-              <Target size={15} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
+              <Target size={12} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
               {simReviews.length > 0 && (
                 <span style={{ fontSize: 9, color: C.teal, background: `${C.teal}15`, padding: "2px 8px", borderRadius: 999, fontWeight: 600 }}>
                   {T("sim_driven")}
@@ -761,11 +761,17 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={phaseChartData} barSize={14}>
+                <defs>
+                  <linearGradient id="doneGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={C.teal} stopOpacity={1} />
+                    <stop offset="100%" stopColor={C.teal} stopOpacity={0.5} />
+                  </linearGradient>
+                </defs>
                 <XAxis dataKey="name" tick={{ fill: C.ash, fontSize: 9 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} cursor={{ fill: 'transparent' }} />
-                <Bar dataKey="done" stackId="a" fill={C.teal} radius={[0, 0, 0, 0]} name={T("done_label")} />
-                <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" radius={[4, 4, 0, 0]} name={T("remaining_label")} />
+                <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                <Bar dataKey="done" stackId="a" fill="url(#doneGrad)" radius={[0, 0, 0, 0]} name={T("done_label")} />
+                <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.05)" radius={[4, 4, 0, 0]} name={T("remaining_label")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -803,9 +809,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Case Pipeline — Owner/Manager */}
         {isOwnerOrManager && (
           <div id="section-cases" style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
-            <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Briefcase size={16} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
+            <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 6 }}>
+                <Briefcase size={13} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
               </span>
               <button onClick={() => setShowAddCase(!showAddCase)}
                 style={{ background: C.gradTeal, color: C.white, border: "none", padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4 }}>
@@ -892,14 +898,14 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 <AreaChart data={caseAnalyticsData}>
                   <defs>
                     <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={C.teal} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={C.teal} stopOpacity={0} />
+                      <stop offset="0%" stopColor={C.teal} stopOpacity={0.45} />
+                      <stop offset="100%" stopColor={C.teal} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="month" tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
                   <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} formatter={(v: number) => [`${v}%`, T("conversion_rate")]} />
-                  <Area type="monotone" dataKey="conversionRate" stroke={C.teal} fill="url(#convGrad)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="conversionRate" stroke={C.teal} fill="url(#convGrad)" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: C.teal }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -909,10 +915,16 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               </div>
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={caseAnalyticsData} barSize={20}>
+                  <defs>
+                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={C.gold} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={C.gold} stopOpacity={0.35} />
+                    </linearGradient>
+                  </defs>
                   <XAxis dataKey="month" tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} formatter={(v: number) => [`$${v.toLocaleString()}`, T("revenue_label")]} />
-                  <Bar dataKey="revenue" fill={C.gold} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="revenue" fill="url(#revGrad)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -951,7 +963,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <Trophy size={22} strokeWidth={1.5} /> {T("all_complete")}
             </div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
-              style={{ background: C.gradRed, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3) }}>
+              style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.3) }}>
               {T("complete_onboarding")}
             </button>
           </div>
@@ -968,11 +980,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Training Modules Accordion */}
         <div id="section-training" style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
-          <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <ClipboardList size={16} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
+          <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 6 }}>
+              <ClipboardList size={13} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
             </span>
-            <span style={{ fontSize: 11, color: C.ash, background: "rgba(255,255,255,0.06)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
+            <span style={{ fontSize: 9, color: C.ash, background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: 999 }}>{dN}/{myM.length}</span>
           </div>
           {myPH.map(phase => {
             const pm = myM.filter(m => m.phase === phase.id);
@@ -1025,11 +1037,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Revenue Calculator — Owner/Manager only */}
         {isOwnerOrManager && (
           <div style={{ ...glass, padding: 28, marginBottom: 24 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: C.radiusSm, background: C.gradGold, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <DollarSign size={16} strokeWidth={1.5} color={C.dark} />
-              </div>
-               {T("revenue_calculator")}
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 22, display: "flex", alignItems: "center", gap: 6 }}>
+              <DollarSign size={12} strokeWidth={1.5} color={C.gold} />
+              {T("revenue_calculator")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 24 }}>
               {[
@@ -1064,7 +1074,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         )}
 
         {/* Goals & Notes Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginBottom: 24 }}>
           <div style={{ ...glass, padding: 22 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <Target size={14} strokeWidth={1.5} color={C.teal} /> {T("goals_label")}
@@ -1125,33 +1135,36 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </div>
 
         {/* Quick Reference */}
-        <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
-          <div style={{ background: C.gradRed, color: C.white, padding: "12px 20px", fontSize: 13, fontWeight: 700, borderRadius: `${C.radius} ${C.radius} 0 0` }}>{T("quick_reference")}</div>
-          <div style={{ padding: 20, fontSize: 12, color: C.ash, lineHeight: 2 }}>
-            <div>· {T("ref_not_nightguard")}</div>
-            <div>· {T("ref_sensors")}</div>
-            <div>· {T("ref_data")}</div>
-            <div>· {T("ref_never_say")}</div>
-            <div>· {T("ref_support")}</div>
-            <div>· {T("ref_tech")}</div>
-            <div>· {T("ref_lab")}</div>
+        <div style={{ ...glass, padding: "20px 22px", marginBottom: 24 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 16, display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("quick_reference")}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {[T("ref_not_nightguard"), T("ref_sensors"), T("ref_data"), T("ref_never_say"), T("ref_support"), T("ref_tech"), T("ref_lab")].map((ref, i) => (
+              <div key={i} style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.8, paddingLeft: 12, borderLeft: "2px solid rgba(255,255,255,0.06)" }}>
+                {ref}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Support + Reset */}
-        <div style={{ display: "flex", gap: 14, marginBottom: 24 }}>
-          <div style={{ flex: 1, ...glass, padding: 22, textAlign: "center" }}>
-            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>{T("need_help")}</div>
+        <div style={{ display: "flex", gap: 14, marginBottom: 24, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 200, ...glass, padding: "20px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>{T("need_help")}</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Book a 1-on-1 support call</div>
+            </div>
             <button onClick={() => setShowBooking(true)}
-              style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "11px 24px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>
+              style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, flexShrink: 0 }}>
               {T("schedule_call")}
             </button>
           </div>
-          <div style={{ ...glass, padding: 22, textAlign: "center", display: "flex", alignItems: "center" }}>
+          <div style={{ ...glass, padding: "20px 22px", display: "flex", alignItems: "center" }}>
             <button onClick={reset}
-              style={{ background: "transparent", color: C.slate, border: `1px solid ${C.glassBorder}`, padding: "11px 24px", fontSize: 12, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = C.red}
-              onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
+              style={{ background: "transparent", color: "rgba(255,255,255,0.3)", border: `1px solid rgba(255,255,255,0.07)`, padding: "10px 20px", fontSize: 11, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s", letterSpacing: "0.04em" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(204,16,16,0.4)"; e.currentTarget.style.color = C.red; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "rgba(255,255,255,0.3)"; }}>
               {T("reset_progress")}
             </button>
           </div>
