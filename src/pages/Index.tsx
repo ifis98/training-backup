@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,7 +14,6 @@ import Simulation from '@/screens/Simulation';
 import SimulationSummary from '@/screens/SimulationSummary';
 import Report from '@/screens/Report';
 import AICoach from '@/components/AICoach';
-import { C } from '@/data/constants';
 import { Lang } from '@/data/translations';
 
 interface IndexProps { forceView?: 'staff' | 'owner'; }
@@ -37,9 +35,6 @@ const Index = ({ forceView }: IndexProps = {}) => {
     setCoachMode(mode);
     setShowCoach(true);
   };
-
-  // Don't show floating coach on pre-training screens
-  const showFloatingCoach = !['splash', 'setup', 'baseline', 'blR', 'intake'].includes(s.phase);
 
   const renderScreen = () => {
     // ── Intake flow (first-time setup) ──────────────────────────────────
@@ -81,21 +76,7 @@ const Index = ({ forceView }: IndexProps = {}) => {
   return (
     <>
       {renderScreen()}
-      {showFloatingCoach && (
-        <button
-          onClick={() => openCoach('general')}
-          style={{
-            position: 'fixed', bottom: 80, right: 24, width: 56, height: 56,
-            borderRadius: '50%', background: C.gold, border: 'none',
-            cursor: 'pointer', boxShadow: '0 4px 20px rgba(201,168,76,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-            color: C.dark,
-          }}
-        >
-          <Sparkles size={24} strokeWidth={2} />
-        </button>
-      )}
-      {showCoach && <AICoach onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />}
+{showCoach && <AICoach onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />}
     </>
   );
 };

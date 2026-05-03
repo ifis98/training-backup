@@ -48,7 +48,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     { id: "signout", icon: LogOut, label: T("sign_out"), mobileLabel: "Sign Out", action: onSignOut },
   ];
 
-  // Mobile: fixed bottom navigation bar (4 core items + sign out)
+  // Mobile: fixed bottom navigation bar (4 core items only)
   if (isMobile) {
     const mobileItems = [
       navItems[0], // Dashboard
@@ -63,7 +63,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
         left: 0,
         right: 0,
         height: 60,
-        background: "rgba(14, 14, 20, 0.97)",
+        background: "rgba(10, 10, 14, 0.98)",
         backdropFilter: C.blur,
         WebkitBackdropFilter: C.blur,
         borderTop: `1px solid ${C.glassBorder}`,
@@ -89,39 +89,27 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 3,
+                gap: 4,
                 cursor: isDisabled ? "not-allowed" : "pointer",
                 opacity: isDisabled ? 0.3 : 1,
-                color: isActive ? C.teal : C.ash,
+                color: isActive ? C.teal : "rgba(160,160,180,0.7)",
                 borderTop: isActive ? `2px solid ${C.teal}` : "2px solid transparent",
-                background: isActive ? "rgba(20,184,166,0.08)" : "transparent",
+                background: isActive ? "rgba(20,184,166,0.06)" : "transparent",
                 transition: "all 0.2s",
               }}
             >
-              <item.icon size={20} strokeWidth={1.5} />
-              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.3, fontFamily: C.fn }}>{(item as any).mobileLabel || item.label}</span>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: isActive ? "rgba(20,184,166,0.12)" : "transparent",
+                transition: "all 0.2s",
+              }}>
+                <item.icon size={18} strokeWidth={isActive ? 2 : 1.5} />
+              </div>
+              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.2, fontFamily: C.fn }}>{(item as any).mobileLabel || item.label}</span>
             </div>
           );
         })}
-        {/* Sign Out */}
-        <div
-          onClick={onSignOut}
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 3,
-            cursor: "pointer",
-            color: C.ash,
-            borderTop: "2px solid transparent",
-            transition: "all 0.2s",
-          }}
-        >
-          <LogOut size={20} strokeWidth={1.5} />
-          <span style={{ fontSize: 9, fontFamily: C.fn, letterSpacing: 0.3 }}>{T("sign_out")}</span>
-        </div>
       </div>
     );
   }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { toast } from 'sonner';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
 import { Module } from '@/data/constants';
@@ -44,6 +45,8 @@ const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
 
 export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: DashboardProps) {
   const isMobile = useIsMobile();
+  const { user: clerkUser } = useUser();
+  const displayName = clerkUser?.firstName || clerkUser?.fullName || s.name || '';
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -387,11 +390,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             {/* Left: avatar + name + roles */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: isMobile ? 32 : 38, height: isMobile ? 32 : 38, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? 14 : 17, fontWeight: 800, flexShrink: 0 }}>
-                {(s.name || 'U')[0].toUpperCase()}
+                {(displayName || 'U')[0].toUpperCase()}
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: isMobile ? 14 : 17, fontWeight: 700, lineHeight: 1 }}>{s.name || 'Welcome'}</span>
+                  <span style={{ fontSize: isMobile ? 14 : 17, fontWeight: 700, lineHeight: 1 }}>{displayName || 'Welcome'}</span>
                   {hasCertifiedBadge && <span style={{ background: `${C.gold}20`, color: C.gold, padding: "1px 7px", fontSize: 9, fontWeight: 700, borderRadius: 999 }}>★ Certified</span>}
                 </div>
                 <div style={{ display: "flex", gap: 4, marginTop: 3, flexWrap: "wrap" }}>
@@ -447,17 +450,17 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       </div>
 
       {/* ── Mobile slide-in menu ── */}
-      {isMobile && showMobileMenu && (
+      {isMobile && (
         <>
           {/* Backdrop */}
           <div onClick={() => setShowMobileMenu(false)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(2px)" }} />
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(2px)", opacity: showMobileMenu ? 1 : 0, pointerEvents: showMobileMenu ? "auto" : "none", transition: "opacity 0.25s ease" }} />
           {/* Drawer */}
-          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 260, background: "rgba(14,14,20,0.98)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderLeft: `1px solid ${C.glassBorder}`, zIndex: 201, display: "flex", flexDirection: "column", padding: "20px 0" }}>
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 270, background: "rgba(10,10,14,0.99)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderLeft: `1px solid ${C.glassBorder}`, zIndex: 201, display: "flex", flexDirection: "column", padding: "20px 0", transform: showMobileMenu ? "translateX(0)" : "translateX(100%)", transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)", boxShadow: showMobileMenu ? "-20px 0 60px rgba(0,0,0,0.5)" : "none" }}>
             {/* Close */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px 16px", borderBottom: `1px solid ${C.glassBorder}` }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{s.name || 'Menu'}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{displayName || 'Menu'}</div>
                 <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>{s.practice}</div>
               </div>
               <button onClick={() => setShowMobileMenu(false)}
