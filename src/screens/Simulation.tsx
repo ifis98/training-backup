@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { C, ROLES } from '@/data/constants';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Mic, MicOff, Send } from 'lucide-react';
 import { scrollTop, startSTT } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
@@ -90,9 +90,12 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   };
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
-      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+    // height: 100dvh = dynamic viewport height (shrinks when iOS keyboard appears)
+    // overflow: hidden = outer shell never scrolls; only the chat list scrolls internally
+    <div style={{ fontFamily: C.fn, background: C.dark, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+      {/* ── Header (fixed top) ── */}
+      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
         <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
           style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
           <ChevronLeft size={16} strokeWidth={2} /> {T("back")}
@@ -101,13 +104,35 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700, minWidth: 30, textAlign: "right" }}>{s.simP}/3</div>
       </div>
 
-      {/* Patient card */}
-      <div style={{ margin: isMobile ? "12px 12px 0" : "16px 24px 0", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: isMobile ? "12px 16px" : "14px 20px" }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>{T("patient_label")} {patient.name}, {patient.age}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{patient.card}</div>
+      {/* ── Patient card (fixed below header) ── */}
+      <div style={{ margin: isMobile ? "10px 12px 0" : "14px 24px 0", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: isMobile ? "10px 14px" : "14px 20px", flexShrink: 0 }}>
+        <div style={{ fontSize: isMobile ? 13 : 14, fontWeight: 700, color: C.white, marginBottom: 2 }}>{T("patient_label")} {patient.name}, {patient.age}</div>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{patient.card}</div>
       </div>
 
-      <div style={{ flex: 1, padding: isMobile ? "12px 12px" : "16px 24px", overflowY: "auto", minHeight: 200 }}>
+      {/* ── Completion banner (shown above chat when done) ── */}
+      {s.simP >= 3 && (
+        <div style={{ background: C.green, color: C.white, padding: isMobile ? "10px 16px" : "10px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, margin: isMobile ? "8px 12px 0" : "10px 24px 0", borderRadius: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>3 {T("patients_guided")}</span>
+          <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}
+            style={{ background: "rgba(255,255,255,0.2)", color: C.white, border: "none", padding: "6px 14px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: 6 }}>
+            {T("return_arrow")}
+          </button>
+        </div>
+      )}
+
+      {/* ── New patient prompt ── */}
+      {s.simMsgs.length >= 8 && s.simP < 3 && (
+        <div style={{ padding: isMobile ? "6px 12px" : "6px 24px", textAlign: "center", flexShrink: 0 }}>
+          <button onClick={handleNewPatient}
+            style={{ background: C.gold, color: C.dark, border: "none", padding: "8px 18px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: 6 }}>
+            {T("new_patient")}
+          </button>
+        </div>
+      )}
+
+      {/* ── Chat messages (scrollable fill) ── */}
+      <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? "12px 12px" : "16px 24px", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
         {s.simMsgs.length === 0 && (
           <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 40 }}>
             {T("start_conversation").replace("{name}", patient.name)}
@@ -150,38 +175,28 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         <div ref={chatEnd} />
       </div>
 
-      {s.simP >= 3 && (
-        <div style={{ background: C.green, color: C.white, padding: isMobile ? "10px 16px" : "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 14, fontWeight: 700 }}>3 {T("patients_guided")}</span>
-          <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}
-            style={{ background: "rgba(255,255,255,0.2)", color: C.white, border: "none", padding: "8px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-            {T("return_arrow")}
-          </button>
-        </div>
-      )}
-
-      {s.simMsgs.length >= 8 && s.simP < 3 && (
-        <div style={{ padding: isMobile ? "8px 16px" : "8px 24px", textAlign: "center" }}>
-          <button onClick={handleNewPatient}
-            style={{ background: C.gold, color: C.dark, border: "none", padding: "10px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer" }}>
-            {T("new_patient")}
-          </button>
-        </div>
-      )}
-
-      <div style={{ padding: isMobile ? "10px 12px" : "12px 24px", borderTop: `1px solid ${C.borderD}`, display: "flex", gap: 8, alignItems: "center" }}>
+      {/* ── Input bar (fixed bottom) ── */}
+      <div style={{
+        padding: isMobile ? "10px 12px" : "12px 24px",
+        paddingBottom: isMobile ? "calc(10px + env(safe-area-inset-bottom))" : "12px",
+        borderTop: `1px solid ${C.borderD}`,
+        display: "flex", gap: 8, alignItems: "center",
+        background: C.dark, flexShrink: 0,
+      }}>
         <button onClick={handleMic}
-          style={{ width: 40, height: 40, background: s.lst ? C.red : C.dark2, border: "none", borderRadius: "50%", fontSize: 18, cursor: "pointer", flexShrink: 0 }}>🎤</button>
+          style={{ width: 40, height: 40, background: s.lst ? `${C.red}25` : "rgba(255,255,255,0.06)", border: `1px solid ${s.lst ? C.red : "rgba(255,255,255,0.1)"}`, borderRadius: "50%", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {s.lst ? <MicOff size={16} strokeWidth={1.5} color={C.red} /> : <Mic size={16} strokeWidth={1.5} color={C.ash} />}
+        </button>
         <input
           value={s.simIn}
           onChange={e => u({ simIn: e.target.value })}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
           placeholder={T("talk_to").replace("{name}", patient.name)}
-          style={{ flex: 1, background: C.dark2, border: "none", color: C.white, padding: isMobile ? "10px 10px" : "10px 14px", fontSize: isMobile ? 13 : 14, fontFamily: C.fn, outline: "none", minWidth: 0 }}
+          style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, color: C.white, padding: isMobile ? "10px 12px" : "10px 14px", fontSize: isMobile ? 14 : 14, fontFamily: C.fn, outline: "none", minWidth: 0 }}
         />
-        <button onClick={() => sendMessage()}
-          style={{ background: C.teal, color: C.white, border: "none", padding: isMobile ? "10px 12px" : "10px 16px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", flexShrink: 0 }}>
-          {T("send")}
+        <button onClick={() => sendMessage()} disabled={!s.simIn.trim() || loading}
+          style={{ width: 40, height: 40, background: s.simIn.trim() && !loading ? C.teal : "rgba(255,255,255,0.06)", border: "none", borderRadius: "50%", cursor: s.simIn.trim() && !loading ? "pointer" : "default", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
+          <Send size={16} strokeWidth={2} color={s.simIn.trim() && !loading ? C.dark : C.ash} />
         </button>
       </div>
     </div>
