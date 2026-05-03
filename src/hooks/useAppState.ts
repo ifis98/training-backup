@@ -29,13 +29,14 @@ export interface AppState {
   spk: boolean;
   signed: boolean;
   lang: string;
+  intakeDone: boolean;
 }
 
 const defaultState: AppState = {
-  phase: "splash",
-  name: "",
+  phase: 'splash',
+  name: '',
   roles: [],
-  practice: "",
+  practice: '',
   seed: 0,
   bl: [],
   blIdx: 0,
@@ -46,26 +47,28 @@ const defaultState: AppState = {
   ckA: null,
   mQs: {},
   simMsgs: [],
-  simIn: "",
+  simIn: '',
   simP: 0,
   lst: false,
   xp: 0,
   spk: false,
   signed: false,
-  lang: "en",
+  lang: 'en',
+  intakeDone: false,
 };
 
-export function useAppState() {
+/** Pass the Clerk user ID so we can sync to the DB without calling supabase.auth */
+export function useAppState(clerkUserId: string | null = null) {
   const [s, setS] = useState<AppState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const d = JSON.parse(saved);
-        if (d?.phase && d.phase !== "splash") {
+        if (d?.phase && d.phase !== 'splash') {
           return {
             ...defaultState,
             ...d,
-            phase: d.phase === "module" ? "dashboard" : d.phase,
+            phase: d.phase === 'module' ? 'dashboard' : d.phase,
             lst: false,
           };
         }
@@ -82,7 +85,7 @@ export function useAppState() {
 
   // Persist to localStorage
   useEffect(() => {
-    if (s.phase !== "splash") {
+    if (s.phase !== 'splash') {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, lst: false }));
       } catch {}
@@ -91,18 +94,10 @@ export function useAppState() {
 
   // Debounced sync to database
   useEffect(() => {
-    if (s.phase === "splash") return;
+    if (!clerkUserId || s.phase === 'splash') return;
     if (syncTimer.current) clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const { data: existing } = await supabase
-          .from('training_progress')
-          .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
         const payload = {
           training_roles: s.roles,
           baseline_score: s.blScore,
@@ -114,47 +109,28 @@ export function useAppState() {
           name: s.name,
           practice: s.practice,
         };
-
-        if (existing) {
-          await supabase.from('training_progress').update(payload).eq('id', existing.id);
-        } else {
-          const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).maybeSingle();
-          await supabase.from('training_progress').insert({
-            user_id: user.id,
-            practice_id: profile?.practice_id || null,
-            ...payload,
-          });
-        }
+        await supabase
+          .from('training_progress')
+          .upsert({ clerk_user_id: clerkUserId, ...payload }, { onConflict: 'clerk_user_id' });
       } catch {}
     }, SYNC_DEBOUNCE);
     return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
-  }, [s.roles, s.blScore, s.done, s.xp, s.simP, s.signed, s.name, s.practice]);
+  }, [clerkUserId, s.roles, s.blScore, s.done, s.xp, s.simP, s.signed, s.name, s.practice]);
 
-  // Load from DB on mount
+  // Load from DB on mount (when we have a Clerk user)
   useEffect(() => {
+    if (!clerkUserId) return;
     (async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        
-        // Load training progress
         const { data } = await supabase
           .from('training_progress')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('clerk_user_id', clerkUserId)
           .maybeSingle();
-        
-        // Load profile for name fallback
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        
+
         if (data) {
-          const restoredName = (data as any).name || profile?.full_name || '';
+          const restoredName = (data as any).name || '';
           const restoredPractice = (data as any).practice || '';
-          
           setS(prev => {
             const hasProgress = data.done_modules?.length > 0 || data.training_roles?.length > 0;
             return {
@@ -167,27 +143,20 @@ export function useAppState() {
               signed: data.signed || prev.signed,
               name: restoredName || prev.name,
               practice: restoredPractice || prev.practice,
-              // Skip splash if we have name and progress
-              phase: (restoredName && hasProgress && prev.phase === "splash") ? "dashboard" : prev.phase,
+              phase: (restoredName && hasProgress && prev.phase === 'splash') ? 'dashboard' : prev.phase,
             };
           });
-        } else if (profile?.full_name) {
-          // No training progress yet but we have a profile name
-          setS(prev => ({
-            ...prev,
-            name: prev.name || profile.full_name,
-          }));
         }
       } catch {}
     })();
-  }, []);
+  }, [clerkUserId]);
 
   const sRoles = useMemo(() => ROLES.filter(r => s.roles.includes(r.id)), [s.roles]);
   const sc = s.blScore || 0;
   const myPH = useMemo(() => PH.filter(p => (p.minScore === -1 ? sc <= p.maxScore : true)), [sc]);
   const myM = useMemo(() => M.filter(m => {
     const phOk = myPH.some(p => p.id === m.phase);
-    const roleOk = m.roles.includes("all") || m.roles.some(r => s.roles.includes(r));
+    const roleOk = m.roles.includes('all') || m.roles.some(r => s.roles.includes(r));
     return phOk && roleOk;
   }), [myPH, s.roles]);
 

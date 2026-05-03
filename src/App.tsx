@@ -3,43 +3,70 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SignIn, SignUp, useUser } from "@clerk/clerk-react";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
-import AuthPage from "./pages/Auth";
 import ByteSenseAdmin from "./pages/ByteSenseAdmin";
-import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import DashboardSwitcher from "./components/DashboardSwitcher";
+import { C } from "@/data/constants";
 
 const queryClient = new QueryClient();
 
+/** Centred Clerk-hosted sign-in / sign-up components */
+function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
+  return (
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: C.dark, fontFamily: C.fn,
+    }}>
+      {mode === "sign-in"
+        ? <SignIn routing="path" path="/login" signUpUrl="/register" afterSignInUrl="/" />
+        : <SignUp routing="path" path="/register" signInUrl="/login" afterSignUpUrl="/" />
+      }
+    </div>
+  );
+}
+
 function AppRoutes() {
-  const { user, loading, isByteSenseAdmin } = useAuth();
-  const email = (user?.email || "").toLowerCase();
-  const SUPER_USERS = ["nbc1079@gmail.com", "natasha@bytesense.ai", "majid@bytesense.ai", "john@bytesense.ai"];
-  const isSuperUser = SUPER_USERS.includes(email);
+  const { user: clerkUser, isLoaded } = useUser();
+  const { loading, isByteSenseAdmin, isSuperUser } = useAuth();
 
-  const defaultAuthenticatedRoute = (isByteSenseAdmin && !isSuperUser) ? "/bytesense-admin" : "/";
-
-  if (loading) {
-    return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0C0C0E", color: "#9898A8", fontFamily: "'Outfit', sans-serif" }}>Loading...</div>;
+  if (!isLoaded || loading) {
+    return (
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        background: C.dark, color: C.ash, fontFamily: C.fn,
+      }}>
+        Loading…
+      </div>
+    );
   }
+
+  const isSignedIn = !!clerkUser;
+  const defaultRoute = (isByteSenseAdmin && !isSuperUser) ? "/bytesense-admin" : "/";
 
   return (
     <>
       <Routes>
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/welcome" element={!user ? <Welcome /> : <Navigate to={defaultAuthenticatedRoute} />} />
-        <Route path="/login" element={!user ? <AuthPage mode="login" /> : <Navigate to={defaultAuthenticatedRoute} />} />
-        <Route path="/register" element={!user ? <AuthPage mode="register" /> : <Navigate to={defaultAuthenticatedRoute} />} />
-        <Route path="/bytesense-admin" element={<ByteSenseAdmin />} />
-        <Route path="/staff" element={user ? <Index forceView="staff" /> : <Navigate to="/welcome" />} />
-        <Route path="/owner" element={user ? <Index forceView="owner" /> : <Navigate to="/welcome" />} />
-        <Route path="/" element={user ? ((isByteSenseAdmin && !isSuperUser) ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/welcome" />} />
+        <Route path="/welcome" element={!isSignedIn ? <Welcome /> : <Navigate to={defaultRoute} />} />
+        <Route path="/login/*" element={!isSignedIn ? <AuthScreen mode="sign-in" /> : <Navigate to={defaultRoute} />} />
+        <Route path="/register/*" element={!isSignedIn ? <AuthScreen mode="sign-up" /> : <Navigate to={defaultRoute} />} />
+        <Route path="/bytesense-admin" element={isSignedIn ? <ByteSenseAdmin /> : <Navigate to="/welcome" />} />
+        <Route path="/staff" element={isSignedIn ? <Index forceView="staff" /> : <Navigate to="/welcome" />} />
+        <Route path="/owner" element={isSignedIn ? <Index forceView="owner" /> : <Navigate to="/welcome" />} />
+        <Route
+          path="/"
+          element={
+            isSignedIn
+              ? ((isByteSenseAdmin && !isSuperUser) ? <Navigate to="/bytesense-admin" /> : <Index />)
+              : <Navigate to="/welcome" />
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {user && isSuperUser && <DashboardSwitcher />}
+      {isSignedIn && isSuperUser && <DashboardSwitcher />}
     </>
   );
 }

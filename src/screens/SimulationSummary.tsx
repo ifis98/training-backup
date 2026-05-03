@@ -3,7 +3,7 @@ import { C } from '@/data/constants';
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, FUNCTIONS_URL, FUNCTIONS_KEY } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SimulationSummaryProps {
@@ -33,12 +33,10 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
 
   const saveSummaryToDb = async (data: SummaryData) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).maybeSingle();
+      const clerkUserId = (window as any).__clerkUserId as string | undefined;
+      if (!clerkUserId) return;
       await supabase.from('simulation_reviews').insert({
-        user_id: user.id,
-        practice_id: profile?.practice_id || null,
+        clerk_user_id: clerkUserId,
         session_number: s.simP,
         score: data.score,
         score_label: data.scoreLabel,
@@ -54,11 +52,9 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
   const generateSummary = async () => {
     try {
       const conversationText = s.simMsgs.map(m => `${m.r === "user" ? "Staff" : "Patient"}: ${m.t}`).join("\n");
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const resp = await fetch(`${supabaseUrl}/functions/v1/ai-coach`, {
+      const resp = await fetch(`${FUNCTIONS_URL}/functions/v1/ai-coach`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseKey}` },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FUNCTIONS_KEY}` },
         body: JSON.stringify({ messages: [{ role: "user", content: `Here is the full simulation conversation:\n\n${conversationText}\n\nPlease analyze and provide the structured coaching summary.` }], mode: "summary", lang }),
       });
       if (!resp.ok) throw new Error("Failed to generate summary");

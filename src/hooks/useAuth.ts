@@ -1,96 +1,72 @@
-import { useState, useEffect } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
 
-async function loadUserAccess(userId: string) {
-  const [{ data: profileData }, { data: roleData }] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single(),
-    supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId),
-  ]);
-
-  // Update last_seen_at (fire and forget)
-  supabase.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('user_id', userId).then(() => {});
-
-  return {
-    profile: profileData,
-    isAdmin: roleData?.some(r => r.role === 'admin') ?? false,
-    isByteSenseAdmin: roleData?.some(r => r.role === 'bytesense_admin') ?? false,
-    isStaff: roleData?.some(r => r.role === 'staff') ?? false,
-  };
-}
+const SUPER_USERS = ['nbc1079@gmail.com', 'natasha@bytesense.ai', 'majid@bytesense.ai', 'john@bytesense.ai'];
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, isLoaded } = useUser();
+  const { signOut: clerkSignOut } = useClerk();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isByteSenseAdmin, setIsByteSenseAdmin] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
+
+  const clerkUserId = user?.id ?? null;
+  const email = (user?.primaryEmailAddress?.emailAddress ?? '').toLowerCase();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    if (!clerkUserId) {
+      setIsAdmin(false);
+      setIsByteSenseAdmin(false);
+      setIsStaff(false);
+      setProfile(null);
+      setRolesLoaded(true);
+      return;
+    }
 
-        if (session?.user) {
-          // Defer Supabase calls to avoid deadlocking the auth callback
-          setTimeout(() => {
-            loadUserAccess(session.user.id).then(access => {
-              setProfile(access.profile);
-              setIsAdmin(access.isAdmin);
-              setIsByteSenseAdmin(access.isByteSenseAdmin);
-              setIsStaff(access.isStaff);
-              setLoading(false);
-            }).catch(() => setLoading(false));
-          }, 0);
-        } else {
-          setProfile(null);
-          setIsAdmin(false);
-          setIsByteSenseAdmin(false);
-          setIsStaff(false);
-          setLoading(false);
-        }
+    (async () => {
+      try {
+        const [{ data: roleData }, { data: profileData }] = await Promise.all([
+          supabase.from('user_roles').select('role').eq('clerk_user_id', clerkUserId),
+          supabase.from('profiles').select('*').eq('clerk_user_id', clerkUserId).maybeSingle(),
+        ]);
+
+        setIsAdmin(roleData?.some(r => r.role === 'admin') ?? false);
+        setIsByteSenseAdmin(roleData?.some(r => r.role === 'bytesense_admin') ?? false);
+        setIsStaff(roleData?.some(r => r.role === 'staff') ?? false);
+        setProfile(profileData ?? null);
+
+        // Update last_seen_at (fire & forget)
+        supabase.from('profiles')
+          .upsert({ clerk_user_id: clerkUserId, last_seen_at: new Date().toISOString() }, { onConflict: 'clerk_user_id' })
+          .then(() => {});
+      } catch {
+        // non-fatal
+      } finally {
+        setRolesLoaded(true);
       }
-    );
+    })();
+  }, [clerkUserId]);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (!session) {
-        setLoading(false);
-        return;
-      }
-
-      loadUserAccess(session.user.id).then(access => {
-        setProfile(access.profile);
-        setIsAdmin(access.isAdmin);
-        setIsByteSenseAdmin(access.isByteSenseAdmin);
-        setIsStaff(access.isStaff);
-        setLoading(false);
-      });
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
+  const signOut = useCallback(async () => {
+    await clerkSignOut();
     setIsAdmin(false);
     setIsByteSenseAdmin(false);
     setIsStaff(false);
-  };
+    setProfile(null);
+  }, [clerkSignOut]);
 
-  return { user, session, loading, isAdmin, isByteSenseAdmin, isStaff, profile, signOut };
+  return {
+    /** Clerk user mapped to the shape the rest of the app expects */
+    user: user ? { id: clerkUserId!, email } : null,
+    loading: !isLoaded || !rolesLoaded,
+    isAdmin,
+    isByteSenseAdmin,
+    isStaff,
+    profile,
+    signOut,
+    isSuperUser: SUPER_USERS.includes(email),
+  };
 }

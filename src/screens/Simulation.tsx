@@ -5,6 +5,7 @@ import { scrollTop, startSTT } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FUNCTIONS_URL, FUNCTIONS_KEY } from '@/integrations/supabase/client';
 
 interface SimulationProps {
   s: AppState;
@@ -57,11 +58,9 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
     u({ simMsgs: msgs, simIn: "" });
     setLoading(true);
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const resp = await fetch(`${supabaseUrl}/functions/v1/patient-sim`, {
+      const resp = await fetch(`${FUNCTIONS_URL}/functions/v1/patient-sim`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseKey}` },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FUNCTIONS_KEY}` },
         body: JSON.stringify({ messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })), patientIndex: patientIdx }),
       });
       if (!resp.ok) { const errData = await resp.json().catch(() => ({})); throw new Error(errData.error || `Error ${resp.status}`); }
