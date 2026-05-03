@@ -30,11 +30,10 @@ interface DashboardProps {
 const CHART_COLORS = [C.teal, C.red, C.gold, C.blue, C.violet, C.cyan, C.green, C.rose, C.amber];
 
 const glass = {
-  background: C.glass,
-  backdropFilter: C.blur,
-  WebkitBackdropFilter: C.blur,
-  border: `1px solid ${C.glassBorder}`,
-  borderRadius: C.radius,
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: 14,
+  boxShadow: "0 10px 28px -10px rgba(0,0,0,0.25)",
 } as React.CSSProperties;
 
 const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
@@ -361,16 +360,22 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
   const kpiCard = (label: string, value: string | number, sub: string, color: string, gradient: string) => (
     <div style={{
-      ...glass, padding: "22px 20px", flex: 1, minWidth: 140,
-      position: "relative", overflow: "hidden", transition: "all 0.3s",
-      boxShadow: C.glow(color, 0.08),
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      borderRadius: 14,
+      padding: "20px 22px 22px",
+      flex: 1, minWidth: 140,
+      position: "relative", overflow: "hidden",
+      transition: "all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+      boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)",
     }}
-    onMouseEnter={e => { e.currentTarget.style.boxShadow = C.glow(color, 0.2); e.currentTarget.style.transform = "translateY(-3px)"; }}
-    onMouseLeave={e => { e.currentTarget.style.boxShadow = C.glow(color, 0.08); e.currentTarget.style.transform = "translateY(0)"; }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: gradient, borderRadius: `${C.radius} ${C.radius} 0 0` }} />
-      <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10, fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 34, fontWeight: 800, color, lineHeight: 1, letterSpacing: -1 }}>{value}</div>
-      <div style={{ fontSize: 11, color: C.ash, marginTop: 6 }}>{sub}</div>
+    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = `${color}30`; }}
+    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
+      {/* Subtle color dot accent */}
+      <div style={{ width: 6, height: 6, borderRadius: "50%", background: color, marginBottom: 14, opacity: 0.85 }} />
+      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 8, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 34, fontWeight: 700, color, lineHeight: 1, letterSpacing: "-0.02em" }}>{value}</div>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 7, letterSpacing: "0.02em" }}>{sub}</div>
     </div>
   );
 
@@ -383,7 +388,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
       <div style={{ flex: 1, minWidth: 0, overflowX: "hidden" }}>
       {/* ── Header ── */}
-      <div style={{ background: "rgba(12,12,14,0.95)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderBottom: `1px solid ${C.glassBorder}`, position: "sticky", top: 0, zIndex: 30 }}>
+      <div style={{ background: "rgba(8,8,12,0.96)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderBottom: "1px solid rgba(255,255,255,0.07)", position: "sticky", top: 0, zIndex: 30 }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "10px 16px" : "14px 28px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
@@ -645,10 +650,10 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </div>
 
         {/* Knowledge Score + Recommendations Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "260px 1fr", gap: 16, marginBottom: 28 }}>
           {/* Knowledge Score Gauge */}
-          <div style={{ ...glass, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ fontSize: 11, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
+          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
             <div style={{ position: "relative", width: 140, height: 140 }}>
               <svg width="140" height="140" viewBox="0 0 140 140">
                 <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
@@ -673,9 +678,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
 
           {/* Training Recommendations */}
-          <div style={{ ...glass, padding: 24, overflow: "hidden" }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <Target size={16} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
+          <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 24, overflow: "hidden", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 18, display: "flex", alignItems: "center", gap: 8, letterSpacing: "-0.01em" }}>
+              <Target size={15} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
               {simReviews.length > 0 && (
                 <span style={{ fontSize: 9, color: C.teal, background: `${C.teal}15`, padding: "2px 8px", borderRadius: 999, fontWeight: 600 }}>
                   {T("sim_driven")}
@@ -696,9 +701,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 {recommendations.map((rec, i) => (
                   <div key={rec.moduleId}
                     onClick={() => { u({ phase: "module", curMod: rec.moduleId, ckA: null }); scrollTop(); }}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "rgba(255,255,255,0.02)", borderRadius: C.radiusXs, cursor: "pointer", border: `1px solid ${C.glassBorder}`, transition: "all 0.2s" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${rec.color}40`; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}>
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", background: "transparent", borderRadius: 10, cursor: "pointer", border: "1px solid rgba(255,255,255,0.07)", transition: "all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${rec.color}35`; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.background = "transparent"; }}>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: rec.color, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{rec.moduleTitle}</div>

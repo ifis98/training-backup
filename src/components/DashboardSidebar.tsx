@@ -62,15 +62,17 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
         bottom: 0,
         left: 0,
         right: 0,
-        height: 60,
-        background: "rgba(10, 10, 14, 0.98)",
+        background: "rgba(8, 8, 12, 0.97)",
         backdropFilter: C.blur,
         WebkitBackdropFilter: C.blur,
-        borderTop: `1px solid ${C.glassBorder}`,
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 -8px 32px rgba(0,0,0,0.4)",
         display: "flex",
-        alignItems: "stretch",
+        alignItems: "center",
+        justifyContent: "space-around",
         zIndex: 100,
-        paddingBottom: "env(safe-area-inset-bottom)",
+        padding: "8px 6px",
+        paddingBottom: "calc(8px + env(safe-area-inset-bottom))",
       }}>
         {mobileItems.map(item => {
           const isActive = item.phase && s.phase === item.phase;
@@ -89,24 +91,33 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 4,
+                gap: 3,
                 cursor: isDisabled ? "not-allowed" : "pointer",
                 opacity: isDisabled ? 0.3 : 1,
-                color: isActive ? C.teal : "rgba(160,160,180,0.7)",
-                borderTop: isActive ? `2px solid ${C.teal}` : "2px solid transparent",
-                background: isActive ? "rgba(20,184,166,0.06)" : "transparent",
-                transition: "all 0.2s",
+                transition: "all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
               }}
             >
+              {/* Icon pill — filled when active */}
               <div style={{
-                width: 32, height: 32, borderRadius: 10,
+                width: 44, height: 28, borderRadius: 999,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                background: isActive ? "rgba(20,184,166,0.12)" : "transparent",
-                transition: "all 0.2s",
+                background: isActive ? `${C.teal}22` : "transparent",
+                transition: "all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
               }}>
-                <item.icon size={18} strokeWidth={isActive ? 2 : 1.5} />
+                <item.icon
+                  size={17}
+                  strokeWidth={isActive ? 2.2 : 1.5}
+                  color={isActive ? C.teal : "rgba(255,255,255,0.38)"}
+                />
               </div>
-              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.2, fontFamily: C.fn }}>{(item as any).mobileLabel || item.label}</span>
+              <span style={{
+                fontSize: 9, letterSpacing: "0.06em", fontFamily: C.fn,
+                fontWeight: isActive ? 600 : 400,
+                color: isActive ? C.teal : "rgba(255,255,255,0.35)",
+                transition: "all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+              }}>
+                {(item as any).mobileLabel || item.label}
+              </span>
             </div>
           );
         })}
