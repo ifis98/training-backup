@@ -38,14 +38,14 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   };
 
   const navItems = [
-    { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), phase: "dashboard", action: () => { u({ phase: "dashboard" }); scrollTop(); } },
-    { id: "training", icon: BookOpen, label: T("sidebar_training"), action: () => scrollToSection("section-training") },
-    { id: "cases", icon: Briefcase, label: T("sidebar_cases"), action: () => scrollToSection("section-cases") },
-    { id: "simulations", icon: Bot, label: T("sidebar_simulations"), phase: "simulation" },
-    { id: "coach", icon: Brain, label: T("sidebar_coach"), action: () => openCoach("general") },
-    { id: "report", icon: FileText, label: T("sidebar_report"), phase: "report", disabled: !allComplete && !s.signed },
-    { id: "contact", icon: Mail, label: T("sidebar_contact_support") || "Contact Support", action: () => window.location.href = "mailto:support@bytesense.ai" },
-    { id: "signout", icon: LogOut, label: T("sign_out"), action: onSignOut },
+    { id: "dashboard", icon: LayoutDashboard, label: T("sidebar_dashboard"), mobileLabel: "Home", phase: "dashboard", action: () => { u({ phase: "dashboard" }); scrollTop(); } },
+    { id: "training", icon: BookOpen, label: T("sidebar_training"), mobileLabel: "Training", action: () => scrollToSection("section-training") },
+    { id: "cases", icon: Briefcase, label: T("sidebar_cases"), mobileLabel: "Cases", action: () => scrollToSection("section-cases") },
+    { id: "simulations", icon: Bot, label: T("sidebar_simulations"), mobileLabel: "Simulate", phase: "simulation" },
+    { id: "coach", icon: Brain, label: T("sidebar_coach"), mobileLabel: "Coach", action: () => openCoach("general") },
+    { id: "report", icon: FileText, label: T("sidebar_report"), mobileLabel: "Report", phase: "report", disabled: !allComplete && !s.signed },
+    { id: "contact", icon: Mail, label: T("sidebar_contact_support") || "Contact Support", mobileLabel: "Support", action: () => window.location.href = "mailto:support@bytesense.ai" },
+    { id: "signout", icon: LogOut, label: T("sign_out"), mobileLabel: "Sign Out", action: onSignOut },
   ];
 
   // Mobile: fixed bottom navigation bar (4 core items + sign out)
@@ -99,7 +99,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
               }}
             >
               <item.icon size={20} strokeWidth={1.5} />
-              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.3, fontFamily: C.fn }}>{item.label}</span>
+              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.3, fontFamily: C.fn }}>{(item as any).mobileLabel || item.label}</span>
             </div>
           );
         })}

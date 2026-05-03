@@ -11,7 +11,7 @@ import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Tooltip } from 'recharts';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import BookingModal from '@/components/BookingModal';
-import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save } from 'lucide-react';
+import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save, Menu, X, LogOut, Settings, Globe } from 'lucide-react';
 
 interface DashboardProps {
   s: AppState;
@@ -47,6 +47,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [staffData, setStaffData] = useState<any[]>([]);
   const [simReviews, setSimReviews] = useState<any[]>([]);
@@ -378,92 +379,124 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} lang={lang} />
 
       <div style={{ flex: 1, minWidth: 0, overflowX: "hidden" }}>
-      {/* Header */}
-      <div style={{ background: "rgba(20,20,28,0.9)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, padding: isMobile ? "12px 16px 14px" : "20px 28px 22px", borderBottom: `1px solid ${C.glassBorder}`, position: "sticky", top: 0, zIndex: 30 }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+      {/* ── Header ── */}
+      <div style={{ background: "rgba(12,12,14,0.95)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderBottom: `1px solid ${C.glassBorder}`, position: "sticky", top: 0, zIndex: 30 }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "10px 16px" : "14px 28px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
-          {/* Top row: logo + buttons (desktop) / logo only (mobile) */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: isMobile ? 10 : 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14 }}>
-              <Logo size={isMobile ? 22 : 30} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
-              {!isMobile && <span style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("practice_dashboard")}</span>}
+            {/* Left: avatar + name + roles */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: isMobile ? 32 : 38, height: isMobile ? 32 : 38, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? 14 : 17, fontWeight: 800, flexShrink: 0 }}>
+                {(s.name || 'U')[0].toUpperCase()}
+              </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: isMobile ? 14 : 17, fontWeight: 700, lineHeight: 1 }}>{s.name || 'Welcome'}</span>
+                  {hasCertifiedBadge && <span style={{ background: `${C.gold}20`, color: C.gold, padding: "1px 7px", fontSize: 9, fontWeight: 700, borderRadius: 999 }}>★ Certified</span>}
+                </div>
+                <div style={{ display: "flex", gap: 4, marginTop: 3, flexWrap: "wrap" }}>
+                  {sRoles.map(r => <span key={r.id} style={{ background: `${r.color}20`, color: r.color, padding: "1px 7px", fontSize: 9, fontWeight: 700, borderRadius: 999 }}>{r.short}</span>)}
+                </div>
+              </div>
             </div>
 
-            {/* Desktop: language + change roles + sign out */}
-            {!isMobile && (
+            {/* Right: desktop buttons OR mobile burger */}
+            {isMobile ? (
+              <button onClick={() => setShowMobileMenu(true)}
+                style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${C.glassBorder}`, color: C.white, width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+                <Menu size={18} strokeWidth={2} />
+              </button>
+            ) : (
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <div style={{ position: "relative" }}>
                   <button onClick={() => setShowLangMenu(!showLangMenu)}
-                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 5, borderRadius: C.radiusXs, transition: "all 0.2s" }}>
+                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 5, borderRadius: C.radiusXs }}>
                     {LANG_OPTIONS.find((l: any) => l.id === lang)?.flag} {LANG_OPTIONS.find((l: any) => l.id === lang)?.label}
                   </button>
                   {showLangMenu && (
                     <div style={{ ...glass, position: "absolute", top: "100%", right: 0, zIndex: 50, minWidth: 150, marginTop: 6, overflow: "hidden" }}>
                       {LANG_OPTIONS.map((l: any) => (
                         <div key={l.id} onClick={() => { u({ lang: l.id }); setShowLangMenu(false); }}
-                          style={{ padding: "10px 14px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? "rgba(201,168,76,0.1)" : "transparent", transition: "background 0.2s" }}
-                          onMouseEnter={e => { if (lang !== l.id) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-                          onMouseLeave={e => { if (lang !== l.id) e.currentTarget.style.background = "transparent"; }}>
+                          style={{ padding: "10px 14px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? "rgba(201,168,76,0.1)" : "transparent" }}>
                           {l.flag} {l.label}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-                {[{ label: T("change_roles"), onClick: () => { u({ phase: "setup", roles: [] }); scrollTop(); } },
-                  { label: T("sign_out"), onClick: handleSignOut }].map((btn, i) => (
-                  <button key={i} onClick={btn.onClick}
-                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs, transition: "all 0.2s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
-                    {btn.label}
-                  </button>
-                ))}
+                <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); }}
+                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs }}>
+                  {T("change_roles")}
+                </button>
+                <button onClick={handleSignOut}
+                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs }}>
+                  {T("sign_out")}
+                </button>
               </div>
             )}
-
-            {/* Mobile: practice name label */}
-            {isMobile && (
-              <span style={{ fontSize: 9, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>
-                {s.practice || T("practice_dashboard")}
-              </span>
-            )}
-          </div>
-
-          {/* User info row */}
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 14 }}>
-            <div style={{ width: isMobile ? 34 : 40, height: isMobile ? 34 : 40, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? 15 : 18, fontWeight: 800, boxShadow: C.glow(C.teal, 0.2), flexShrink: 0 }}>
-              {(s.name || 'U')[0].toUpperCase()}
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <span style={{ fontSize: isMobile ? 15 : 18, fontWeight: 700 }}>{s.name || 'Welcome'}</span>
-                {hasCertifiedBadge && (
-                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 8px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", gap: 4 }}>
-                    <Award size={10} strokeWidth={1.5} /> {T("badge_certified")}
-                  </span>
-                )}
-                {hasTopPerformerBadge && !isMobile && (
-                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 8px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40`, display: "flex", alignItems: "center", gap: 4 }}>
-                    <Star size={10} strokeWidth={1.5} /> {T("badge_top_performer")}
-                  </span>
-                )}
-              </div>
-              <div style={{ display: "flex", gap: 5, marginTop: 3, flexWrap: "wrap" }}>
-                {sRoles.map(r => <span key={r.id} style={{ background: `${r.color}20`, color: r.color, padding: "2px 8px", fontSize: isMobile ? 9 : 10, fontWeight: 700, borderRadius: 999 }}>{r.short}</span>)}
-              </div>
-            </div>
           </div>
 
           {/* Progress bar */}
-          <div style={{ marginTop: isMobile ? 10 : 14 }}>
+          <div style={{ marginTop: 10 }}>
             <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999 }}>
-              <div style={{ height: "100%", width: `${pr}%`, background: C.gradTeal, transition: "width 0.5s", borderRadius: 999, boxShadow: C.glow(C.teal, 0.3) }} />
+              <div style={{ height: "100%", width: `${pr}%`, background: C.gradTeal, transition: "width 0.5s", borderRadius: 999 }} />
             </div>
-            <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{dN}/{myM.length} {T("sections")} · {myPH.length} {T("phases")} · {pr}% complete</div>
+            <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{dN}/{myM.length} {T("sections")} · {pr}% complete</div>
           </div>
         </div>
       </div>
+
+      {/* ── Mobile slide-in menu ── */}
+      {isMobile && showMobileMenu && (
+        <>
+          {/* Backdrop */}
+          <div onClick={() => setShowMobileMenu(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(2px)" }} />
+          {/* Drawer */}
+          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 260, background: "rgba(14,14,20,0.98)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderLeft: `1px solid ${C.glassBorder}`, zIndex: 201, display: "flex", flexDirection: "column", padding: "20px 0" }}>
+            {/* Close */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px 16px", borderBottom: `1px solid ${C.glassBorder}` }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{s.name || 'Menu'}</div>
+                <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>{s.practice}</div>
+              </div>
+              <button onClick={() => setShowMobileMenu(false)}
+                style={{ background: "none", border: "none", color: C.ash, cursor: "pointer", padding: 4 }}>
+                <X size={20} strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Language */}
+            <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.glassBorder}` }}>
+              <div style={{ fontSize: 10, letterSpacing: 2, color: C.slate, textTransform: "uppercase", fontWeight: 700, marginBottom: 10 }}>Language</div>
+              {LANG_OPTIONS.map((l: any) => (
+                <div key={l.id} onClick={() => { u({ lang: l.id }); setShowMobileMenu(false); }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", cursor: "pointer", color: lang === l.id ? C.gold : C.ash, fontSize: 13, fontWeight: lang === l.id ? 700 : 400, borderRadius: 6 }}>
+                  <span style={{ fontSize: 18 }}>{l.flag}</span> {l.label}
+                  {lang === l.id && <span style={{ marginLeft: "auto", fontSize: 10, color: C.gold }}>✓</span>}
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ padding: "16px 20px", flex: 1 }}>
+              <div style={{ fontSize: 10, letterSpacing: 2, color: C.slate, textTransform: "uppercase", fontWeight: 700, marginBottom: 10 }}>Settings</div>
+              <button onClick={() => { u({ phase: "setup", roles: [] }); scrollTop(); setShowMobileMenu(false); }}
+                style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "12px 0", background: "none", border: "none", color: C.ash, fontSize: 14, cursor: "pointer", fontFamily: C.fn, borderBottom: `1px solid ${C.glassBorder}` }}>
+                <Settings size={16} strokeWidth={1.5} /> Change Roles
+              </button>
+            </div>
+
+            {/* Sign out */}
+            <div style={{ padding: "16px 20px", borderTop: `1px solid ${C.glassBorder}` }}>
+              <button onClick={() => { handleSignOut(); setShowMobileMenu(false); }}
+                style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "12px 16px", background: "rgba(204,16,16,0.08)", border: `1px solid rgba(204,16,16,0.2)`, borderRadius: C.radiusXs, color: "#FF5555", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: C.fn }}>
+                <LogOut size={16} strokeWidth={1.5} /> Sign Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "16px 16px 100px" : "28px 28px 60px" }}>
 
