@@ -1,5 +1,5 @@
 import { C, ROLES } from '@/data/constants';
-import { Logo } from '@/components/ByteSenseLogo';
+import { Logo } from '@/components/ByteSenseLogo'; // kept for certificate only
 import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
@@ -45,7 +45,7 @@ export default function Report({ s, u, sc, myPH, myM, dN, pr, lang = "en" }: Rep
               <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: C.charcoal }}>{T("onboarding_report")}</div>
               <div style={{ fontSize: 12, color: C.ash }}>{dt}</div>
             </div>
-            <Logo size={28} />
+            <div style={{ fontSize: 11, color: C.ash, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>ByteSense</div>
           </div>
 
           {/* Stats grid: 2-col on desktop, 1-col on mobile */}

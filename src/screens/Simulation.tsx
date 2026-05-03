@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { C, ROLES } from '@/data/constants';
-import { Logo } from '@/components/ByteSenseLogo';
+import { ChevronLeft } from 'lucide-react';
 import { scrollTop, startSTT } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
@@ -91,19 +91,20 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
 
   return (
     <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.borderD}` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Logo size={24} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
-          <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
-            style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn }}>{T("back")}</button>
-        </div>
-        <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("patient_simulation")}</div>
-        <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700 }}>{s.simP}/3</div>
+      {/* Header */}
+      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
+          style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+          <ChevronLeft size={16} strokeWidth={2} /> {T("back")}
+        </button>
+        <div style={{ fontSize: 10, letterSpacing: "0.2em", color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("patient_simulation")}</div>
+        <div style={{ fontSize: 13, color: s.simP >= 3 ? C.green : C.ash, fontWeight: 700, minWidth: 30, textAlign: "right" }}>{s.simP}/3</div>
       </div>
 
-      <div style={{ background: C.dark2, padding: isMobile ? "12px 16px" : "14px 24px", margin: isMobile ? "0 12px" : "0 24px", marginTop: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{T("patient_label")} {patient.name}, {patient.age}</div>
-        <div style={{ fontSize: 12, color: C.ash }}>{patient.card}</div>
+      {/* Patient card */}
+      <div style={{ margin: isMobile ? "12px 12px 0" : "16px 24px 0", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: isMobile ? "12px 16px" : "14px 20px" }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>{T("patient_label")} {patient.name}, {patient.age}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{patient.card}</div>
       </div>
 
       <div style={{ flex: 1, padding: isMobile ? "12px 12px" : "16px 24px", overflowY: "auto", minHeight: 200 }}>

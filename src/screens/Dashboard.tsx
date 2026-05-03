@@ -3,7 +3,6 @@ import { useUser } from '@clerk/clerk-react';
 import { toast } from 'sonner';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
 import { Module } from '@/data/constants';
-import { Logo } from '@/components/ByteSenseLogo';
 import { scrollTop, computeKnowledgeScore, getScoreLabel, getScoreColor, getRecommendations, getImprovementAreas, getBlockerFirstModuleIds } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
@@ -650,7 +649,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </div>
 
         {/* Knowledge Score + Recommendations Row */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "260px 1fr", gap: 16, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 28 }}>
           {/* Knowledge Score Gauge */}
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
