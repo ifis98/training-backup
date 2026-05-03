@@ -357,24 +357,21 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     switch (status) { case 'converted': return C.green; case 'follow_up': return C.gold; case 'rejected': return C.red; default: return C.ash; }
   };
 
-  const kpiCard = (label: string, value: string | number, sub: string, color: string, gradient: string) => (
+  const kpiCard = (label: string, value: string | number, sub: string, color: string) => (
     <div style={{
       background: "rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.08)",
-      borderRadius: 14,
-      padding: "20px 22px 22px",
-      flex: 1, minWidth: 140,
+      border: "1px solid rgba(255,255,255,0.07)",
+      borderRadius: 12,
+      padding: isMobile ? "16px 14px" : "20px 18px",
       position: "relative", overflow: "hidden",
       transition: "all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-      boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)",
     }}
-    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = `${color}30`; }}
-    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
-      {/* Subtle color dot accent */}
-      <div style={{ width: 6, height: 6, borderRadius: "50%", background: color, marginBottom: 14, opacity: 0.85 }} />
-      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 10, fontWeight: 700 }}>{label}</div>
-      <div style={{ fontSize: 36, fontWeight: 800, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{value}</div>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 8, letterSpacing: "0.02em" }}>{sub}</div>
+    onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}30`; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${color}, transparent)` }} />
+      <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.16em", marginBottom: 8, fontWeight: 700 }}>{label}</div>
+      <div style={{ fontSize: isMobile ? 28 : 32, fontWeight: 800, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{value}</div>
+      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>{sub}</div>
     </div>
   );
 
@@ -505,7 +502,48 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </>
       )}
 
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "16px 16px 100px" : "28px 28px 60px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "12px 12px 120px" : "28px 28px 60px" }}>
+
+        {/* ── Next Step Hero ── */}
+        {(() => {
+          if (allComplete) return null;
+          const nextMod = recommendations[0];
+          if (allModsDone) {
+            return (
+              <div onClick={() => { u({ phase: "simulation" }); scrollTop(); }}
+                style={{ background: `linear-gradient(135deg, ${C.teal}18, ${C.teal}08)`, border: `1px solid ${C.teal}30`, borderRadius: 14, padding: isMobile ? "16px 16px" : "18px 24px", marginBottom: isMobile ? 16 : 24, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 240ms cubic-bezier(0.2,0.8,0.2,1)" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${C.teal}60`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = `${C.teal}30`}>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: C.teal, marginBottom: 4 }}>Next Step</div>
+                  <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 700, color: C.white }}>Complete AI Patient Simulations</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 2 }}>{s.simP}/3 completed · Practice your pitch</div>
+                </div>
+                <div style={{ width: 36, height: 36, borderRadius: 999, background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ArrowRight size={16} strokeWidth={2.5} color={C.dark} />
+                </div>
+              </div>
+            );
+          }
+          if (nextMod) {
+            return (
+              <div onClick={() => { u({ phase: "module", curMod: nextMod.moduleId, ckA: null }); scrollTop(); }}
+                style={{ background: `linear-gradient(135deg, ${C.teal}15, transparent)`, border: `1px solid ${C.teal}25`, borderRadius: 14, padding: isMobile ? "16px 16px" : "18px 24px", marginBottom: isMobile ? 16 : 24, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "all 240ms cubic-bezier(0.2,0.8,0.2,1)" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${C.teal}50`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = `${C.teal}25`}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: C.teal, marginBottom: 4 }}>Continue Training</div>
+                  <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 700, color: C.white, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nextMod.moduleTitle}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 2 }}>{nextMod.time} · {pr}% complete</div>
+                </div>
+                <div style={{ width: 36, height: 36, borderRadius: 999, background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ArrowRight size={16} strokeWidth={2.5} color={C.dark} />
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* Practice Performance — Goals vs Actuals */}
         {(isOwnerOrManager || practiceGoals) && (
@@ -638,18 +676,18 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         )}
 
-        {/* KPI Cards */}
-        <div style={{ display: "flex", gap: 14, marginBottom: 28, flexWrap: "wrap" }}>
-          {kpiCard(T("kpi_training_progress"), `${pr}%`, `${dN} ${T("kpi_of_total").replace("{n}", String(myM.length))}`, C.teal, C.gradTeal)}
-          {kpiCard(T("kpi_xp_earned"), s.xp, T("kpi_experience_points"), C.gold, C.gradGold)}
-          {kpiCard(T("kpi_modules_done"), dN, T("kpi_of_total").replace("{n}", String(myM.length)), C.blue, C.gradBlue)}
-          <div onClick={() => { u({ phase: "simulation" }); scrollTop(); }} style={{ cursor: "pointer", flex: 1, minWidth: 120 }}>
-            {kpiCard(T("kpi_ai_simulations"), `${s.simP}/3`, T("kpi_patient_encounters"), C.red, C.gradRed)}
+        {/* KPI Cards — always 2×2 on mobile, 4-col on desktop */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: isMobile ? 10 : 14, marginBottom: isMobile ? 20 : 28 }}>
+          {kpiCard(T("kpi_training_progress"), `${pr}%`, `${dN}/${myM.length} ${T("sections")}`, C.teal)}
+          {kpiCard(T("kpi_xp_earned"), s.xp, T("kpi_experience_points"), C.gold)}
+          {kpiCard(T("kpi_modules_done"), dN, T("kpi_of_total").replace("{n}", String(myM.length)), "#60A5FA")}
+          <div onClick={() => { u({ phase: "simulation" }); scrollTop(); }} style={{ cursor: "pointer" }}>
+            {kpiCard(T("kpi_ai_simulations"), `${s.simP}/3`, T("kpi_patient_encounters"), C.red)}
           </div>
         </div>
 
         {/* Knowledge Score + Recommendations Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: isMobile ? 10 : 16, marginBottom: isMobile ? 16 : 28 }}>
           {/* Knowledge Score Gauge */}
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
@@ -979,7 +1017,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         )}
 
         {/* Training Modules Accordion */}
-        <div id="section-training" style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
+        <div id="section-training" style={{ ...glass, marginBottom: isMobile ? 16 : 24, overflow: "hidden" }}>
           <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", display: "flex", alignItems: "center", gap: 6 }}>
               <ClipboardList size={13} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
@@ -1148,26 +1186,19 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
         </div>
 
-        {/* Support + Reset */}
-        <div style={{ display: "flex", gap: 14, marginBottom: 24, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 200, ...glass, padding: "20px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>{T("need_help")}</div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Book a 1-on-1 support call</div>
-            </div>
-            <button onClick={() => setShowBooking(true)}
-              style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, flexShrink: 0 }}>
-              {T("schedule_call")}
-            </button>
-          </div>
-          <div style={{ ...glass, padding: "20px 22px", display: "flex", alignItems: "center" }}>
-            <button onClick={reset}
-              style={{ background: "transparent", color: "rgba(255,255,255,0.3)", border: `1px solid rgba(255,255,255,0.07)`, padding: "10px 20px", fontSize: 11, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s", letterSpacing: "0.04em" }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(204,16,16,0.4)"; e.currentTarget.style.color = C.red; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "rgba(255,255,255,0.3)"; }}>
-              {T("reset_progress")}
-            </button>
-          </div>
+        {/* Support + Reset — single compact row */}
+        <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", flex: 1, minWidth: 160 }}>{T("need_help")} Book a support call.</span>
+          <button onClick={() => setShowBooking(true)}
+            style={{ background: C.teal, color: C.dark, border: "none", padding: "8px 16px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: 8 }}>
+            {T("schedule_call")}
+          </button>
+          <button onClick={reset}
+            style={{ background: "transparent", color: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.07)", padding: "8px 16px", fontSize: 11, fontFamily: C.fn, cursor: "pointer", borderRadius: 8, transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.color = C.red; e.currentTarget.style.borderColor = "rgba(204,16,16,0.3)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.2)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}>
+            {T("reset_progress")}
+          </button>
         </div>
 
         <div style={{ textAlign: "center", fontSize: 10, color: C.ash, marginTop: 24, opacity: 0.6 }}>
