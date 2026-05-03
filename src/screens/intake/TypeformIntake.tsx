@@ -135,6 +135,16 @@ const QUESTIONS: QuestionDef[] = [
     type: 'welcome',
   },
   {
+    id: 'practice_info',
+    type: 'fields',
+    num: '00',
+    question: 'What\'s your practice called?',
+    description: 'This personalizes your entire training experience.',
+    fields: [
+      { id: 'practice_name', label: 'Practice Name', placeholder: 'e.g. Smile Dental Studio', required: true },
+    ],
+  },
+  {
     id: 'decision_maker',
     type: 'radio',
     num: '01',
@@ -290,7 +300,7 @@ const QUESTIONS: QuestionDef[] = [
 
 interface Props {
   clerkUserId: string | null;
-  onDone: (staffRoles: string[]) => void;
+  onDone: (staffRoles: string[], intakeData: IntakeData) => void;
 }
 
 export default function TypeformIntake({ clerkUserId, onDone }: Props) {
@@ -404,8 +414,8 @@ export default function TypeformIntake({ clerkUserId, onDone }: Props) {
     setSaving(true);
     await complete();
     setSaving(false);
-    onDone(data.staff_roles);
-  }, [complete, data.staff_roles, onDone]);
+    onDone(data.staff_roles, data);
+  }, [complete, data, onDone]);
 
   if (!current) return null;
 

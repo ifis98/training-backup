@@ -48,23 +48,29 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     { id: "signout", icon: LogOut, label: T("sign_out"), action: onSignOut },
   ];
 
-  // Mobile: fixed bottom navigation bar
+  // Mobile: fixed bottom navigation bar (4 core items + sign out)
   if (isMobile) {
-    const mobileItems = navItems.slice(0, 5); // show first 5 items on mobile bottom bar
+    const mobileItems = [
+      navItems[0], // Dashboard
+      navItems[1], // Training
+      navItems[3], // AI Simulations
+      navItems[4], // AI Coach
+    ];
     return (
       <div style={{
         position: "fixed",
         bottom: 0,
         left: 0,
         right: 0,
-        height: 58,
-        background: "rgba(14, 14, 20, 0.96)",
+        height: 60,
+        background: "rgba(14, 14, 20, 0.97)",
         backdropFilter: C.blur,
         WebkitBackdropFilter: C.blur,
         borderTop: `1px solid ${C.glassBorder}`,
         display: "flex",
         alignItems: "stretch",
         zIndex: 100,
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}>
         {mobileItems.map(item => {
           const isActive = item.phase && s.phase === item.phase;
@@ -93,11 +99,11 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
               }}
             >
               <item.icon size={20} strokeWidth={1.5} />
-              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.5, fontFamily: C.fn }}>{item.label}</span>
+              <span style={{ fontSize: 9, fontWeight: isActive ? 700 : 400, letterSpacing: 0.3, fontFamily: C.fn }}>{item.label}</span>
             </div>
           );
         })}
-        {/* Sign out on far right */}
+        {/* Sign Out */}
         <div
           onClick={onSignOut}
           style={{
@@ -114,7 +120,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
           }}
         >
           <LogOut size={20} strokeWidth={1.5} />
-          <span style={{ fontSize: 9, fontFamily: C.fn, letterSpacing: 0.5 }}>{T("sign_out")}</span>
+          <span style={{ fontSize: 9, fontFamily: C.fn, letterSpacing: 0.3 }}>{T("sign_out")}</span>
         </div>
       </div>
     );

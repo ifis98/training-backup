@@ -30,6 +30,8 @@ export interface AppState {
   signed: boolean;
   lang: string;
   intakeDone: boolean;
+  mainBlocker: string;
+  monthlyVolume: string;
 }
 
 const defaultState: AppState = {
@@ -55,6 +57,8 @@ const defaultState: AppState = {
   signed: false,
   lang: 'en',
   intakeDone: false,
+  mainBlocker: '',
+  monthlyVolume: '',
 };
 
 /** Pass the Clerk user ID so we can sync to the DB without calling supabase.auth */

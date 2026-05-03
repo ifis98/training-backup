@@ -4,6 +4,7 @@ import { C } from '@/data/constants';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUser, useClerk } from '@clerk/clerk-react';
 
 const SCANNERS = ['Medit', 'iTero', '3Shape TRIOS', 'Planmeca', 'Carestream', 'Dentsply Sirona', 'Other'];
 const GOALS_LIST = [
@@ -19,6 +20,9 @@ const glass = {
 export default function Welcome() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
+  const isSignedIn = !!clerkUser;
   const [showDemo, setShowDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [demoData, setDemoData] = useState({
@@ -91,12 +95,27 @@ export default function Welcome() {
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
             Request a Demo
           </button>
-          <button onClick={() => navigate('/login')}
-            style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = C.glassHover}
-            onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
-            Sign In
-          </button>
+          {isSignedIn ? (
+            <>
+              <button onClick={() => navigate('/app')}
+                style={{ background: "rgba(255,255,255,0.05)", color: C.white, border: `1px solid ${C.glassBorder}`, padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = C.glassHover}
+                onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
+                Continue to App →
+              </button>
+              <button onClick={() => signOut({ redirectUrl: '/' })}
+                style={{ background: "transparent", color: C.ash, border: "none", padding: isMobile ? "14px 8px" : "16px 8px", fontSize: 14, fontFamily: C.fn, cursor: "pointer", textDecoration: "underline", textDecorationColor: C.slate }}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <button onClick={() => navigate('/login')}
+              style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = C.glassHover}
+              onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
+              Sign In
+            </button>
+          )}
         </div>
       </div>
 

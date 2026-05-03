@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
-import { scrollTop, computeKnowledgeScore, getScoreLabel, getScoreColor, getRecommendations, getImprovementAreas } from '@/lib/helpers';
+import { scrollTop, computeKnowledgeScore, getScoreLabel, getScoreColor, getRecommendations, getImprovementAreas, getBlockerFirstModuleIds } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -238,8 +238,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
   const scoreLabelKey = getScoreLabel(knowledgeScore);
 
-  // Simulation-driven recommendations
+  // Simulation-driven recommendations (with intake blocker pinning)
   const recommendations = useMemo(() => {
+    // 1. Sim-based recs take highest priority
     if (simReviews.length > 0) {
       const latestReview = simReviews[0];
       const simRecs: any[] = [];
@@ -260,8 +261,33 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         return [...simRecs.slice(0, 3), ...fallback.slice(0, 2)];
       }
     }
+
+    // 2. Pin blocker module first if not yet done (intake answer)
+    const blockerIds = getBlockerFirstModuleIds(s.mainBlocker || '');
+    if (blockerIds.length > 0) {
+      const pinnedMods: any[] = [];
+      for (const id of blockerIds) {
+        const mod = myM.find(m => m.id === id && !s.done.includes(m.id));
+        if (mod) {
+          const ph = myPH.find(p => p.id === mod.phase);
+          pinnedMods.push({
+            phaseId: mod.phase, phaseLabel: ph?.label || mod.phase, moduleId: mod.id,
+            moduleTitle: mod.title, time: mod.time, priority: "high" as const,
+            color: ph?.color || "#888", pinned: true,
+          });
+          if (pinnedMods.length >= 2) break;
+        }
+      }
+      if (pinnedMods.length > 0) {
+        const rest = getRecommendations(s.done, myM, myPH, 5)
+          .filter(r => !pinnedMods.find(p => p.moduleId === r.moduleId));
+        return [...pinnedMods, ...rest].slice(0, 5);
+      }
+    }
+
+    // 3. Default: first incomplete modules in order
     return getRecommendations(s.done, myM, myPH, 5);
-  }, [s.done, myM, myPH, simReviews]);
+  }, [s.done, s.mainBlocker, myM, myPH, simReviews]);
 
   // Simulation-driven improvement areas
   const improvementAreas = useMemo(() => {
@@ -351,78 +377,95 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
       {/* Sidebar */}
       <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} lang={lang} />
 
-      <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
+      <div style={{ flex: 1, minWidth: 0, overflowX: "hidden" }}>
       {/* Header */}
-      <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid ${C.glassBorder}` }}>
+      <div style={{ background: "rgba(20,20,28,0.9)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, padding: isMobile ? "12px 16px 14px" : "20px 28px 22px", borderBottom: `1px solid ${C.glassBorder}`, position: "sticky", top: 0, zIndex: 30 }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <Logo size={30} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
-              <span style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("practice_dashboard")}</span>
+
+          {/* Top row: logo + buttons (desktop) / logo only (mobile) */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: isMobile ? 10 : 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14 }}>
+              <Logo size={isMobile ? 22 : 30} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
+              {!isMobile && <span style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("practice_dashboard")}</span>}
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ position: "relative" }}>
-                <button onClick={() => setShowLangMenu(!showLangMenu)}
-                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 5, borderRadius: C.radiusXs, transition: "all 0.2s" }}>
-                  {LANG_OPTIONS.find((l: any) => l.id === lang)?.flag} {LANG_OPTIONS.find((l: any) => l.id === lang)?.label}
-                </button>
-                {showLangMenu && (
-                  <div style={{ ...glass, position: "absolute", top: "100%", right: 0, zIndex: 50, minWidth: 150, marginTop: 6, overflow: "hidden" }}>
-                    {LANG_OPTIONS.map((l: any) => (
-                      <div key={l.id} onClick={() => { u({ lang: l.id }); setShowLangMenu(false); }}
-                        style={{ padding: "10px 14px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? "rgba(201,168,76,0.1)" : "transparent", transition: "background 0.2s" }}
-                        onMouseEnter={e => { if (lang !== l.id) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-                        onMouseLeave={e => { if (lang !== l.id) e.currentTarget.style.background = "transparent"; }}>
-                        {l.flag} {l.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
+
+            {/* Desktop: language + change roles + sign out */}
+            {!isMobile && (
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                  <button onClick={() => setShowLangMenu(!showLangMenu)}
+                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 5, borderRadius: C.radiusXs, transition: "all 0.2s" }}>
+                    {LANG_OPTIONS.find((l: any) => l.id === lang)?.flag} {LANG_OPTIONS.find((l: any) => l.id === lang)?.label}
+                  </button>
+                  {showLangMenu && (
+                    <div style={{ ...glass, position: "absolute", top: "100%", right: 0, zIndex: 50, minWidth: 150, marginTop: 6, overflow: "hidden" }}>
+                      {LANG_OPTIONS.map((l: any) => (
+                        <div key={l.id} onClick={() => { u({ lang: l.id }); setShowLangMenu(false); }}
+                          style={{ padding: "10px 14px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? "rgba(201,168,76,0.1)" : "transparent", transition: "background 0.2s" }}
+                          onMouseEnter={e => { if (lang !== l.id) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+                          onMouseLeave={e => { if (lang !== l.id) e.currentTarget.style.background = "transparent"; }}>
+                          {l.flag} {l.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {[{ label: T("change_roles"), onClick: () => { u({ phase: "setup", roles: [] }); scrollTop(); } },
+                  { label: T("sign_out"), onClick: handleSignOut }].map((btn, i) => (
+                  <button key={i} onClick={btn.onClick}
+                    style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs, transition: "all 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
+                    {btn.label}
+                  </button>
+                ))}
               </div>
-              {[{ label: T("change_roles"), onClick: () => { u({ phase: "setup", roles: [] }); scrollTop(); } },
-                { label: T("sign_out"), onClick: handleSignOut }].map((btn, i) => (
-                <button key={i} onClick={btn.onClick}
-                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs, transition: "all 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
-                  {btn.label}
-                </button>
-              ))}
-            </div>
+            )}
+
+            {/* Mobile: practice name label */}
+            {isMobile && (
+              <span style={{ fontSize: 9, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>
+                {s.practice || T("practice_dashboard")}
+              </span>
+            )}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, boxShadow: C.glow(C.teal, 0.2) }}>
+
+          {/* User info row */}
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 14 }}>
+            <div style={{ width: isMobile ? 34 : 40, height: isMobile ? 34 : 40, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? 15 : 18, fontWeight: 800, boxShadow: C.glow(C.teal, 0.2), flexShrink: 0 }}>
               {(s.name || 'U')[0].toUpperCase()}
             </div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 18, fontWeight: 700 }}>{s.name || 'Welcome'}</span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                <span style={{ fontSize: isMobile ? 15 : 18, fontWeight: 700 }}>{s.name || 'Welcome'}</span>
                 {hasCertifiedBadge && (
-                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ background: `${C.gold}20`, color: C.gold, padding: "2px 8px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.gold}40`, display: "flex", alignItems: "center", gap: 4 }}>
                     <Award size={10} strokeWidth={1.5} /> {T("badge_certified")}
                   </span>
                 )}
-                {hasTopPerformerBadge && (
-                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 10px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40`, display: "flex", alignItems: "center", gap: 4 }}>
+                {hasTopPerformerBadge && !isMobile && (
+                  <span style={{ background: `${C.red}20`, color: C.red, padding: "2px 8px", fontSize: 9, fontWeight: 700, borderRadius: 999, border: `1px solid ${C.red}40`, display: "flex", alignItems: "center", gap: 4 }}>
                     <Star size={10} strokeWidth={1.5} /> {T("badge_top_performer")}
                   </span>
                 )}
               </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                {sRoles.map(r => <span key={r.id} style={{ background: `${r.color}20`, color: r.color, padding: "2px 10px", fontSize: 10, fontWeight: 700, borderRadius: 999 }}>{r.short}</span>)}
+              <div style={{ display: "flex", gap: 5, marginTop: 3, flexWrap: "wrap" }}>
+                {sRoles.map(r => <span key={r.id} style={{ background: `${r.color}20`, color: r.color, padding: "2px 8px", fontSize: isMobile ? 9 : 10, fontWeight: 700, borderRadius: 999 }}>{r.short}</span>)}
               </div>
             </div>
           </div>
-          <div style={{ marginTop: 14 }}>
-            <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 999 }}>
+
+          {/* Progress bar */}
+          <div style={{ marginTop: isMobile ? 10 : 14 }}>
+            <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 999 }}>
               <div style={{ height: "100%", width: `${pr}%`, background: C.gradTeal, transition: "width 0.5s", borderRadius: 999, boxShadow: C.glow(C.teal, 0.3) }} />
             </div>
-            <div style={{ fontSize: 10, color: C.ash, marginTop: 5 }}>{dN}/{myM.length} {T("sections")} · {myPH.length} {T("phases")} · {pr}% complete</div>
+            <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>{dN}/{myM.length} {T("sections")} · {myPH.length} {T("phases")} · {pr}% complete</div>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 28px 60px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "16px 16px 100px" : "28px 28px 60px" }}>
 
         {/* Practice Performance — Goals vs Actuals */}
         {(isOwnerOrManager || practiceGoals) && (
@@ -602,6 +645,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   {T("sim_driven")}
                 </span>
               )}
+              {!simReviews.length && s.mainBlocker && s.mainBlocker !== 'nothing' && (
+                <span style={{ fontSize: 9, color: C.gold, background: `${C.gold}15`, padding: "2px 8px", borderRadius: 999, fontWeight: 600 }}>
+                  personalized
+                </span>
+              )}
             </div>
             {recommendations.length === 0 ? (
               <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
@@ -620,10 +668,16 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                       <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{rec.moduleTitle}</div>
                       <div style={{ fontSize: 10, color: C.ash }}>{rec.time}</div>
                     </div>
+                    {(rec as any).pinned ? (
+                      <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 999, fontWeight: 700, color: C.gold, background: `${C.gold}18` }}>
+                        start here
+                      </span>
+                    ) : (
                     <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 999, fontWeight: 700,
                       color: rec.priority === "high" ? C.red : rec.priority === "medium" ? C.gold : C.ash,
                       background: rec.priority === "high" ? `${C.red}15` : rec.priority === "medium" ? `${C.gold}15` : "rgba(255,255,255,0.04)",
                     }}>{T(`priority_${rec.priority}`)}</span>
+                    )}
                     <span style={{ color: C.teal, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{T("start_module")}</span>
                   </div>
                 ))}

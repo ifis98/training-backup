@@ -101,6 +101,21 @@ export function stopSpeech() {
   window.speechSynthesis?.cancel();
 }
 
+// Maps intake main_blocker to the most relevant module ID to surface first
+export const BLOCKER_MODULE_MAP: Record<string, string[]> = {
+  explain_patients: ['p3', 's1', 'p1'],          // Patient ID, persuasion, ByteSense positioning
+  submit_case:      ['o1', 'o2', 'o3'],           // Scanning, delivery, consent
+  staff_training:   ['b1', 'b2', 'c1'],           // Comm basics, dental exam, grinding
+  pricing:          ['f1', 's4', 's2'],            // Money convo, pricing moment, objections
+  clinical:         ['c1', 'c2', 'p1'],            // Grinding, guards, positioning
+  technical:        ['o1', 'o6', 'o2'],            // Scanning protocol, device issues, delivery
+  nothing:          [],                            // No pin — use default order
+};
+
+export function getBlockerFirstModuleIds(mainBlocker: string): string[] {
+  return BLOCKER_MODULE_MAP[mainBlocker] ?? [];
+}
+
 // Knowledge Score Engine
 export function computeKnowledgeScore(
   blScore: number | null,

@@ -5,6 +5,8 @@ const STORAGE_KEY = 'bsi1';
 const TOTAL_STEPS = 10;
 
 export interface IntakeData {
+  // step 0 — practice info
+  practice_name: string;
   // step 2 — decision maker
   is_decision_maker: string;
   codecision_name: string;
@@ -41,6 +43,7 @@ export interface IntakeData {
 }
 
 const defaultData: IntakeData = {
+  practice_name: '',
   is_decision_maker: '',
   codecision_name: '',
   codecision_role: '',

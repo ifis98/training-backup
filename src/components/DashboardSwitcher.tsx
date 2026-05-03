@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Shield, ChevronUp } from 'lucide-react';
 import { C } from '@/data/constants';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function DashboardSwitcher() {
   const nav = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
   const goTo = (path: string) => {
     setOpen(false);
     nav(path, { replace: false });
@@ -20,7 +22,7 @@ export default function DashboardSwitcher() {
   const active = items.find(i => i.match) || items[0];
 
   return (
-    <div style={{ position: 'fixed', bottom: 24, left: 24, zIndex: 200, fontFamily: C.fn }}>
+    <div style={{ position: 'fixed', bottom: isMobile ? 70 : 24, left: isMobile ? 12 : 24, zIndex: 200, fontFamily: C.fn }}>
       {open && (
         <div style={{
           background: C.dark2, border: `1px solid ${C.borderD}`, borderRadius: C.radiusSm,

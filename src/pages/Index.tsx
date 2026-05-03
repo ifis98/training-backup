@@ -47,9 +47,17 @@ const Index = ({ forceView }: IndexProps = {}) => {
       return (
         <IntakeFlow
           clerkUserId={clerkUserId}
-          onDone={(staffRoles) => {
-            // Seed the training state with roles chosen during intake
-            u({ intakeDone: true, roles: staffRoles, phase: 'splash' });
+          onDone={(staffRoles, intakeData) => {
+            // Seed AppState from intake answers
+            u({
+              intakeDone: true,
+              roles: staffRoles,
+              name: intakeData.primary_name || '',
+              practice: intakeData.practice_name || '',
+              mainBlocker: intakeData.main_blocker || '',
+              monthlyVolume: intakeData.monthly_volume || '',
+              phase: 'dashboard',
+            });
           }}
         />
       );

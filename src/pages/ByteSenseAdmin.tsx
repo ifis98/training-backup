@@ -96,7 +96,7 @@ export default function ByteSenseAdmin() {
       const isAdmin = data?.some(r => r.role === 'bytesense_admin') ?? false;
       setIsBSAdmin(isAdmin);
       setChecking(false);
-      if (!isAdmin) { toast.error('Access denied'); navigate('/'); }
+      if (!isAdmin) { toast.error('Access denied'); navigate('/app'); }
     })();
   }, [user, authLoading, navigate]);
 
