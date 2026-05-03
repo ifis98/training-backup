@@ -729,7 +729,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Improvement Areas */}
         {improvementAreas.length > 0 && (
           <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <BarChart3 size={16} strokeWidth={1.5} color={C.teal} /> {T("areas_to_improve")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
@@ -756,7 +756,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Charts Row */}
         <div style={{ display: "grid", gridTemplateColumns: staffChartData.length > 0 ? "1fr 1fr" : "1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, color: C.white, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("modules_by_phase")}
             </div>
             <ResponsiveContainer width="100%" height={200}>
@@ -771,7 +771,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
 
           <div style={{ ...glass, padding: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, color: C.white, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} />
               {staffChartData.length > 1 ? T("staff_training_progress") : T("overall_completion")}
             </div>
@@ -885,7 +885,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {isOwnerOrManager && caseAnalyticsData.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
             <div style={{ ...glass, padding: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("conversion_rate")}
               </div>
               <ResponsiveContainer width="100%" height={180}>
@@ -904,7 +904,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               </ResponsiveContainer>
             </div>
             <div style={{ ...glass, padding: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold }} /> {T("revenue_trend")}
               </div>
               <ResponsiveContainer width="100%" height={180}>
@@ -1066,7 +1066,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Goals & Notes Row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
           <div style={{ ...glass, padding: 22 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <Target size={14} strokeWidth={1.5} color={C.teal} /> {T("goals_label")}
             </div>
             {goals.map((g, i) => (
@@ -1090,7 +1090,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
 
           <div style={{ ...glass, padding: 22 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
               <StickyNote size={14} strokeWidth={1.5} color={C.gold} /> {T("notes_label")}
             </div>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={T("notes_placeholder")}
@@ -1100,10 +1100,10 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Quick Tools */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <Zap size={14} strokeWidth={1.5} color={C.teal} /> {T("quick_tools")}
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <Zap size={12} strokeWidth={1.5} color={C.teal} /> {T("quick_tools")}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
             {[
               { mode: "followup", Icon: Mail, label: T("patient_followup"), desc: T("followup_desc"), color: C.teal },
               { mode: "treatment", Icon: ClipboardList, label: T("treatment_plan"), desc: T("treatment_desc"), color: C.blue },
@@ -1111,14 +1111,14 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               { mode: "educational", Icon: BookOpen, label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
             ].map(tool => (
               <div key={tool.mode} onClick={() => openCoach(tool.mode)}
-                style={{ ...glass, padding: "18px 14px", cursor: "pointer", transition: "all 0.3s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = `${tool.color}40`; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = C.glow(tool.color, 0.12); }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-                <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: `${tool.color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
-                  <tool.Icon size={18} strokeWidth={1.5} color={tool.color} />
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "16px 14px", cursor: "pointer", transition: "all 240ms cubic-bezier(0.2,0.8,0.2,1)" }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${tool.color}0d`; e.currentTarget.style.borderColor = `${tool.color}30`; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                <div style={{ width: 34, height: 34, borderRadius: 10, background: `${tool.color}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                  <tool.Icon size={16} strokeWidth={1.5} color={tool.color} />
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 700 }}>{tool.label}</div>
-                <div style={{ fontSize: 10, color: C.ash, marginTop: 3, lineHeight: 1.5 }}>{tool.desc}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.white, lineHeight: 1.3, marginBottom: 4 }}>{tool.label}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{tool.desc}</div>
               </div>
             ))}
           </div>
