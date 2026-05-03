@@ -9,11 +9,134 @@
  * - Smooth slide-up (forward) / slide-down (back) transitions
  * - Thin teal progress bar at very top
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useIntakeState, IntakeData } from '@/hooks/useIntakeState';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Logo } from '@/components/ByteSenseLogo';
+
+// ─── Country phone codes ──────────────────────────────────────────────────────
+const COUNTRIES = [
+  { code: '+1',   flag: '🇺🇸', name: 'United States' },
+  { code: '+1',   flag: '🇨🇦', name: 'Canada' },
+  { code: '+44',  flag: '🇬🇧', name: 'United Kingdom' },
+  { code: '+61',  flag: '🇦🇺', name: 'Australia' },
+  { code: '+64',  flag: '🇳🇿', name: 'New Zealand' },
+  { code: '+91',  flag: '🇮🇳', name: 'India' },
+  { code: '+86',  flag: '🇨🇳', name: 'China' },
+  { code: '+81',  flag: '🇯🇵', name: 'Japan' },
+  { code: '+82',  flag: '🇰🇷', name: 'South Korea' },
+  { code: '+65',  flag: '🇸🇬', name: 'Singapore' },
+  { code: '+63',  flag: '🇵🇭', name: 'Philippines' },
+  { code: '+60',  flag: '🇲🇾', name: 'Malaysia' },
+  { code: '+66',  flag: '🇹🇭', name: 'Thailand' },
+  { code: '+62',  flag: '🇮🇩', name: 'Indonesia' },
+  { code: '+84',  flag: '🇻🇳', name: 'Vietnam' },
+  { code: '+971', flag: '🇦🇪', name: 'UAE' },
+  { code: '+966', flag: '🇸🇦', name: 'Saudi Arabia' },
+  { code: '+974', flag: '🇶🇦', name: 'Qatar' },
+  { code: '+965', flag: '🇰🇼', name: 'Kuwait' },
+  { code: '+973', flag: '🇧🇭', name: 'Bahrain' },
+  { code: '+968', flag: '🇴🇲', name: 'Oman' },
+  { code: '+49',  flag: '🇩🇪', name: 'Germany' },
+  { code: '+33',  flag: '🇫🇷', name: 'France' },
+  { code: '+34',  flag: '🇪🇸', name: 'Spain' },
+  { code: '+39',  flag: '🇮🇹', name: 'Italy' },
+  { code: '+31',  flag: '🇳🇱', name: 'Netherlands' },
+  { code: '+46',  flag: '🇸🇪', name: 'Sweden' },
+  { code: '+47',  flag: '🇳🇴', name: 'Norway' },
+  { code: '+45',  flag: '🇩🇰', name: 'Denmark' },
+  { code: '+358', flag: '🇫🇮', name: 'Finland' },
+  { code: '+41',  flag: '🇨🇭', name: 'Switzerland' },
+  { code: '+43',  flag: '🇦🇹', name: 'Austria' },
+  { code: '+32',  flag: '🇧🇪', name: 'Belgium' },
+  { code: '+351', flag: '🇵🇹', name: 'Portugal' },
+  { code: '+48',  flag: '🇵🇱', name: 'Poland' },
+  { code: '+55',  flag: '🇧🇷', name: 'Brazil' },
+  { code: '+52',  flag: '🇲🇽', name: 'Mexico' },
+  { code: '+54',  flag: '🇦🇷', name: 'Argentina' },
+  { code: '+57',  flag: '🇨🇴', name: 'Colombia' },
+  { code: '+56',  flag: '🇨🇱', name: 'Chile' },
+  { code: '+27',  flag: '🇿🇦', name: 'South Africa' },
+  { code: '+234', flag: '🇳🇬', name: 'Nigeria' },
+  { code: '+254', flag: '🇰🇪', name: 'Kenya' },
+];
+
+function parsePhone(v: string) {
+  if (!v) return { country: COUNTRIES[0], number: '' };
+  const sorted = [...COUNTRIES].sort((a, b) => b.code.length - a.code.length);
+  const match = sorted.find(c => v.startsWith(c.code));
+  if (match) return { country: match, number: v.slice(match.code.length).replace(/^\s+/, '') };
+  return { country: COUNTRIES[0], number: v };
+}
+
+function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
+  value: string; onChange: (v: string) => void;
+  placeholder?: string; fontSize?: number; fontFamily?: string;
+}) {
+  const init = useMemo(() => parsePhone(value), []);
+  const [country, setCountry] = useState(init.country);
+  const [number, setNumber] = useState(init.number);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const fs = fontSize || 16;
+  const ff = fontFamily || C.fn;
+
+  const filtered = useMemo(() =>
+    COUNTRIES.filter(c =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.code.includes(search)
+    ), [search]);
+
+  const selectCountry = (c: typeof COUNTRIES[0]) => {
+    setCountry(c); setOpen(false); setSearch('');
+    onChange(c.code + (number ? ' ' + number : ''));
+  };
+
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* Country picker button */}
+      <button type="button" onClick={() => setOpen(o => !o)}
+        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, color: C.white, fontSize: fs - 2, fontFamily: ff, flexShrink: 0 }}>
+        <span style={{ fontSize: 18, lineHeight: 1 }}>{country.flag}</span>
+        <span>{country.code}</span>
+        <span style={{ opacity: 0.4, fontSize: 10 }}>▾</span>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, width: 270, maxHeight: 300, display: 'flex', flexDirection: 'column', background: 'rgba(14,14,20,0.99)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, boxShadow: '0 16px 48px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search country..."
+              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 10px', color: C.white, fontSize: 13, fontFamily: ff, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {filtered.map((c, i) => {
+              const isActive = c.code === country.code && c.flag === country.flag;
+              return (
+                <div key={c.name} onClick={() => selectCountry(c)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', cursor: 'pointer', background: isActive ? 'rgba(20,184,166,0.1)' : 'transparent', color: isActive ? C.teal : C.ash, fontSize: 13, fontFamily: ff, borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
+                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                  onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}>
+                  <span style={{ fontSize: 18 }}>{c.flag}</span>
+                  <span style={{ flex: 1 }}>{c.name}</span>
+                  <span style={{ fontSize: 11, opacity: 0.45 }}>{c.code}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Number input */}
+      <input type="tel" value={number}
+        onChange={e => { setNumber(e.target.value); onChange(country.code + (e.target.value ? ' ' + e.target.value : '')); }}
+        placeholder={placeholder || '000-000-0000'}
+        style={{ flex: 1, background: 'transparent', border: 'none', color: C.white, fontSize: fs, fontFamily: ff, padding: '6px 0', outline: 'none' }} />
+    </div>
+  );
+}
 
 // ─── Question definitions ─────────────────────────────────────────────────────
 
@@ -397,8 +520,13 @@ export default function TypeformIntake({ clerkUserId, onDone }: Props) {
       return ((data[current.dataKey] as string[]) || []).length > 0;
     }
     if (current.type === 'fields') {
-      // Only check required fields
-      return (current.fields || []).filter(f => f.required).every(f => !!(data[f.id] as string)?.trim());
+      const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return (current.fields || []).filter(f => f.required).every(f => {
+        const val = (data[f.id] as string)?.trim();
+        if (!val) return false;
+        if (f.type === 'email') return EMAIL_RE.test(val);
+        return true;
+      });
     }
     return true;
   }, [current, data]);
@@ -705,19 +833,29 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
             <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>
               {field.label}{field.required && <span style={{ color: C.teal, marginLeft: 3 }}>*</span>}
             </label>
-            <input
-              ref={el => inputRefs.current[i] = el}
-              type={field.type || 'text'}
-              value={(data[field.id] as string) || ''}
-              onChange={e => update({ [field.id]: e.target.value } as Partial<IntakeData>)}
-              onKeyDown={e => handleKey(e, i)}
-              placeholder={field.placeholder}
-              style={{
-                width: '100%', background: 'transparent', border: 'none',
-                color: C.white, fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
-                padding: '6px 0', outline: 'none', boxSizing: 'border-box',
-              }}
-            />
+            {field.type === 'tel' ? (
+              <PhoneInput
+                value={(data[field.id] as string) || ''}
+                onChange={v => update({ [field.id]: v } as Partial<IntakeData>)}
+                placeholder={field.placeholder}
+                fontSize={isMobile ? 16 : 18}
+                fontFamily={C.fn}
+              />
+            ) : (
+              <input
+                ref={el => inputRefs.current[i] = el}
+                type={field.type || 'text'}
+                value={(data[field.id] as string) || ''}
+                onChange={e => update({ [field.id]: e.target.value } as Partial<IntakeData>)}
+                onKeyDown={e => handleKey(e, i)}
+                placeholder={field.placeholder}
+                style={{
+                  width: '100%', background: 'transparent', border: 'none',
+                  color: C.white, fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
+                  padding: '6px 0', outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+            )}
           </div>
         ))}
       </div>

@@ -137,6 +137,8 @@ export function useAppState(clerkUserId: string | null = null) {
           const restoredPractice = (data as any).practice || '';
           setS(prev => {
             const hasProgress = data.done_modules?.length > 0 || data.training_roles?.length > 0;
+            // If they have a DB record with name or roles, they've already done intake
+            const alreadyDoneIntake = !!(restoredName || data.training_roles?.length);
             return {
               ...prev,
               roles: data.training_roles?.length ? data.training_roles : prev.roles,
@@ -147,6 +149,7 @@ export function useAppState(clerkUserId: string | null = null) {
               signed: data.signed || prev.signed,
               name: restoredName || prev.name,
               practice: restoredPractice || prev.practice,
+              intakeDone: alreadyDoneIntake ? true : prev.intakeDone,
               phase: (restoredName && hasProgress && prev.phase === 'splash') ? 'dashboard' : prev.phase,
             };
           });
