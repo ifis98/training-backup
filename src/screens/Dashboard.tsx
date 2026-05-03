@@ -527,7 +527,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             {/* Goals Editor */}
             {editingGoals && (
               <div style={{ ...glass, padding: "20px 24px", marginBottom: 16, boxShadow: C.glow(C.teal, 0.12), border: `1px solid ${C.teal}30` }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto auto", gap: 14, alignItems: "end" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 14, alignItems: "end" }}>
                   <div>
                     <label style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 6, display: "block" }}>{T("case_goal")}</label>
                     <input type="number" value={editCaseGoal} onChange={e => setEditCaseGoal(+e.target.value)}
@@ -754,7 +754,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         )}
 
         {/* Charts Row */}
-        <div style={{ display: "grid", gridTemplateColumns: staffChartData.length > 0 ? "1fr 1fr" : "1fr", gap: 16, marginBottom: 28 }}>
+        <div style={{ display: "grid", gridTemplateColumns: staffChartData.length > 0 ? "repeat(auto-fit, minmax(280px, 1fr))" : "1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 24 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("modules_by_phase")}
@@ -822,7 +822,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             {/* Add case form */}
             {showAddCase && (
               <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(255,255,255,0.02)" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 10 }}>
                   <input value={newCase.patient_name} onChange={e => setNewCase({ ...newCase, patient_name: e.target.value })} placeholder={T("patient_name")}
                     style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
                   <select value={newCase.status} onChange={e => setNewCase({ ...newCase, status: e.target.value })}
@@ -889,7 +889,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Case Analytics Charts */}
         {isOwnerOrManager && caseAnalyticsData.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 28 }}>
             <div style={{ ...glass, padding: 24 }}>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal }} /> {T("conversion_rate")}
@@ -1041,7 +1041,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               <DollarSign size={12} strokeWidth={1.5} color={C.gold} />
               {T("revenue_calculator")}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 20, marginBottom: 24 }}>
               {[
                 { label: T("patients_per_month"), value: revPatients, min: 50, max: 800, step: 1, set: setRevPatients, color: C.teal, format: (v: number) => `${v}` },
                 { label: T("avg_case_price"), value: revPrice, min: 500, max: 5000, step: 100, set: setRevPrice, color: C.gold, format: (v: number) => `$${v.toLocaleString()}` },
@@ -1055,7 +1055,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
               <div style={{ background: "rgba(255,255,255,0.03)", padding: 22, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.glassBorder}` }}>
                 <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>{T("current_monthly")}</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: C.ash }}>${currentRev.toLocaleString()}</div>

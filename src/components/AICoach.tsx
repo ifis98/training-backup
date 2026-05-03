@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { C } from '@/data/constants';
 import { t, Lang } from '@/data/translations';
 import { toast } from 'sonner';
+import { Brain, Copy, Star, Trash2, MessageSquare, X } from 'lucide-react';
 
 interface AICoachProps {
   onClose: () => void;
@@ -126,10 +127,11 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{
             width: 36, height: 36, borderRadius: C.radiusSm,
-            background: C.gradGold,
+            background: "rgba(201,168,76,0.15)", border: `1px solid rgba(201,168,76,0.25)`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 18, boxShadow: C.glow(C.gold, 0.3),
-          }}>🧠</div>
+          }}>
+            <Brain size={18} strokeWidth={1.5} color={C.gold} />
+          </div>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.white, letterSpacing: 0.5 }}>{T("ai_coach")}</div>
             <div style={{ fontSize: 11, color: C.ash }}>{MODES.find(m => m.id === mode)?.desc}</div>
@@ -144,21 +146,21 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
         }}
         onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = C.white; }}
         onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = C.ash; }}
-        >✕</button>
+        ><X size={16} strokeWidth={2} /></button>
       </div>
 
       {/* Tab Bar */}
       <div style={{ display: "flex", gap: 4, padding: "10px 24px", borderBottom: `1px solid ${C.glassBorder}` }}>
-        {[{ id: "chat" as const, label: `💬 ${T("chat")}` }, { id: "saved" as const, label: `⭐ ${T("saved_responses")} (${favorites.length})` }].map(tb => (
+        {[{ id: "chat" as const, label: T("chat"), Icon: MessageSquare }, { id: "saved" as const, label: `${T("saved_responses")} (${favorites.length})`, Icon: Star }].map(tb => (
           <button key={tb.id} onClick={() => setTab(tb.id)}
             style={{
-              flex: 1, padding: "10px", fontSize: 12, fontWeight: 700, fontFamily: C.fn,
-              cursor: "pointer", border: "none", borderRadius: C.radiusXs,
-              background: tab === tb.id ? "rgba(201, 168, 76, 0.15)" : "transparent",
-              color: tab === tb.id ? C.gold : C.ash,
-              transition: "all 0.2s",
+              flex: 1, padding: "9px 12px", fontSize: 11, fontWeight: 700, fontFamily: C.fn,
+              cursor: "pointer", border: tab === tb.id ? `1px solid rgba(201,168,76,0.25)` : "1px solid transparent", borderRadius: C.radiusXs,
+              background: tab === tb.id ? "rgba(201,168,76,0.1)" : "transparent",
+              color: tab === tb.id ? C.gold : "rgba(255,255,255,0.35)",
+              transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}>
-            {tb.label}
+            <tb.Icon size={12} strokeWidth={1.5} /> {tb.label}
           </button>
         ))}
       </div>
@@ -166,8 +168,10 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
       {tab === "saved" ? (
         <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto" }}>
           {favorites.length === 0 && (
-            <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 60 }}>
-              <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.4 }}>⭐</div>
+            <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: 13, marginTop: 60 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+                <Star size={22} strokeWidth={1.5} color="rgba(255,255,255,0.2)" />
+              </div>
               {T("no_saved")}
             </div>
           )}
@@ -178,8 +182,8 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
                   {fav.mode} · {new Date(fav.savedAt).toLocaleDateString()}
                 </span>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => copyText(fav.content)} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, fontSize: 12, cursor: "pointer", fontFamily: C.fn, padding: "4px 8px", borderRadius: C.radiusXs }}>📋</button>
-                  <button onClick={() => deleteFavorite(i)} style={{ background: "rgba(204,16,16,0.1)", border: "none", color: C.red, fontSize: 12, cursor: "pointer", fontFamily: C.fn, padding: "4px 8px", borderRadius: C.radiusXs }}>🗑️</button>
+                  <button onClick={() => copyText(fav.content)} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, cursor: "pointer", fontFamily: C.fn, padding: "5px 8px", borderRadius: C.radiusXs, display: "flex", alignItems: "center" }}><Copy size={13} strokeWidth={1.5} /></button>
+                  <button onClick={() => deleteFavorite(i)} style={{ background: "rgba(204,16,16,0.1)", border: "none", color: C.red, cursor: "pointer", fontFamily: C.fn, padding: "5px 8px", borderRadius: C.radiusXs, display: "flex", alignItems: "center" }}><Trash2 size={13} strokeWidth={1.5} /></button>
                 </div>
               </div>
               <div style={{ fontSize: 13, color: C.white, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
@@ -214,9 +218,12 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
               <div style={{ textAlign: "center", color: C.ash, fontSize: 13, marginTop: 50, animation: "float-up 0.5s ease-out" }}>
                 <div style={{
                   width: 64, height: 64, borderRadius: C.radius,
-                  background: C.gradGold, display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 28, margin: "0 auto 16px", boxShadow: C.glow(C.gold, 0.25),
-                }}>🧠</div>
+                  background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  margin: "0 auto 16px",
+                }}>
+                  <Brain size={28} strokeWidth={1.5} color={C.gold} />
+                </div>
                 <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 16, color: C.white }}>{T("coach_welcome")}</div>
                 <div style={{ fontSize: 13, maxWidth: 340, margin: "0 auto", lineHeight: 1.7, color: C.ash }}>{T(hintKey)}</div>
               </div>
@@ -250,7 +257,7 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
                           }}
                           onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
                           onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}>
-                          📋 {T("copy")}
+                          <Copy size={11} strokeWidth={1.5} /> {T("copy")}
                         </button>
                         <button onClick={() => saveResponse(msg.content)}
                           style={{
@@ -260,7 +267,7 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
                           }}
                           onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
                           onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}>
-                          ⭐ {T("save")}
+                          <Star size={11} strokeWidth={1.5} /> {T("save")}
                         </button>
                       </div>
                     </>

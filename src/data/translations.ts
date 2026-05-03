@@ -549,7 +549,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "sidebar_contact_support": "Contactar Soporte",
     "goals_save_error": "Error al guardar las metas. Intente de nuevo.",
     "goals_saved": "¡Metas guardadas exitosamente!",
-    "daily_breakdown": "💡 Son solo {cpd} caso(s) por día a ${price} cada uno = ${revenue}/mes en ingresos adicionales",
+    "daily_breakdown": "Son solo {cpd} caso(s) por día a ${price} cada uno = ${revenue}/mes en ingresos adicionales",
   },
 
   pt: {
@@ -804,7 +804,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "sidebar_contact_support": "Contatar Suporte",
     "goals_save_error": "Erro ao salvar metas. Tente novamente.",
     "goals_saved": "Metas salvas com sucesso!",
-    "daily_breakdown": "💡 São apenas {cpd} caso(s) por dia a ${price} cada = ${revenue}/mês em receita adicional",
+    "daily_breakdown": "São apenas {cpd} caso(s) por dia a ${price} cada = ${revenue}/mês em receita adicional",
   },
 
   fr: {
@@ -1059,7 +1059,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "sidebar_contact_support": "Contacter le Support",
     "goals_save_error": "Erreur lors de la sauvegarde. Réessayez.",
     "goals_saved": "Objectifs sauvegardés !",
-    "daily_breakdown": "💡 C'est seulement {cpd} cas par jour à ${price} chacun = ${revenue}/mois de revenus supplémentaires",
+    "daily_breakdown": "C'est seulement {cpd} cas par jour à ${price} chacun = ${revenue}/mois de revenus supplémentaires",
   },
 
   zh: {
@@ -1314,7 +1314,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "sidebar_contact_support": "联系支持",
     "goals_save_error": "保存目标失败，请重试。",
     "goals_saved": "目标已成功保存！",
-    "daily_breakdown": "💡 每天只需 {cpd} 个案例，每个 ${price} = 每月 ${revenue} 额外收入",
+    "daily_breakdown": "每天只需 {cpd} 个案例，每个 ${price} = 每月 ${revenue} 额外收入",
   },
 };
 
