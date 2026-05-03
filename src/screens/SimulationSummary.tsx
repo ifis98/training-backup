@@ -5,6 +5,7 @@ import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { supabase, FUNCTIONS_URL, FUNCTIONS_KEY } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Brain } from 'lucide-react';
 
 interface SimulationSummaryProps {
   s: AppState;
@@ -80,7 +81,9 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
       <div style={{ maxWidth: 600, margin: "0 auto", padding: isMobile ? "20px 16px 48px" : "24px 20px" }}>
         {loading && (
           <div style={{ textAlign: "center", color: C.ash, marginTop: 60 }}>
-            <div style={{ fontSize: 28, marginBottom: 12 }}>🧠</div>
+            <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+              <Brain size={24} strokeWidth={1.5} color={C.gold} />
+            </div>
             <div style={{ fontSize: 14 }}>{T("analyzing")}</div>
           </div>
         )}

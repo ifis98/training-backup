@@ -14,6 +14,7 @@ import { useIntakeState, IntakeData } from '@/hooks/useIntakeState';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Logo } from '@/components/ByteSenseLogo';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 // ─── Country phone codes ──────────────────────────────────────────────────────
 const COUNTRIES = [
@@ -874,12 +875,16 @@ function CompleteScreen({ onComplete, saving, isMobile }: { onComplete: () => Pr
     <div style={{ textAlign: 'center', padding: isMobile ? '0 8px' : '0 20px' }}>
       {saving ? (
         <>
-          <div style={{ fontSize: 40, marginBottom: 20 }}>⏳</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+            <Loader2 size={44} strokeWidth={1.5} color={C.teal} style={{ animation: "spin 1s linear infinite" }} />
+          </div>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.4)' }}>Saving your setup…</p>
         </>
       ) : (
         <>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+            <CheckCircle2 size={56} strokeWidth={1.5} color={C.teal} />
+          </div>
           <div style={{ fontSize: 11, letterSpacing: 3, color: C.teal, textTransform: 'uppercase', fontWeight: 700, marginBottom: 16 }}>
             Setup Complete
           </div>

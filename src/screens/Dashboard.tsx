@@ -612,7 +612,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             {practiceGoals && (practiceGoals as any)?.price_per_case > 0 && !editingGoals && (
               <div style={{ marginBottom: 14, padding: "10px 14px", background: "rgba(20,184,166,0.08)", borderRadius: C.radiusXs, border: `1px solid ${C.teal}30` }}>
                 <p style={{ fontSize: 12, color: C.teal, lineHeight: 1.6, margin: 0 }}>
-                  💡 {T("daily_breakdown")
+                  {T("daily_breakdown")
                     .replace("{cpd}", String(Math.ceil((practiceGoals?.monthly_case_goal || 0) / 20)))
                     .replace("{price}", `$${((practiceGoals as any)?.price_per_case || 0).toLocaleString()}`)
                     .replace("{revenue}", `$${(practiceGoals?.monthly_revenue_goal || 0).toLocaleString()}`)}

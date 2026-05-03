@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Logo } from '@/components/ByteSenseLogo';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 interface Props {
   onFinish: () => void;
@@ -23,12 +24,16 @@ export default function Step10Complete({ onFinish, onComplete }: Props) {
       <div style={{ textAlign: 'center', maxWidth: 440, marginTop: 32 }}>
         {saving ? (
           <>
-            <div style={{ fontSize: 32, marginBottom: 16 }}>⏳</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+              <Loader2 size={36} strokeWidth={1.5} color={C.teal} style={{ animation: "spin 1s linear infinite" }} />
+            </div>
             <div style={{ fontSize: 16, color: C.ash }}>Saving your setup…</div>
           </>
         ) : (
           <>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+              <CheckCircle2 size={48} strokeWidth={1.5} color={C.teal} />
+            </div>
             <div style={{ fontSize: 10, letterSpacing: 3, color: C.teal, textTransform: 'uppercase', fontWeight: 700, marginBottom: 12 }}>
               Setup Complete
             </div>
