@@ -125,7 +125,7 @@ const Index = ({ forceView }: IndexProps = {}) => {
     if (s.phase === 'baseline') return <Baseline s={s} u={u} lang={lang} />;
     if (s.phase === 'blR') return <BaselineResults s={s} u={u} sc={sc} sRoles={sRoles} myPH={myPH} myM={myM} lang={lang} />;
     if (s.phase === 'module' && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} lang={lang} />;
-    if (s.phase === 'sales-training')    return <Dashboard {...dashboardProps} />;
+    if (s.phase === 'sales-training')    return <PanelView src="/sales-training.html" />;
     if (s.phase === 'product-experience') return <PanelView src="/product-experience.html" />;
     if (s.phase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
     if (s.phase === 'contact-support')  return <PanelView src="/contact-support.html" />;

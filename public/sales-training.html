@@ -819,6 +819,63 @@
     margin-bottom: 3px;
   }
 
+  /* ── Dashboard Module Replica ─────────────────────────────────────────── */
+  .db-hero {
+    background: linear-gradient(135deg,rgba(0,194,168,.15),rgba(0,194,168,.05));
+    border: 1px solid rgba(0,194,168,.3);
+    border-radius: 14px;
+    padding: 18px 24px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: default;
+    transition: border-color .2s;
+  }
+  .db-hero:hover { border-color: rgba(0,194,168,.55); }
+  .db-hero-badge  { font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:4px; }
+  .db-hero-title  { font-size:16px;font-weight:700;color:var(--white); }
+  .db-hero-sub    { font-size:11px;color:var(--ash);margin-top:2px; }
+  .db-hero-arrow  { width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#000;font-size:18px;font-weight:900; }
+  .db-kpi-grid    { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px; }
+  @media(max-width:700px){ .db-kpi-grid { grid-template-columns:repeat(2,1fr); } }
+  .db-kpi         { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 18px;position:relative;overflow:hidden;transition:all .2s; }
+  .db-kpi:hover   { transform:translateY(-2px); }
+  .db-kpi-bar     { position:absolute;top:0;left:0;right:0;height:2px; }
+  .db-kpi-label   { font-size:9px;color:var(--ash);text-transform:uppercase;letter-spacing:.16em;margin-bottom:8px;font-weight:700; }
+  .db-kpi-val     { font-size:32px;font-weight:800;line-height:1;letter-spacing:-.03em; }
+  .db-kpi-sub     { font-size:10px;color:var(--ash);margin-top:6px; }
+  .db-two-col     { display:grid;grid-template-columns:220px 1fr;gap:14px;margin-bottom:18px; }
+  @media(max-width:700px){ .db-two-col { grid-template-columns:1fr; } }
+  .db-panel       { background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px; }
+  .db-panel-label { font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);margin-bottom:16px; }
+  .db-gauge-wrap  { display:flex;flex-direction:column;align-items:center; }
+  .db-rec-item    { display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border); }
+  .db-rec-item:last-child { border-bottom:none; }
+  .db-rec-dot     { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+  .db-rec-title   { font-size:13px;font-weight:600;color:var(--white); }
+  .db-rec-meta    { font-size:10px;color:var(--ash);margin-top:2px; }
+  .db-rec-badge   { font-size:9px;font-weight:700;color:var(--teal);background:rgba(0,194,168,.1);padding:1px 7px;border-radius:99px;margin-left:auto;flex-shrink:0;align-self:flex-start; }
+  .db-phase-card  { background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s; }
+  .db-phase-card.open { border-color:rgba(0,194,168,.25); }
+  .db-phase-hdr   { display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;transition:background .15s;position:relative; }
+  .db-phase-hdr:hover { background:rgba(255,255,255,.02); }
+  .db-phase-icon  { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px; }
+  .db-phase-name  { font-size:14px;font-weight:700;color:var(--white); }
+  .db-phase-count { font-size:10px;color:var(--ash);margin-top:2px; }
+  .db-phase-pct   { font-size:11px;font-weight:700; }
+  .db-phase-chev  { color:var(--ash);font-size:20px;transition:transform .25s;flex-shrink:0;line-height:1; }
+  .db-phase-card.open .db-phase-chev { transform:rotate(90deg); }
+  .db-phase-body  { max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1);border-top:1px solid var(--border); }
+  .db-phase-card.open .db-phase-body { max-height:3000px; }
+  .db-mod-grid    { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:14px 16px; }
+  .db-mod-card    { background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;transition:all .18s;cursor:pointer;position:relative; }
+  .db-mod-card:hover { border-color:rgba(0,194,168,.35);transform:translateY(-1px); }
+  .db-mod-time    { font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--ash);text-transform:uppercase;margin-bottom:6px; }
+  .db-mod-title   { font-size:12px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:8px; }
+  .db-mod-btn     { font-size:10px;font-weight:700;color:var(--teal);letter-spacing:.05em; }
+
   /* ACCORDION */
   .accordion-item {
     background: var(--card);
@@ -1693,70 +1750,156 @@ function mdToHtml(text) {
   const container = document.getElementById('tm-container');
   if (!container) return;
 
-  let html = '';
+  const phaseColors = {
+    beginner:       '#60a5fa',
+    core:           '#00C2A8',
+    product:        '#34d399',
+    sales:          '#D4AF37',
+    financial:      '#10b981',
+    operations:     '#a78bfa',
+    advanced:       '#fb7185',
+    flywheel:       '#f59e0b',
+    'role-specific':'#22d3ee',
+  };
+  const phaseEmoji = {
+    beginner:'📚', core:'🧠', product:'📦', sales:'🎯',
+    financial:'💰', operations:'⚙️', advanced:'🔥',
+    flywheel:'🚀', 'role-specific':'👤',
+  };
+
+  // ── Hero Banner ──────────────────────────────────────────────────────────
+  let html = `
+    <div class="db-hero">
+      <div>
+        <div class="db-hero-badge">Continue Training</div>
+        <div class="db-hero-title">${MODULES[0]?.title || 'Start Your First Module'}</div>
+        <div class="db-hero-sub">${MODULES[0]?.time || ''} · 0% complete</div>
+      </div>
+      <div class="db-hero-arrow">→</div>
+    </div>
+  `;
+
+  // ── KPI Cards ────────────────────────────────────────────────────────────
+  const totalMods = MODULES.length;
+  html += `
+    <div class="db-kpi-grid">
+      <div class="db-kpi">
+        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#00C2A8,transparent)"></div>
+        <div class="db-kpi-label">Training Progress</div>
+        <div class="db-kpi-val" style="color:#00C2A8">0%</div>
+        <div class="db-kpi-sub">of curriculum complete</div>
+      </div>
+      <div class="db-kpi">
+        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#D4AF37,transparent)"></div>
+        <div class="db-kpi-label">Modules Done</div>
+        <div class="db-kpi-val" style="color:#D4AF37">0<span style="font-size:15px;font-weight:400;color:var(--ash)">/${totalMods}</span></div>
+        <div class="db-kpi-sub">lessons completed</div>
+      </div>
+      <div class="db-kpi">
+        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#a78bfa,transparent)"></div>
+        <div class="db-kpi-label">XP Earned</div>
+        <div class="db-kpi-val" style="color:#a78bfa">0</div>
+        <div class="db-kpi-sub">experience points</div>
+      </div>
+      <div class="db-kpi">
+        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#fb7185,transparent)"></div>
+        <div class="db-kpi-label">AI Sims Done</div>
+        <div class="db-kpi-val" style="color:#fb7185">0<span style="font-size:15px;font-weight:400;color:var(--ash)">/3</span></div>
+        <div class="db-kpi-sub">patient conversations</div>
+      </div>
+    </div>
+  `;
+
+  // ── Knowledge Score Gauge + Recommendations ──────────────────────────────
+  const R = 54, circ = 2 * Math.PI * R;
+  const recMods = MODULES.slice(0, 4);
+  html += `
+    <div class="db-two-col">
+      <div class="db-panel">
+        <div class="db-panel-label">Knowledge Score</div>
+        <div class="db-gauge-wrap">
+          <svg width="150" height="150" viewBox="0 0 150 150">
+            <circle cx="75" cy="75" r="${R}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+            <circle cx="75" cy="75" r="${R}" fill="none" stroke="#00C2A8" stroke-width="10"
+              stroke-dasharray="0 ${circ}" stroke-linecap="round"
+              transform="rotate(-90 75 75)" style="transition:stroke-dasharray 1s ease;"/>
+            <text x="75" y="69" text-anchor="middle" font-size="30" font-weight="800" fill="#00C2A8" font-family="Outfit,sans-serif">0</text>
+            <text x="75" y="88" text-anchor="middle" font-size="11" fill="#9898a8" font-family="Outfit,sans-serif">/ 100</text>
+          </svg>
+          <div style="font-size:13px;color:var(--ash);font-weight:600;margin-top:2px;">Fresh Start</div>
+          <div style="font-size:10px;color:var(--ash);margin-top:4px;text-align:center;">Complete modules to raise your score</div>
+        </div>
+      </div>
+      <div class="db-panel">
+        <div class="db-panel-label">Training Recommendations</div>
+        ${recMods.map((m, i) => {
+          const ph = PHASES.find(p => p.key === m.phase);
+          const color = phaseColors[m.phase] || '#00C2A8';
+          return `
+            <div class="db-rec-item">
+              <div class="db-rec-dot" style="background:${color}"></div>
+              <div style="flex:1;min-width:0;">
+                <div class="db-rec-title">${m.title}</div>
+                <div class="db-rec-meta">${ph ? ph.label : ''} · ${m.time}</div>
+              </div>
+              ${i === 0 ? '<span class="db-rec-badge">UP NEXT</span>' : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  // ── Phase Cards → Module Grid ────────────────────────────────────────────
+  html += `<div style="font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#00C2A8" stroke-width="1.5"/><path d="M6 4v4M4 6h4" stroke="#00C2A8" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Training Phases
+  </div>`;
+
   PHASES.forEach(phase => {
     const phaseMods = MODULES.filter(m => m.phase === phase.key);
     if (!phaseMods.length) return;
+    const color = phaseColors[phase.key] || '#00C2A8';
+    const emoji = phaseEmoji[phase.key] || '📖';
 
     html += `
-      <div style="margin-bottom:32px;">
-        <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--white-faint);text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">${phase.label}</div>
-        <div class="accordion">
-    `;
-
-    phaseMods.forEach((mod, idx) => {
-      const bodyId = 'tm-body-' + mod.id;
-      const itemId = 'tm-item-' + mod.id;
-      html += `
-        <div class="accordion-item" id="${itemId}">
-          <button class="accordion-trigger tm-trigger">
-            <span style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--white-faint);background:var(--surface);border:1px solid var(--border);padding:2px 8px;flex-shrink:0;">${mod.time}</span>
-              ${mod.title}
-            </span>
-            <span class="accordion-icon">+</span>
-          </button>
-          <div class="accordion-body" id="${bodyId}">
-            <div class="accordion-body-inner tm-content">${mdToHtml(mod.content)}</div>
+      <div class="db-phase-card" data-phase="${phase.key}">
+        <div class="db-phase-hdr">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${color};border-radius:3px 0 0 3px;"></div>
+          <div class="db-phase-icon" style="background:${color}20;">${emoji}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="db-phase-name">${phase.label}</div>
+            <div class="db-phase-count">${phaseMods.length} module${phaseMods.length !== 1 ? 's' : ''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="db-phase-pct" style="color:${color}">0%</div>
+            <div style="width:60px;height:4px;background:rgba(255,255,255,0.06);border-radius:99px;">
+              <div style="width:0%;height:100%;background:${color};border-radius:99px;"></div>
+            </div>
+          </div>
+          <div class="db-phase-chev">›</div>
+        </div>
+        <div class="db-phase-body">
+          <div class="db-mod-grid">
+            ${phaseMods.map(mod => `
+              <div class="db-mod-card">
+                <div class="db-mod-time">${mod.time}</div>
+                <div class="db-mod-title">${mod.title}</div>
+                <div class="db-mod-btn">Start →</div>
+              </div>
+            `).join('')}
           </div>
         </div>
-      `;
-    });
-
-    html += `</div></div>`;
+      </div>
+    `;
   });
 
   container.innerHTML = html;
 
-  // Wire up accordion toggle with dynamic height
-  container.querySelectorAll('.tm-trigger').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.closest('.accordion-item');
-      const body = item.querySelector('.accordion-body');
-      const isOpen = item.classList.contains('open');
-
-      // Close all others in same phase group
-      const group = item.closest('.accordion');
-      if (group) {
-        group.querySelectorAll('.accordion-item.open').forEach(openItem => {
-          if (openItem !== item) {
-            openItem.classList.remove('open');
-            const b = openItem.querySelector('.accordion-body');
-            b.style.maxHeight = '0';
-            b.classList.remove('open');
-          }
-        });
-      }
-
-      if (isOpen) {
-        item.classList.remove('open');
-        body.style.maxHeight = '0';
-        body.classList.remove('open');
-      } else {
-        item.classList.add('open');
-        body.classList.add('open');
-        body.style.maxHeight = body.scrollHeight + 'px';
-      }
+  // Wire phase card toggles
+  container.querySelectorAll('.db-phase-card').forEach(card => {
+    card.querySelector('.db-phase-hdr').addEventListener('click', () => {
+      card.classList.toggle('open');
     });
   });
 })();
