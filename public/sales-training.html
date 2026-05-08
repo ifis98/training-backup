@@ -1905,6 +1905,22 @@ function mdToHtml(text) {
 })();
 </script>
 
+<script>
+// When loaded as ?embed=resources, hide the training-module section
+// (it's rendered by the React app instead) and scroll to first real section
+(function() {
+  if (!location.search.includes('embed=resources')) return;
+  var tm = document.getElementById('training-module');
+  if (tm) tm.style.display = 'none';
+  var tmLink = document.querySelector('a[href="#training-module"]');
+  if (tmLink) tmLink.closest('.nav-section') && (tmLink.previousElementSibling || tmLink).style.display = 'none';
+  if (tmLink) tmLink.style.display = 'none';
+  // Scroll to first visible section
+  setTimeout(function() {
+    var first = document.querySelector('#about');
+    if (first) first.scrollIntoView({ behavior: 'auto' });
+  }, 50);
+})();
+</script>
 
 </body></html>
-</html>
