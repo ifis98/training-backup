@@ -22,9 +22,9 @@ import { Lang } from '@/data/translations';
 import { BL } from '@/data/constants';
 import { C } from '@/data/constants';
 
-interface IndexProps { forceView?: 'staff' | 'owner'; }
+interface IndexProps { forceView?: 'staff' | 'owner'; forcePhase?: string; }
 
-const Index = ({ forceView }: IndexProps = {}) => {
+const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const clerkUserId = clerkUser?.id ?? null;
@@ -122,25 +122,37 @@ const Index = ({ forceView }: IndexProps = {}) => {
         return null;
       }
     }
+    // ── Transient states always take priority (even when on a section URL) ──
     if (s.phase === 'baseline') return <Baseline s={s} u={u} lang={lang} />;
     if (s.phase === 'blR') return <BaselineResults s={s} u={u} sc={sc} sRoles={sRoles} myPH={myPH} myM={myM} lang={lang} />;
     if (s.phase === 'module' && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} lang={lang} />;
-    if (s.phase === 'sales-training')    return <PanelView src="/sales-training.html" />;
-    if (s.phase === 'product-experience') return <PanelView src="/product-experience.html" />;
-    if (s.phase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
-    if (s.phase === 'contact-support')  return <PanelView src="/contact-support.html" />;
-    if (s.phase === 'roleplay') return <RoleplayHub s={s} u={u} lang={lang} />;
     if (s.phase === 'simulation') return <Simulation s={s} u={u} lang={lang} />;
     if (s.phase === 'simSummary') return <SimulationSummary s={s} u={u} lang={lang} />;
     if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
+
+    // ── URL-based section routing ────────────────────────────────────────
+    // /sales-training → full real Dashboard (live Supabase data, all sections)
+    if (forcePhase === 'sales-training')    return <Dashboard {...dashboardProps} />;
+    if (forcePhase === 'product-experience') return <PanelView src="/product-experience.html" />;
+    if (forcePhase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
+    if (forcePhase === 'contact-support')   return <PanelView src="/contact-support.html" />;
+    if (forcePhase === 'roleplay')          return <RoleplayHub s={s} u={u} lang={lang} />;
+
+    // ── Phase-state routing (used internally, e.g. from mobile menu) ─────
+    if (s.phase === 'sales-training')    return <Dashboard {...dashboardProps} />;
+    if (s.phase === 'product-experience') return <PanelView src="/product-experience.html" />;
+    if (s.phase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
+    if (s.phase === 'contact-support')   return <PanelView src="/contact-support.html" />;
+    if (s.phase === 'roleplay') return <RoleplayHub s={s} u={u} lang={lang} />;
+
     if (forceView === 'staff') return <StaffDashboard {...dashboardProps} />;
     if (forceView === 'owner') return <Dashboard {...dashboardProps} />;
     if (isStaff && !isAdmin) return <StaffDashboard {...dashboardProps} />;
     return <Dashboard {...dashboardProps} />;
   };
 
-  // Show the sidebar layout for all screens once intake is complete
-  const showLayout = s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'roleplay', 'contact-support'].includes(s.phase);
+  // Show the sidebar layout for all screens once intake is complete (or on a section URL)
+  const showLayout = !!forcePhase || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'roleplay', 'contact-support'].includes(s.phase);
 
   if (showLayout) {
     return (

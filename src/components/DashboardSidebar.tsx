@@ -5,6 +5,7 @@ import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, TrendingUp, Package, Building2, Award, Mail, LogOut, ChevronLeft, ChevronRight, Settings, Swords } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -30,6 +31,8 @@ const glass = {
 export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, onSignOut, onOpenSettings, onOpenPanel, lang, activePanel }: DashboardSidebarProps) {
   const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
   // Keep CSS variable in sync so SlidingPanel knows where to start
@@ -47,16 +50,28 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     }, 50);
   };
 
+  // Determine active item from current URL path
+  const path = location.pathname;
+  const activeId = path === '/app' || path === '/'
+    ? 'dashboard'
+    : path.startsWith('/sales-training')     ? 'sales-training'
+    : path.startsWith('/product-experience') ? 'product-training'
+    : path.startsWith('/office-workflow')    ? 'office-workflow'
+    : path.startsWith('/roleplay')           ? 'roleplay'
+    : path.startsWith('/contact-support')    ? 'contact'
+    : s.phase === 'report'                   ? 'report'
+    : 'dashboard';
+
   const navItems = [
-    { id: "dashboard",        icon: LayoutDashboard, label: "Dashboard",             phase: "dashboard", action: () => { u({ phase: "dashboard" }); scrollTop(); } },
-    { id: "sales-training",   icon: TrendingUp,      label: "Sales Training",        phase: "sales-training" },
-    { id: "product-training", icon: Package,         label: "Product Experience",    phase: "product-experience" },
-    { id: "office-workflow",  icon: Building2,       label: "Office Workflow",       phase: "office-workflow" },
-    { id: "roleplay",         icon: Swords,          label: "Roleplay Simulation",   phase: "roleplay" },
-    { id: "report",           icon: Award,           label: "Reports & Certificates", phase: "report", disabled: !allComplete && !s.signed },
-    { id: "contact",          icon: Mail,            label: "Contact Support",       phase: "contact-support" },
-    { id: "settings",         icon: Settings,        label: "Settings",              action: onOpenSettings },
-    { id: "signout",          icon: LogOut,          label: T("sign_out"),           action: onSignOut },
+    { id: "dashboard",        icon: LayoutDashboard, label: "Dashboard",              action: () => { u({ phase: "dashboard" }); navigate('/app'); scrollTop(); } },
+    { id: "sales-training",   icon: TrendingUp,      label: "Sales Training",         action: () => { navigate('/sales-training'); scrollTop(); } },
+    { id: "product-training", icon: Package,         label: "Product Experience",     action: () => { navigate('/product-experience'); scrollTop(); } },
+    { id: "office-workflow",  icon: Building2,       label: "Office Workflow",        action: () => { navigate('/office-workflow'); scrollTop(); } },
+    { id: "roleplay",         icon: Swords,          label: "Roleplay Simulation",    action: () => { navigate('/roleplay'); scrollTop(); } },
+    { id: "report",           icon: Award,           label: "Reports & Certificates", action: () => { u({ phase: "report" }); navigate('/app'); scrollTop(); }, disabled: !allComplete && !s.signed },
+    { id: "contact",          icon: Mail,            label: "Contact Support",        action: () => { navigate('/contact-support'); scrollTop(); } },
+    { id: "settings",         icon: Settings,        label: "Settings",               action: onOpenSettings },
+    { id: "signout",          icon: LogOut,          label: T("sign_out"),            action: onSignOut },
   ];
 
   // Mobile: no bottom nav — navigation lives in the hamburger drawer in Dashboard header
@@ -90,15 +105,14 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
       {/* Nav items */}
       <div style={{ flex: 1, padding: "12px 0", overflowY: "auto" }}>
         {navItems.map(item => {
-          const isActive = !!(item.phase && s.phase === item.phase);
+          const isActive = activeId === item.id;
           const isDisabled = (item as any).disabled;
           return (
             <div
               key={item.id}
               onClick={() => {
                 if (isDisabled) return;
-                if (item.action) { item.action(); return; }
-                if (item.phase) { u({ phase: item.phase }); scrollTop(); }
+                if (item.action) item.action();
               }}
               style={{
                 display: "flex", alignItems: "center", gap: 12,

@@ -9,8 +9,6 @@ import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import ByteSenseAdmin from "./pages/ByteSenseAdmin";
 import NotFound from "./pages/NotFound";
-import SalesTrainingView from "./screens/SalesTrainingView";
-import OfficeWorkflowView from "./screens/OfficeWorkflowView";
 import { C } from "@/data/constants";
 
 const queryClient = new QueryClient();
@@ -180,8 +178,14 @@ function AppRoutes() {
 
         {/* Protected app — new users see intake, existing users see dashboard (handled inside Index) */}
         <Route path="/app" element={isSignedIn ? (isByteSenseAdmin ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/login" />} />
-        <Route path="/sales-training" element={isSignedIn ? <SalesTrainingView /> : <Navigate to="/login" />} />
-        <Route path="/office-workflow" element={isSignedIn ? <OfficeWorkflowView /> : <Navigate to="/login" />} />
+
+        {/* Section routes — each gets its own URL, sidebar always present */}
+        <Route path="/sales-training"    element={isSignedIn ? <Index forcePhase="sales-training" />    : <Navigate to="/login" />} />
+        <Route path="/product-experience" element={isSignedIn ? <Index forcePhase="product-experience" /> : <Navigate to="/login" />} />
+        <Route path="/office-workflow"   element={isSignedIn ? <Index forcePhase="office-workflow" />   : <Navigate to="/login" />} />
+        <Route path="/roleplay"          element={isSignedIn ? <Index forcePhase="roleplay" />          : <Navigate to="/login" />} />
+        <Route path="/contact-support"   element={isSignedIn ? <Index forcePhase="contact-support" />   : <Navigate to="/login" />} />
+
         <Route path="/staff" element={isSignedIn ? <Index forceView="staff" /> : <Navigate to="/login" />} />
         <Route path="/owner" element={isSignedIn ? <Index forceView="owner" /> : <Navigate to="/login" />} />
         <Route path="/bytesense-admin" element={isSignedIn ? <ByteSenseAdmin /> : <Navigate to="/login" />} />
