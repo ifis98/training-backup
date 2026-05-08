@@ -985,7 +985,7 @@
   <section id="training-module" class="section" style="max-width:900px;">
     <div class="section-tag">Training Curriculum</div>
     <h2 class="section-title">Sales Training <span class="accent">Module</span></h2>
-    <p class="section-subtitle">Complete training curriculum — all phases, all roles. Expand any module to read the full lesson.</p>
+    <p class="section-subtitle">Complete training curriculum — all phases, all roles. Click any phase to expand and start a module.</p>
     <div id="tm-container"></div>
   </section>
 
@@ -1751,131 +1751,40 @@ function mdToHtml(text) {
   if (!container) return;
 
   const phaseColors = {
-    beginner:       '#60a5fa',
-    core:           '#00C2A8',
-    product:        '#34d399',
-    sales:          '#D4AF37',
-    financial:      '#10b981',
-    operations:     '#a78bfa',
-    advanced:       '#fb7185',
-    flywheel:       '#f59e0b',
-    'role-specific':'#22d3ee',
-  };
-  const phaseEmoji = {
-    beginner:'📚', core:'🧠', product:'📦', sales:'🎯',
-    financial:'💰', operations:'⚙️', advanced:'🔥',
-    flywheel:'🚀', 'role-specific':'👤',
+    beginner:        '#60a5fa',
+    core:            '#00C2A8',
+    product:         '#34d399',
+    sales:           '#D4AF37',
+    financial:       '#10b981',
+    operations:      '#a78bfa',
+    advanced:        '#fb7185',
+    flywheel:        '#f59e0b',
+    'role-specific': '#22d3ee',
   };
 
-  // ── Hero Banner ──────────────────────────────────────────────────────────
-  let html = `
-    <div class="db-hero">
-      <div>
-        <div class="db-hero-badge">Continue Training</div>
-        <div class="db-hero-title">${MODULES[0]?.title || 'Start Your First Module'}</div>
-        <div class="db-hero-sub">${MODULES[0]?.time || ''} · 0% complete</div>
-      </div>
-      <div class="db-hero-arrow">→</div>
-    </div>
-  `;
+  // Phase label initials for the colored icon square (matches dashboard style — no emojis)
+  const phaseInitial = {
+    beginner: 'B', core: 'C', product: 'P', sales: 'S',
+    financial: 'F', operations: 'O', advanced: 'A',
+    flywheel: 'G', 'role-specific': 'R',
+  };
 
-  // ── KPI Cards ────────────────────────────────────────────────────────────
-  const totalMods = MODULES.length;
-  html += `
-    <div class="db-kpi-grid">
-      <div class="db-kpi">
-        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#00C2A8,transparent)"></div>
-        <div class="db-kpi-label">Training Progress</div>
-        <div class="db-kpi-val" style="color:#00C2A8">0%</div>
-        <div class="db-kpi-sub">of curriculum complete</div>
-      </div>
-      <div class="db-kpi">
-        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#D4AF37,transparent)"></div>
-        <div class="db-kpi-label">Modules Done</div>
-        <div class="db-kpi-val" style="color:#D4AF37">0<span style="font-size:15px;font-weight:400;color:var(--ash)">/${totalMods}</span></div>
-        <div class="db-kpi-sub">lessons completed</div>
-      </div>
-      <div class="db-kpi">
-        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#a78bfa,transparent)"></div>
-        <div class="db-kpi-label">XP Earned</div>
-        <div class="db-kpi-val" style="color:#a78bfa">0</div>
-        <div class="db-kpi-sub">experience points</div>
-      </div>
-      <div class="db-kpi">
-        <div class="db-kpi-bar" style="background:linear-gradient(90deg,#fb7185,transparent)"></div>
-        <div class="db-kpi-label">AI Sims Done</div>
-        <div class="db-kpi-val" style="color:#fb7185">0<span style="font-size:15px;font-weight:400;color:var(--ash)">/3</span></div>
-        <div class="db-kpi-sub">patient conversations</div>
-      </div>
-    </div>
-  `;
-
-  // ── Knowledge Score Gauge + Recommendations ──────────────────────────────
-  const R = 54, circ = 2 * Math.PI * R;
-  const recMods = MODULES.slice(0, 4);
-  html += `
-    <div class="db-two-col">
-      <div class="db-panel">
-        <div class="db-panel-label">Knowledge Score</div>
-        <div class="db-gauge-wrap">
-          <svg width="150" height="150" viewBox="0 0 150 150">
-            <circle cx="75" cy="75" r="${R}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
-            <circle cx="75" cy="75" r="${R}" fill="none" stroke="#00C2A8" stroke-width="10"
-              stroke-dasharray="0 ${circ}" stroke-linecap="round"
-              transform="rotate(-90 75 75)" style="transition:stroke-dasharray 1s ease;"/>
-            <text x="75" y="69" text-anchor="middle" font-size="30" font-weight="800" fill="#00C2A8" font-family="Outfit,sans-serif">0</text>
-            <text x="75" y="88" text-anchor="middle" font-size="11" fill="#9898a8" font-family="Outfit,sans-serif">/ 100</text>
-          </svg>
-          <div style="font-size:13px;color:var(--ash);font-weight:600;margin-top:2px;">Fresh Start</div>
-          <div style="font-size:10px;color:var(--ash);margin-top:4px;text-align:center;">Complete modules to raise your score</div>
-        </div>
-      </div>
-      <div class="db-panel">
-        <div class="db-panel-label">Training Recommendations</div>
-        ${recMods.map((m, i) => {
-          const ph = PHASES.find(p => p.key === m.phase);
-          const color = phaseColors[m.phase] || '#00C2A8';
-          return `
-            <div class="db-rec-item">
-              <div class="db-rec-dot" style="background:${color}"></div>
-              <div style="flex:1;min-width:0;">
-                <div class="db-rec-title">${m.title}</div>
-                <div class="db-rec-meta">${ph ? ph.label : ''} · ${m.time}</div>
-              </div>
-              ${i === 0 ? '<span class="db-rec-badge">UP NEXT</span>' : ''}
-            </div>
-          `;
-        }).join('')}
-      </div>
-    </div>
-  `;
-
-  // ── Phase Cards → Module Grid ────────────────────────────────────────────
-  html += `<div style="font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-    <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#00C2A8" stroke-width="1.5"/><path d="M6 4v4M4 6h4" stroke="#00C2A8" stroke-width="1.5" stroke-linecap="round"/></svg>
-    Training Phases
-  </div>`;
+  let html = '';
 
   PHASES.forEach(phase => {
     const phaseMods = MODULES.filter(m => m.phase === phase.key);
     if (!phaseMods.length) return;
     const color = phaseColors[phase.key] || '#00C2A8';
-    const emoji = phaseEmoji[phase.key] || '📖';
+    const initial = phaseInitial[phase.key] || phase.label[0];
 
     html += `
       <div class="db-phase-card" data-phase="${phase.key}">
         <div class="db-phase-hdr">
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${color};border-radius:3px 0 0 3px;"></div>
-          <div class="db-phase-icon" style="background:${color}20;">${emoji}</div>
+          <div class="db-phase-icon" style="background:${color}20;color:${color};font-size:13px;font-weight:800;font-family:Outfit,sans-serif;">${initial}</div>
           <div style="flex:1;min-width:0;">
             <div class="db-phase-name">${phase.label}</div>
             <div class="db-phase-count">${phaseMods.length} module${phaseMods.length !== 1 ? 's' : ''}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="db-phase-pct" style="color:${color}">0%</div>
-            <div style="width:60px;height:4px;background:rgba(255,255,255,0.06);border-radius:99px;">
-              <div style="width:0%;height:100%;background:${color};border-radius:99px;"></div>
-            </div>
           </div>
           <div class="db-phase-chev">›</div>
         </div>
