@@ -132,15 +132,14 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
 
     // ── URL-based section routing ────────────────────────────────────────
-    // /sales-training → tabbed screen: Training Module (real Dashboard) + Sales Resources (HTML)
-    if (forcePhase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
+    if (forcePhase === 'sales-training')    return <PanelView src="/sales-training.html" />;
     if (forcePhase === 'product-experience') return <PanelView src="/product-experience.html" />;
     if (forcePhase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
     if (forcePhase === 'contact-support')   return <PanelView src="/contact-support.html" />;
     if (forcePhase === 'roleplay')          return <RoleplayHub s={s} u={u} lang={lang} />;
 
     // ── Phase-state routing (used internally, e.g. from mobile menu) ─────
-    if (s.phase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
+    if (s.phase === 'sales-training')    return <PanelView src="/sales-training.html" />;
     if (s.phase === 'product-experience') return <PanelView src="/product-experience.html" />;
     if (s.phase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
     if (s.phase === 'contact-support')   return <PanelView src="/contact-support.html" />;
