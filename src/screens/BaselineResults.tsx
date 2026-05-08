@@ -25,8 +25,8 @@ export default function BaselineResults({ s, u, sc, sRoles, myPH, myM, lang = "e
     : { l: T("fresh_start"), c: C.teal, m: T("fresh_msg") };
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.snow, minHeight: "100vh" }}>
-      <div style={{ background: C.dark, color: C.white, padding: isMobile ? "32px 16px" : "44px 24px", textAlign: "center" }}>
+    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: "100vh" }}>
+      <div style={{ background: "var(--bs-bg2)", color: "var(--bs-text)", padding: isMobile ? "32px 16px" : "44px 24px", textAlign: "center" }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: C.ash, marginBottom: 16, textTransform: "uppercase" }}>{T("your_starting_point")}</div>
         <div style={{ width: 110, height: 110, borderRadius: "50%", border: `3px solid ${lv.c}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
           <div style={{ fontSize: 30, fontWeight: 800, color: lv.c }}>{sc}%</div>
@@ -34,14 +34,14 @@ export default function BaselineResults({ s, u, sc, sRoles, myPH, myM, lang = "e
         <div style={{ fontSize: 18, fontWeight: 800, color: lv.c, marginBottom: 6 }}>{lv.l}</div>
         <p style={{ fontSize: 14, color: C.ash, maxWidth: isMobile ? "100%" : 420, margin: "0 auto", lineHeight: 1.7 }}>{lv.m}</p>
       </div>
-      <div style={{ background: C.white, padding: isMobile ? "24px 16px" : "32px 24px" }}>
+      <div style={{ background: "var(--bs-bg)", padding: isMobile ? "24px 16px" : "32px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.charcoal, marginBottom: 6 }}>{T("your_roles")}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--bs-text, #F4F4F6)", marginBottom: 6 }}>{T("your_roles")}</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
             {sRoles.map(r => <span key={r.id} style={{ background: r.bg, color: r.color, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{r.label}</span>)}
           </div>
-          <div style={{ fontSize: 13, color: C.slate, marginBottom: 6 }}>
-            {T("personalized_onboarding")} <strong style={{ color: C.charcoal }}>{myPH.length} {T("phases")}</strong>, <strong style={{ color: C.charcoal }}>{myM.length} {T("sections")}</strong>
+          <div style={{ fontSize: 13, color: "var(--bs-ash, #9898A8)", marginBottom: 6 }}>
+            {T("personalized_onboarding")} <strong style={{ color: "var(--bs-text, #F4F4F6)" }}>{myPH.length} {T("phases")}</strong>, <strong style={{ color: "var(--bs-text, #F4F4F6)" }}>{myM.length} {T("sections")}</strong>
             {sc < 30 ? ` ${T("including_fundamentals")}` : sc < 60 ? ` ${T("including_financial")}` : ""}.
           </div>
           <button onClick={() => { u({ phase: "dashboard" }); scrollTop(); }}

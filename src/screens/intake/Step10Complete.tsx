@@ -18,7 +18,7 @@ export default function Step10Complete({ onFinish, onComplete }: Props) {
   }, []);
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? '24px 16px' : '40px 24px' }}>
+    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? '24px 16px' : '40px 24px' }}>
       <Logo size={40} light />
 
       <div style={{ textAlign: 'center', maxWidth: 440, marginTop: 32 }}>
@@ -48,7 +48,7 @@ export default function Step10Complete({ onFinish, onComplete }: Props) {
               style={{
                 width: '100%', background: C.teal, color: C.white,
                 border: 'none', padding: '16px 24px', fontSize: 15,
-                fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: 2,
+                fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: 12,
               }}
             >
               Start Training →

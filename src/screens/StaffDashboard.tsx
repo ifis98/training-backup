@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { C, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
@@ -8,9 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import DashboardSidebar from '@/components/DashboardSidebar';
 import BookingModal from '@/components/BookingModal';
-import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2, Plus, Briefcase, Clock, XCircle } from 'lucide-react';
+import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2, Plus, Briefcase, Clock, XCircle, Settings } from 'lucide-react';
 
 interface StaffDashboardProps {
   s: AppState;
@@ -23,21 +23,23 @@ interface StaffDashboardProps {
   allD: boolean;
   reset: () => void;
   openCoach: (mode: string) => void;
+  onOpenSettings: () => void;
+  onSignOut: () => void;
 }
 
 const glass = {
-  background: C.glass,
+  background: "var(--bs-card)",
   backdropFilter: C.blur,
   WebkitBackdropFilter: C.blur,
-  border: `1px solid ${C.glassBorder}`,
+  border: `1px solid var(--bs-border)`,
   borderRadius: C.radius,
 } as React.CSSProperties;
 
-export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach }: StaffDashboardProps) {
+export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut }: StaffDashboardProps) {
   const isMobile = useIsMobile();
+  const { user: clerkUser } = useUser();
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
-  const [showLangMenu, setShowLangMenu] = useState(false);
   const [practiceName, setPracticeName] = useState("");
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [simReviews, setSimReviews] = useState<any[]>([]);
@@ -50,54 +52,48 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   const T = (key: string) => t(lang, key);
 
   useEffect(() => {
-    const fetchPractice = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
-      if (profile?.practice_id) {
-        const { data: practice } = await supabase.from('practices').select('name').eq('id', profile.practice_id).single();
-        if (practice) setPracticeName(practice.name);
-        // Load cases for this practice
-        const { data: casesData } = await supabase.from('cases').select('*').eq('practice_id', profile.practice_id).order('created_at', { ascending: false });
+    const clerkUserId = clerkUser?.id;
+    if (!clerkUserId) return;
+    const fetchData = async () => {
+      try {
+        const { data: casesData } = await supabase.from('cases').select('*')
+          .eq('clerk_user_id', clerkUserId).order('created_at', { ascending: false });
         if (casesData) setCases(casesData);
-      }
+      } catch {}
     };
-    fetchPractice();
-  }, []);
+    fetchData();
+  }, [clerkUser?.id]);
 
   useEffect(() => {
+    const clerkUserId = clerkUser?.id;
+    if (!clerkUserId) return;
     const loadReviews = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from('simulation_reviews').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      if (data) setSimReviews(data);
+      try {
+        const { data } = await supabase.from('simulation_reviews').select('*')
+          .eq('clerk_user_id', clerkUserId).order('created_at', { ascending: false });
+        if (data) setSimReviews(data);
+      } catch {}
     };
     loadReviews();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('bsa6');
-    window.location.href = '/welcome';
-  };
+  }, [clerkUser?.id]);
 
   const handleAddCase = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: profile } = await supabase.from('profiles').select('practice_id').eq('user_id', user.id).single();
-    const { data, error } = await supabase.from('cases').insert({
-      user_id: user.id,
-      practice_id: profile?.practice_id,
-      patient_name: newCase.patient_name,
-      status: newCase.status,
-      case_value: newCase.case_value,
-      notes: newCase.notes,
-    }).select().single();
-    if (data) {
-      setCases([data, ...cases]);
-      setNewCase({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
-      setShowAddCase(false);
-    }
+    const clerkUserId = clerkUser?.id;
+    if (!clerkUserId || !newCase.patient_name) return;
+    try {
+      const { data, error } = await supabase.from('cases').insert({
+        clerk_user_id: clerkUserId,
+        patient_name: newCase.patient_name,
+        status: newCase.status,
+        case_value: newCase.case_value,
+        notes: newCase.notes,
+      } as any).select().single();
+      if (!error && data) {
+        setCases([data, ...cases]);
+        setNewCase({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
+        setShowAddCase(false);
+      }
+    } catch {}
   };
 
   const handleUpdateCaseStatus = async (caseId: string, newStatus: string) => {
@@ -120,12 +116,12 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
       case 'converted': return <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} />;
       case 'follow_up': return <Clock size={14} strokeWidth={1.5} color={C.gold} />;
       case 'rejected': return <XCircle size={14} strokeWidth={1.5} color={C.red} />;
-      default: return <Clock size={14} strokeWidth={1.5} color={C.ash} />;
+      default: return <Clock size={14} strokeWidth={1.5} color={"var(--bs-ash)"} />;
     }
   };
 
   const caseStatusColor = (status: string) => {
-    switch (status) { case 'converted': return C.green; case 'follow_up': return C.gold; case 'rejected': return C.red; default: return C.ash; }
+    switch (status) { case 'converted': return C.green; case 'follow_up': return C.gold; case 'rejected': return C.red; default: return "var(--bs-ash)"; }
   };
 
   const convertedCases = cases.filter(c => c.status === 'converted');
@@ -139,10 +135,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
   const pieData = [
     { name: 'Completed', value: dN, color: C.teal },
-    { name: 'Remaining', value: Math.max(myM.length - dN, 0), color: "rgba(255,255,255,0.06)" },
+    { name: 'Remaining', value: Math.max(myM.length - dN, 0), color: "var(--bs-card2)" },
   ];
 
-  const tooltipStyle = { background: C.dark2, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12, color: C.white };
+  const tooltipStyle = { background: C.dark2, border: `1px solid var(--bs-border)`, borderRadius: C.radiusSm, fontSize: 12, color: "var(--bs-text)" };
 
   const knowledgeScore = useMemo(() => computeKnowledgeScore(s.blScore, dN, myM.length, s.simP), [s.blScore, dN, myM.length, s.simP]);
   const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
@@ -203,45 +199,30 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     onMouseEnter={e => { e.currentTarget.style.boxShadow = C.glow(color, 0.2); e.currentTarget.style.transform = "translateY(-3px)"; }}
     onMouseLeave={e => { e.currentTarget.style.boxShadow = C.glow(color, 0.08); e.currentTarget.style.transform = "translateY(0)"; }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: gradient, borderRadius: `${C.radius} ${C.radius} 0 0` }} />
-      <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 2, marginBottom: 10, fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: 30, fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 11, color: C.ash, marginTop: 6 }}>{sub}</div>
+      <div style={{ fontSize: 11, color: "var(--bs-ash)", marginTop: 6 }}>{sub}</div>
     </div>
   );
 
   return (
-    <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: "100vh", color: C.white, display: "flex" }}>
-      <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} lang={lang} />
+    <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, var(--bs-bg2), var(--bs-bg))`, minHeight: "100vh", color: "var(--bs-text)", display: "flex" }}>
+      <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} onOpenSettings={() => setShowSettings(true)} onOpenPanel={(src, title) => { setPanelSrc(src); setPanelTitle(title); }} activePanel={panelSrc} lang={lang} />
 
-      <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
+      <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0, marginLeft: isMobile ? 0 : "var(--bs-sidebar-w, 220px)", transition: "margin-left 0.3s ease" }}>
       {/* Header */}
-      <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid ${C.glassBorder}` }}>
+      <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid var(--bs-border)`, color: "#F0F0F4" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <Logo size={28} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
-              {practiceName && <span style={{ fontSize: 12, color: C.ash, opacity: 0.7 }}>· {practiceName}</span>}
+              {practiceName && <span style={{ fontSize: 12, color: "var(--bs-ash)", opacity: 0.7 }}>· {practiceName}</span>}
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ position: "relative" }}>
-                <button onClick={() => setShowLangMenu(!showLangMenu)}
-                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 5, borderRadius: C.radiusXs }}>
-                  {LANG_OPTIONS.find((l: any) => l.id === lang)?.flag} {LANG_OPTIONS.find((l: any) => l.id === lang)?.label}
-                </button>
-                {showLangMenu && (
-                  <div style={{ ...glass, position: "absolute", top: "100%", right: 0, zIndex: 50, minWidth: 150, marginTop: 6, overflow: "hidden" }}>
-                    {LANG_OPTIONS.map((l: any) => (
-                      <div key={l.id} onClick={() => { u({ lang: l.id }); setShowLangMenu(false); }}
-                        style={{ padding: "10px 14px", fontSize: 12, color: lang === l.id ? C.gold : C.ash, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: lang === l.id ? "rgba(201,168,76,0.1)" : "transparent" }}>
-                        {l.flag} {l.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button onClick={handleSignOut}
-                style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`, color: C.ash, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: C.fn, borderRadius: C.radiusXs }}>{T("sign_out")}</button>
-            </div>
+            <button onClick={() => setShowSettings(true)}
+              style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-ash)", width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+              title="Settings">
+              <Settings size={17} strokeWidth={1.5} />
+            </button>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 40, height: 40, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, boxShadow: C.glow(C.teal, 0.2) }}>
@@ -267,10 +248,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
             </div>
           </div>
           <div style={{ marginTop: 14 }}>
-            <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 999 }}>
+            <div style={{ height: 4, background: "var(--bs-card2)", borderRadius: 999 }}>
               <div style={{ height: "100%", width: `${pr}%`, background: C.gradTeal, transition: "width 0.5s", borderRadius: 999, boxShadow: C.glow(C.teal, 0.3) }} />
             </div>
-            <div style={{ fontSize: 10, color: C.ash, marginTop: 5 }}>{dN}/{myM.length} {T("sections")} · {pr}% complete</div>
+            <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 5 }}>{dN}/{myM.length} {T("sections")} · {pr}% complete</div>
           </div>
         </div>
       </div>
@@ -289,10 +270,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         {/* Knowledge Score + Recommendations */}
         <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, marginBottom: 28 }}>
           <div style={{ ...glass, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ fontSize: 11, color: C.ash, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
+            <div style={{ fontSize: 11, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 2, marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
             <div style={{ position: "relative", width: 140, height: 140 }}>
               <svg width="140" height="140" viewBox="0 0 140 140">
-                <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                <circle cx="70" cy="70" r="58" fill="none" stroke="var(--bs-card2)" strokeWidth="8" />
                 <circle cx="70" cy="70" r="58" fill="none" stroke={scoreColor} strokeWidth="8"
                   strokeDasharray={`${(knowledgeScore / 100) * 364.4} 364.4`}
                   strokeLinecap="round" transform="rotate(-90 70 70)"
@@ -300,14 +281,14 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               </svg>
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ fontSize: 36, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{knowledgeScore}</div>
-                <div style={{ fontSize: 10, color: C.ash, marginTop: 4 }}>/100</div>
+                <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 4 }}>/100</div>
               </div>
             </div>
             <div style={{ marginTop: 14, padding: "4px 14px", borderRadius: 999, fontSize: 11, fontWeight: 700, color: scoreColor, background: `${scoreColor}15` }}>
               {T(scoreLabelKey)}
             </div>
             {avgSimScore !== null && (
-              <div style={{ marginTop: 10, fontSize: 10, color: C.ash, textAlign: "center" }}>
+              <div style={{ marginTop: 10, fontSize: 10, color: "var(--bs-ash)", textAlign: "center" }}>
                 {T("avg_sim_score")}: <span style={{ color: C.gold, fontWeight: 700 }}>{avgSimScore}</span>
               </div>
             )}
@@ -322,7 +303,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               )}
             </div>
             {recommendations.length === 0 ? (
-              <div style={{ fontSize: 12, color: C.ash, textAlign: "center", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "var(--bs-ash)", textAlign: "center", padding: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 <CheckCircle2 size={14} strokeWidth={1.5} color={C.green} /> {T("all_complete")}
               </div>
             ) : (
@@ -330,17 +311,17 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                 {recommendations.map(rec => (
                   <div key={rec.moduleId}
                     onClick={() => { u({ phase: "module", curMod: rec.moduleId, ckA: null }); scrollTop(); }}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "rgba(255,255,255,0.02)", borderRadius: C.radiusXs, cursor: "pointer", border: `1px solid ${C.glassBorder}`, transition: "all 0.2s" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${rec.color}40`; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}>
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "var(--bs-card)", borderRadius: C.radiusXs, cursor: "pointer", border: `1px solid var(--bs-border)`, transition: "all 0.2s" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${rec.color}40`; e.currentTarget.style.background = "var(--bs-card)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.background = "var(--bs-card)"; }}>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: rec.color, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{rec.moduleTitle}</div>
-                      <div style={{ fontSize: 10, color: C.ash }}>{rec.time}</div>
+                      <div style={{ fontSize: 10, color: "var(--bs-ash)" }}>{rec.time}</div>
                     </div>
                     <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 999, fontWeight: 700,
-                      color: rec.priority === "high" ? C.red : rec.priority === "medium" ? C.gold : C.ash,
-                      background: rec.priority === "high" ? `${C.red}15` : rec.priority === "medium" ? `${C.gold}15` : "rgba(255,255,255,0.04)",
+                      color: rec.priority === "high" ? C.red : rec.priority === "medium" ? C.gold : "var(--bs-ash)",
+                      background: rec.priority === "high" ? `${C.red}15` : rec.priority === "medium" ? `${C.gold}15` : "var(--bs-card)",
                     }}>{T(`priority_${rec.priority}`)}</span>
                     <span style={{ color: C.teal, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{T("start_module")}</span>
                   </div>
@@ -362,14 +343,14 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: area.color }} />
                   <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8 }}>{area.category}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 999 }}>
+                    <div style={{ flex: 1, height: 4, background: "var(--bs-card2)", borderRadius: 999 }}>
                       <div style={{ height: "100%", width: `${area.completion}%`, background: area.color, borderRadius: 999, transition: "width 0.5s" }} />
                     </div>
                     <span style={{ fontSize: 11, fontWeight: 700, color: area.color }}>{area.completion}%</span>
                   </div>
-                  <div style={{ fontSize: 10, color: C.ash, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6, fontWeight: 600 }}>{T("tip_label")}</div>
+                  <div style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6, fontWeight: 600 }}>{T("tip_label")}</div>
                   {area.tips.map((tip, i) => (
-                    <div key={i} style={{ fontSize: 11, color: C.ash, lineHeight: 1.6, paddingLeft: 10, borderLeft: `2px solid ${area.color}30`, marginBottom: 4 }}>{tip}</div>
+                    <div key={i} style={{ fontSize: 11, color: "var(--bs-ash)", lineHeight: 1.6, paddingLeft: 10, borderLeft: `2px solid ${area.color}30`, marginBottom: 4 }}>{tip}</div>
                   ))}
                 </div>
               ))}
@@ -385,11 +366,11 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={phaseChartData} barSize={14}>
-                <XAxis dataKey="name" tick={{ fill: C.ash, fontSize: 9 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: C.ash, fontSize: 10 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" tick={{ fill: "var(--bs-ash)", fontSize: 9 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "var(--bs-ash)", fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={tooltipStyle} wrapperStyle={{ outline: 'none' }} cursor={{ fill: 'transparent' }} />
                  <Bar dataKey="done" stackId="a" fill={C.teal} name={T("done_label")} />
-                 <Bar dataKey="remaining" stackId="a" fill="rgba(255,255,255,0.06)" name={T("remaining_label")} />
+                 <Bar dataKey="remaining" stackId="a" fill="var(--bs-card2)" name={T("remaining_label")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -405,7 +386,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               </PieChart>
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                 <div style={{ fontSize: 28, fontWeight: 800, color: C.teal }}>{pr}%</div>
-                <div style={{ fontSize: 10, color: C.ash, letterSpacing: 2, textTransform: "uppercase" }}>{T("done")}</div>
+                <div style={{ fontSize: 10, color: "var(--bs-ash)", letterSpacing: 2, textTransform: "uppercase" }}>{T("done")}</div>
               </div>
             </div>
           </div>
@@ -418,7 +399,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               <FileText size={20} strokeWidth={1.5} color={C.gold} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{T("view_report")}</div>
-                <div style={{ fontSize: 10, color: C.ash }}>{s.signed ? T("report_signed") : T("report_ready")}</div>
+                <div style={{ fontSize: 10, color: "var(--bs-ash)" }}>{s.signed ? T("report_signed") : T("report_ready")}</div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -428,7 +409,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               </button>
               {s.signed && (
                 <button onClick={() => { u({ phase: "report" }); scrollTop(); setTimeout(() => window.print(), 500); }}
-                  style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, display: "flex", alignItems: "center", gap: 6 }}>
+                  style={{ background: "var(--bs-card)", color: "var(--bs-ash)", border: `1px solid var(--bs-border)`, padding: "10px 20px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, display: "flex", alignItems: "center", gap: 6 }}>
                   <Printer size={12} strokeWidth={1.5} /> {T("print_report")}
                 </button>
               )}
@@ -451,7 +432,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
         {allModsDone && !allComplete && (
           <button onClick={() => { u({ phase: "simulation" }); scrollTop(); }}
-            style={{ background: C.gradTeal, color: C.white, padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: C.glow(C.teal, 0.25), width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
+            style={{ background: C.gradTeal, color: "var(--bs-text)", padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: C.glow(C.teal, 0.25), width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.4); }}
             onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.25); }}>
             {T("training_complete")} <ArrowRight size={16} strokeWidth={2} />
@@ -460,9 +441,9 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
         {/* Training Modules Accordion */}
         <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
-          <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid var(--bs-border)`, display: "flex", alignItems: "center", gap: 8 }}>
             <ClipboardList size={16} strokeWidth={1.5} color={C.teal} /> {T("training_modules_label")}
-            <span style={{ fontSize: 11, color: C.ash, marginLeft: "auto", background: "rgba(255,255,255,0.06)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
+            <span style={{ fontSize: 11, color: "var(--bs-ash)", marginLeft: "auto", background: "var(--bs-card2)", padding: "3px 10px", borderRadius: 999 }}>{dN}/{myM.length}</span>
           </div>
           {myPH.map(phase => {
             const pm = myM.filter(m => m.phase === phase.id);
@@ -473,28 +454,28 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
             return (
               <div key={phase.id}>
                 <div onClick={() => setExpandedPhase(isOpen ? null : phase.id)}
-                  style={{ padding: "14px 22px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer", borderBottom: `1px solid ${C.glassBorder}`, background: isOpen ? "rgba(255,255,255,0.03)" : "transparent", transition: "background 0.2s" }}>
+                  style={{ padding: "14px 22px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer", borderBottom: `1px solid var(--bs-border)`, background: isOpen ? "var(--bs-card)" : "transparent", transition: "background 0.2s" }}>
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: pc ? C.green : `${phase.color}60`, border: `2px solid ${pc ? C.green : phase.color}` }} />
                   <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{phase.label}</span>
-                  <span style={{ fontSize: 10, color: pc ? C.green : C.ash, background: pc ? `${C.green}15` : "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 999 }}>{phDone}/{pm.length}</span>
-                  <ChevronRight size={14} strokeWidth={1.5} color={C.ash} style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.25s" }} />
+                  <span style={{ fontSize: 10, color: pc ? C.green : "var(--bs-ash)", background: pc ? `${C.green}15` : "var(--bs-card)", padding: "2px 8px", borderRadius: 999 }}>{phDone}/{pm.length}</span>
+                  <ChevronRight size={14} strokeWidth={1.5} color={"var(--bs-ash)"} style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.25s" }} />
                 </div>
                 {isOpen && pm.map(mod => {
                   const done = s.done.includes(mod.id);
                   return (
                     <div key={mod.id}
                       onClick={() => { u({ phase: "module", curMod: mod.id, ckA: null }); scrollTop(); }}
-                      style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 22px 12px 44px", cursor: "pointer", borderBottom: `1px solid ${C.glassBorder}`, transition: "background 0.2s" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                      style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 22px 12px 44px", cursor: "pointer", borderBottom: `1px solid var(--bs-border)`, transition: "background 0.2s" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "var(--bs-card)"}
                       onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <div style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${done ? C.green : "rgba(255,255,255,0.15)"}`, background: done ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 9, color: C.white, transition: "all 0.3s" }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${done ? C.green : "var(--bs-card2)"}`, background: done ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 9, color: "var(--bs-text)", transition: "all 0.3s" }}>
                         {done ? "✓" : ""}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12, fontWeight: 600 }}>{mod.title}</div>
-                        <div style={{ fontSize: 10, color: C.ash, marginTop: 1 }}>{mod.time}</div>
+                        <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 1 }}>{mod.time}</div>
                       </div>
-                      <ArrowRight size={12} strokeWidth={1.5} color={C.ash} style={{ opacity: 0.5 }} />
+                      <ArrowRight size={12} strokeWidth={1.5} color={"var(--bs-ash)"} style={{ opacity: 0.5 }} />
                     </div>
                   );
                 })}
@@ -505,46 +486,46 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
             style={{ padding: "14px 22px", display: "flex", alignItems: "center", gap: 12, cursor: allModsDone ? "pointer" : "not-allowed", opacity: allModsDone ? 1 : 0.4 }}>
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: s.simP >= 3 ? C.green : `${C.gold}60`, border: `2px solid ${s.simP >= 3 ? C.green : C.gold}` }} />
             <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{T("ai_patient_sim")}</span>
-            <span style={{ fontSize: 10, color: s.simP >= 3 ? C.green : C.ash, background: s.simP >= 3 ? `${C.green}15` : "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: 999 }}>{s.simP}/3</span>
-            <ArrowRight size={12} strokeWidth={1.5} color={C.ash} style={{ opacity: 0.5 }} />
+            <span style={{ fontSize: 10, color: s.simP >= 3 ? C.green : "var(--bs-ash)", background: s.simP >= 3 ? `${C.green}15` : "var(--bs-card)", padding: "2px 8px", borderRadius: 999 }}>{s.simP}/3</span>
+            <ArrowRight size={12} strokeWidth={1.5} color={"var(--bs-ash)"} style={{ opacity: 0.5 }} />
           </div>
         </div>
 
         {/* Case Pipeline — Staff */}
         <div style={{ ...glass, marginBottom: 28, overflow: "hidden" }}>
-          <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid ${C.glassBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ padding: "18px 22px", fontSize: 14, fontWeight: 700, borderBottom: `1px solid var(--bs-border)`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Briefcase size={16} strokeWidth={1.5} color={C.teal} /> {T("case_pipeline")}
             </span>
             <button onClick={() => setShowAddCase(!showAddCase)}
-              style={{ background: C.gradTeal, color: C.white, border: "none", padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4 }}>
+              style={{ background: C.gradTeal, color: "var(--bs-text)", border: "none", padding: "6px 14px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 4 }}>
               <Plus size={12} strokeWidth={2} /> {T("add_case")}
             </button>
           </div>
           {showAddCase && (
-            <div style={{ padding: "16px 22px", borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(255,255,255,0.02)" }}>
+            <div style={{ padding: "16px 22px", borderBottom: `1px solid var(--bs-border)`, background: "var(--bs-card)" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <input value={newCase.patient_name} onChange={e => setNewCase({ ...newCase, patient_name: e.target.value })} placeholder={T("patient_name")}
-                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                  style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
                 <select value={newCase.status} onChange={e => setNewCase({ ...newCase, status: e.target.value })}
-                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }}>
-                  <option value="pending" style={{ background: C.dark2, color: C.white }}>{T("status_pending")}</option>
-                  <option value="follow_up" style={{ background: C.dark2, color: C.white }}>{T("status_follow_up")}</option>
-                  <option value="converted" style={{ background: C.dark2, color: C.white }}>{T("status_converted")}</option>
-                  <option value="rejected" style={{ background: C.dark2, color: C.white }}>{T("status_rejected")}</option>
+                  style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }}>
+                  <option value="pending" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_pending")}</option>
+                  <option value="follow_up" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
+                  <option value="converted" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_converted")}</option>
+                  <option value="rejected" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                 </select>
                 <input type="number" value={newCase.case_value} onChange={e => setNewCase({ ...newCase, case_value: +e.target.value })} placeholder={T("case_value")}
-                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                  style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
                 <button onClick={handleAddCase} disabled={!newCase.patient_name}
-                  style={{ background: newCase.patient_name ? C.gradTeal : "rgba(255,255,255,0.05)", color: C.white, border: "none", padding: "8px 14px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: newCase.patient_name ? "pointer" : "not-allowed", borderRadius: C.radiusXs }}>
+                  style={{ background: newCase.patient_name ? C.gradTeal : "var(--bs-card)", color: "var(--bs-text)", border: "none", padding: "8px 14px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: newCase.patient_name ? "pointer" : "not-allowed", borderRadius: C.radiusXs }}>
                   {T("save")}
                 </button>
               </div>
               <input value={newCase.notes} onChange={e => setNewCase({ ...newCase, notes: e.target.value })} placeholder={T("case_notes")}
-                style={{ width: "100%", background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: C.white, padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                style={{ width: "100%", background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
             </div>
           )}
-          <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${C.glassBorder}` }}>
+          <div style={{ display: "flex", gap: 0, borderBottom: `1px solid var(--bs-border)` }}>
             {[
               { id: 'all', label: T("all"), count: cases.length },
               { id: 'follow_up', label: T("status_follow_up"), count: cases.filter(c => c.status === 'follow_up').length },
@@ -553,30 +534,30 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               { id: 'pending', label: T("status_pending"), count: cases.filter(c => c.status === 'pending').length },
             ].map(tab => (
               <button key={tab.id} onClick={() => setCaseFilter(tab.id)}
-                style={{ padding: "10px 16px", fontSize: 11, fontWeight: caseFilter === tab.id ? 700 : 400, color: caseFilter === tab.id ? C.teal : C.ash, background: "transparent", border: "none", borderBottom: caseFilter === tab.id ? `2px solid ${C.teal}` : "2px solid transparent", cursor: "pointer", fontFamily: C.fn, transition: "all 0.2s", display: "flex", gap: 4, alignItems: "center" }}>
-                {tab.label} <span style={{ fontSize: 9, background: "rgba(255,255,255,0.06)", padding: "1px 6px", borderRadius: 999 }}>{tab.count}</span>
+                style={{ padding: "10px 16px", fontSize: 11, fontWeight: caseFilter === tab.id ? 700 : 400, color: caseFilter === tab.id ? C.teal : "var(--bs-ash)", background: "transparent", border: "none", borderBottom: caseFilter === tab.id ? `2px solid ${C.teal}` : "2px solid transparent", cursor: "pointer", fontFamily: C.fn, transition: "all 0.2s", display: "flex", gap: 4, alignItems: "center" }}>
+                {tab.label} <span style={{ fontSize: 9, background: "var(--bs-card2)", padding: "1px 6px", borderRadius: 999 }}>{tab.count}</span>
               </button>
             ))}
           </div>
           {filteredCases.length === 0 ? (
-            <div style={{ padding: 30, textAlign: "center", fontSize: 12, color: C.ash }}>{T("no_cases")}</div>
+            <div style={{ padding: 30, textAlign: "center", fontSize: 12, color: "var(--bs-ash)" }}>{T("no_cases")}</div>
           ) : (
             filteredCases.slice(0, 10).map(c => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 22px", borderBottom: `1px solid ${C.glassBorder}`, transition: "background 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 22px", borderBottom: `1px solid var(--bs-border)`, transition: "background 0.2s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--bs-card)"}
                 onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                 {caseStatusIcon(c.status)}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600 }}>{c.patient_name}</div>
-                  {c.notes && <div style={{ fontSize: 10, color: C.ash, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.notes}</div>}
+                  {c.notes && <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.notes}</div>}
                 </div>
                 <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>{c.case_value > 0 ? `$${Number(c.case_value).toLocaleString()}` : ''}</span>
                 <select value={c.status} onChange={e => handleUpdateCaseStatus(c.id, e.target.value)}
-                  style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.glassBorder}`, color: caseStatusColor(c.status), padding: "4px 8px", fontSize: 10, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, fontWeight: 700 }}>
-                  <option value="pending" style={{ background: C.dark2, color: C.white }}>{T("status_pending")}</option>
-                  <option value="follow_up" style={{ background: C.dark2, color: C.white }}>{T("status_follow_up")}</option>
-                  <option value="converted" style={{ background: C.dark2, color: C.white }}>{T("status_converted")}</option>
-                  <option value="rejected" style={{ background: C.dark2, color: C.white }}>{T("status_rejected")}</option>
+                  style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: caseStatusColor(c.status), padding: "4px 8px", fontSize: 10, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, fontWeight: 700 }}>
+                  <option value="pending" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_pending")}</option>
+                  <option value="follow_up" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
+                  <option value="converted" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_converted")}</option>
+                  <option value="rejected" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                 </select>
               </div>
             ))
@@ -602,7 +583,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                   <tool.Icon size={18} strokeWidth={1.5} color={tool.color} />
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 700 }}>{tool.label}</div>
-                <div style={{ fontSize: 10, color: C.ash, marginTop: 3, lineHeight: 1.5 }}>{tool.desc}</div>
+                <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 3, lineHeight: 1.5 }}>{tool.desc}</div>
               </div>
             ))}
           </div>
@@ -610,8 +591,8 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
         {/* Quick Reference */}
         <div style={{ ...glass, marginBottom: 24, overflow: "hidden" }}>
-          <div style={{ background: C.gradRed, color: C.white, padding: "12px 20px", fontSize: 13, fontWeight: 700, borderRadius: `${C.radius} ${C.radius} 0 0` }}>{T("quick_reference")}</div>
-          <div style={{ padding: 20, fontSize: 12, color: C.ash, lineHeight: 2 }}>
+          <div style={{ background: C.gradRed, color: "var(--bs-text)", padding: "12px 20px", fontSize: 13, fontWeight: 700, borderRadius: `${C.radius} ${C.radius} 0 0` }}>{T("quick_reference")}</div>
+          <div style={{ padding: 20, fontSize: 12, color: "var(--bs-ash)", lineHeight: 2 }}>
             <div>· {T("ref_not_nightguard")}</div>
             <div>· {T("ref_sensors")}</div>
             <div>· {T("ref_data")}</div>
@@ -629,12 +610,15 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           </button>
         </div>
 
-        <div style={{ textAlign: "center", fontSize: 10, color: C.ash, opacity: 0.6 }}>
+        <div style={{ textAlign: "center", fontSize: 10, color: "var(--bs-ash)", opacity: 0.6 }}>
           {T("confidential")}
         </div>
       </div>
       </div>
-      <BookingModal open={showBooking} onClose={() => setShowBooking(false)} lang={lang} />
+      <BookingModal open={showBooking} onClose={() => setShowBooking(false)} lang={lang}
+        userName={s.name} userEmail={clerkUser?.primaryEmailAddress?.emailAddress || ''} />
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} s={s} u={u} lang={lang} />
+      <SlidingPanel src={panelSrc} title={panelTitle} onClose={() => setPanelSrc(null)} />
     </div>
   );
 }

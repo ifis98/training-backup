@@ -18,8 +18,8 @@ export default function Baseline({ s, u, lang = "en" }: BaselineProps) {
   const sel = s.bl[s.blIdx];
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.white, minHeight: "100vh" }}>
-      <div style={{ background: C.dark, padding: isMobile ? "14px 16px" : "18px 24px" }}>
+    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: "100vh" }}>
+      <div style={{ background: "var(--bs-bg2)", padding: isMobile ? "14px 16px" : "18px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ fontSize: 10, letterSpacing: 3, color: C.ash, textTransform: "uppercase" }}>{T("step2_baseline")}</div>
           <p style={{ fontSize: 13, color: C.ash, marginTop: 4 }}>{T("no_wrong_answers")}</p>
@@ -28,17 +28,17 @@ export default function Baseline({ s, u, lang = "en" }: BaselineProps) {
           </div>
         </div>
       </div>
-      <div style={{ background: C.white, padding: isMobile ? "24px 16px" : "32px 24px" }}>
+      <div style={{ background: "var(--bs-bg)", padding: isMobile ? "24px 16px" : "32px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ fontSize: 12, color: C.ash, marginBottom: 8 }}>Q {s.blIdx + 1}/{qs.length}</div>
-          <div style={{ fontSize: isMobile ? 15 : 16, fontWeight: 700, color: C.charcoal, marginBottom: 18, lineHeight: 1.5 }}>{q.q}</div>
+          <div style={{ fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--bs-text, #F4F4F6)", marginBottom: 18, lineHeight: 1.5 }}>{q.q}</div>
           {q.opts.map((o: string, i: number) => (
             <div key={i} onClick={() => { const b = [...s.bl]; b[s.blIdx] = i; u({ bl: b }); }}
-              style={{ padding: isMobile ? "12px 14px" : "13px 16px", marginBottom: 5, background: sel === i ? C.tealBg : C.snow, border: `1.5px solid ${sel === i ? C.teal : C.border}`, cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${sel === i ? C.teal : C.mist}`, background: sel === i ? C.teal : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              style={{ padding: isMobile ? "12px 14px" : "13px 16px", marginBottom: 5, background: sel === i ? "rgba(20,184,166,0.12)" : "var(--bs-card, rgba(255,255,255,0.04))", border: `1.5px solid ${sel === i ? C.teal : "var(--bs-border, rgba(255,255,255,0.07))"}`, cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${sel === i ? C.teal : "var(--bs-ash, #9898A8)"}`, background: sel === i ? C.teal : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {sel === i && <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.white }} />}
               </div>
-              <span style={{ fontSize: 14, color: C.charcoal }}>{o}</span>
+              <span style={{ fontSize: 14, color: "var(--bs-text, #F4F4F6)" }}>{o}</span>
             </div>
           ))}
           {sel !== undefined && (

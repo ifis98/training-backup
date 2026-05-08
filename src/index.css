@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 /* Prevent horizontal scroll on all screen sizes */
+/* overflow-x: clip instead of hidden — hidden breaks position:sticky on all descendants */
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 *, *::before, *::after {
@@ -96,6 +97,35 @@ All colors MUST be HSL.
   }
 }
 
+/* ByteSense design tokens — light/dark via CSS custom properties */
+:root {
+  --bs-bg:      #F8F8FA;
+  --bs-bg2:     #EFEFF4;
+  --bs-bg3:     #E6E6EE;
+  --bs-text:    #0C0C0E;
+  --bs-text2:   #3A3A4A;
+  --bs-ash:     #5C5C6C;
+  --bs-border:  rgba(0, 0, 0, 0.08);
+  --bs-card:    rgba(0, 0, 0, 0.03);
+  --bs-card2:   rgba(0, 0, 0, 0.06);
+  --bs-glass:   rgba(255, 255, 255, 0.7);
+  --bs-shadow:  rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  --bs-bg:      #0C0C0E;
+  --bs-bg2:     #141418;
+  --bs-bg3:     #1C1C22;
+  --bs-text:    #F4F4F6;
+  --bs-text2:   #C8C8D8;
+  --bs-ash:     #9898A8;
+  --bs-border:  rgba(255, 255, 255, 0.07);
+  --bs-card:    rgba(255, 255, 255, 0.03);
+  --bs-card2:   rgba(255, 255, 255, 0.06);
+  --bs-glass:   rgba(14, 14, 20, 0.85);
+  --bs-shadow:  rgba(0, 0, 0, 0.3);
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -103,6 +133,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background-color: var(--bs-bg);
   }
 }
 

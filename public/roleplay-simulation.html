@@ -1,0 +1,349 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>byteSense — Roleplay Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Outfit+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0A0A0A;
+    --surface: #111111;
+    --card: #181818;
+    --card-hover: #1F1F1F;
+    --border: #252525;
+    --border-light: #2E2E2E;
+    --red: #D01B1B;
+    --red-bright: #E63434;
+    --red-muted: #3A1515;
+    --teal: #00B4AD;
+    --teal-muted: #003D3B;
+    --white: #F4F4F4;
+    --white-dim: #A0A0A0;
+    --white-faint: #555555;
+    --font: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--black);
+    color: var(--white);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .logo-wordmark { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--white); }
+  .logo-wordmark span { color: var(--red); }
+
+  .sidebar-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    color: var(--red); background: var(--red-muted);
+    border: 1px solid #5a1010; padding: 3px 10px; display: inline-block;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+
+  .nav-section {
+    padding: 8px 24px 4px; font-size: 9px; font-weight: 700;
+    letter-spacing: 2.5px; color: var(--white-faint); text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 24px; font-size: 13px; font-weight: 500;
+    color: var(--white-dim); text-decoration: none;
+    transition: all 0.2s; cursor: pointer; border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover { color: var(--white); background: var(--card); }
+  .nav-item.active { color: var(--red-bright); border-left-color: var(--red); background: var(--red-muted); }
+
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--white-faint); flex-shrink: 0; }
+  .nav-item.active .nav-dot { background: var(--red-bright); }
+
+  .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); }
+
+  .support-card { background: var(--red-muted); border: 1px solid #5a1010; padding: 14px; }
+  .support-card .label { font-size: 9px; letter-spacing: 2px; color: var(--red-bright); font-weight: 700; margin-bottom: 6px; }
+  .support-card .name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .support-card .phone { font-size: 13px; color: var(--white-dim); }
+
+  /* MAIN */
+  .main { margin-left: 260px; flex: 1; }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 64px; display: flex; justify-content: space-between;
+    align-items: center; position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left { font-size: 12px; color: var(--white-faint); letter-spacing: 1px; }
+
+  /* SECTIONS */
+  .section { padding: 72px 64px; border-bottom: 1px solid var(--border); max-width: 900px; }
+  .section:last-child { border-bottom: none; }
+
+  .section-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    color: var(--red); text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 38px; font-weight: 800; line-height: 1.1;
+    letter-spacing: -1px; margin-bottom: 8px; color: var(--white);
+  }
+  .section-title .accent { color: var(--red-bright); }
+
+  .section-subtitle {
+    font-size: 16px; color: var(--white-dim); font-weight: 400;
+    margin-bottom: 40px; max-width: 600px;
+  }
+
+  /* COMPONENTS */
+  .card { background: var(--card); border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .card-body { font-size: 14px; color: var(--white-dim); line-height: 1.7; }
+  .card-teal { border-left: 3px solid var(--teal); }
+  .card-red { border-left: 3px solid var(--red); }
+
+  .highlight-box-teal {
+    background: var(--teal-muted); border: 1px solid #1a5c5a; padding: 24px 28px; margin: 24px 0;
+  }
+  .highlight-box-teal .label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; margin-bottom: 10px; color: var(--teal);
+  }
+  .highlight-box-teal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--teal); }
+  .highlight-box-teal p { font-size: 14px; color: var(--white-dim); line-height: 1.7; }
+
+  .feature-list { list-style: none; }
+  .feature-list li {
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px; color: var(--white-dim);
+    display: flex; align-items: flex-start; gap: 12px; line-height: 1.6;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li::before {
+    content: ''; width: 6px; height: 6px; background: var(--teal);
+    border-radius: 50%; flex-shrink: 0; margin-top: 7px;
+  }
+  .feature-list li strong { color: var(--white); }
+
+  .check-list { list-style: none; }
+  .check-list li {
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px; color: var(--white-dim);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; }
+
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  .btn {
+    padding: 12px 28px; font-family: var(--font); font-size: 13px;
+    font-weight: 700; letter-spacing: 1px; cursor: pointer;
+    border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--teal); color: #000; }
+  .btn-primary:hover { background: #00CEC6; }
+  .btn-outline { background: transparent; color: var(--white-dim); border: 1px solid var(--border-light); }
+  .btn-outline:hover { color: var(--white); border-color: var(--white-faint); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+
+  /* PATIENT CHIPS */
+  .patient-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
+  .patient-chip {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 10px 18px; font-size: 13px; color: var(--white-dim);
+    display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+  }
+  .patient-chip .chip-role { font-size: 10px; color: var(--white-faint); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .patient-chip-inner { display: flex; flex-direction: column; }
+  .patient-chip .chip-name { font-weight: 600; color: var(--white); }
+
+  /* PRINT */
+  @media print { .sidebar { display: none; } .main { margin-left: 0; } }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 48px 20px; }
+    .two-col { grid-template-columns: 1fr; }
+    .section-title { font-size: 26px; letter-spacing: -0.5px; }
+    .topbar { padding: 12px 20px; }
+    .topbar-left { display: none; }
+  }
+
+  section[id] { scroll-margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><span class="logo-wordmark">byte<span>Sense</span></span></div>
+    <span class="sidebar-badge">BETA PARTNER</span>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Roleplay Tools</div>
+    <a class="nav-item active" href="#ai-simulations"><span class="nav-dot"></span>AI Simulations</a>
+    <a class="nav-item" href="#ai-coach"><span class="nav-dot"></span>AI Coach</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="support-card">
+      <div class="label">Your Dedicated Support</div>
+      <div class="name">Natasha Blake</div>
+      <div class="phone">909-527-9602</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <div class="topbar">
+    <div class="topbar-left">byteSense — Roleplay Simulation — Confidential Beta</div>
+  </div>
+
+  <!-- AI SIMULATIONS -->
+  <section id="ai-simulations" class="section">
+    <div class="section-tag">Tool 01 — Practice & Roleplay</div>
+    <h2 class="section-title">AI Patient<br><span class="accent">Simulations</span></h2>
+    <p class="section-subtitle">Roleplay real patient conversations with AI. Practice objection handling, closing, and education in a safe environment — no judgment, unlimited attempts.</p>
+
+    <div class="highlight-box-teal">
+      <div class="label">How It Works</div>
+      <h3>Simulate Before You Sell</h3>
+      <p>Each AI patient has a unique personality, hesitation style, and set of objections. Your job is to guide them through the decision — just like a real appointment. The AI responds naturally and adapts to your approach.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--white);">Meet Your AI Patients</h3>
+    <div class="patient-grid">
+      <div class="patient-chip"><div class="patient-chip-inner"><span class="chip-name">Jordan</span><span class="chip-role">Cost-focused · Skeptical</span></div></div>
+      <div class="patient-chip"><div class="patient-chip-inner"><span class="chip-name">Maria</span><span class="chip-role">Anxious · Needs reassurance</span></div></div>
+      <div class="patient-chip"><div class="patient-chip-inner"><span class="chip-name">Devon</span><span class="chip-role">Busy professional · Time-pressed</span></div></div>
+      <div class="patient-chip"><div class="patient-chip-inner"><span class="chip-name">Patricia</span><span class="chip-role">Insurance-first · Budget-minded</span></div></div>
+      <div class="patient-chip"><div class="patient-chip-inner"><span class="chip-name">Marcus</span><span class="chip-role">Tech-savvy · Wants data</span></div></div>
+      <div class="patient-chip"><div class="patient-chip-inner"><span class="chip-name">Aisha</span><span class="chip-role">Curious · Open to wellness</span></div></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--white);">What You'll Practice</h3>
+    <ul class="check-list">
+      <li>Introducing bioSense™ naturally during an appointment</li>
+      <li>Responding to price, insurance, and "I need to think about it" objections</li>
+      <li>Keeping the conversation moving toward a confident close</li>
+      <li>Adjusting your tone based on the patient's personality</li>
+      <li>Completing 3 successful conversations to unlock your certificate</li>
+    </ul>
+
+    <div class="divider"></div>
+    <button class="btn btn-primary" onclick="navigate('simulation')">Launch AI Simulations &rarr;</button>
+  </section>
+
+  <!-- AI COACH -->
+  <section id="ai-coach" class="section">
+    <div class="section-tag">Tool 02 — Personalized Coaching</div>
+    <h2 class="section-title">AI <span class="accent">Coach</span></h2>
+    <p class="section-subtitle">Ask anything. Get instant, personalized guidance on patient conversations, objections, clinical concepts, or training questions — available 24/7.</p>
+
+    <div class="two-col">
+      <div class="card card-teal">
+        <div class="card-title">Ask Anything</div>
+        <div class="card-body">Get answers to any ByteSense, sales, or clinical question instantly. No waiting for a call — your coach is always on.</div>
+      </div>
+      <div class="card card-teal">
+        <div class="card-title">Patient Follow-Up</div>
+        <div class="card-body">Generate personalized follow-up scripts for any patient. Share them with your TC or send directly.</div>
+      </div>
+      <div class="card card-teal">
+        <div class="card-title">Treatment Plan Language</div>
+        <div class="card-body">Get help explaining bioSense™ in clinical terms. Useful for case presentations and informed consent conversations.</div>
+      </div>
+      <div class="card card-teal">
+        <div class="card-title">Objection Handling</div>
+        <div class="card-body">Describe an objection you heard and get a word-for-word response tailored to your patient's concern.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--white);">Coaching Modes</h3>
+    <ul class="feature-list">
+      <li><strong>General Q&A</strong> — Any training or product question answered immediately</li>
+      <li><strong>Follow-Up Coach</strong> — Scripts and guidance for patients who didn't commit</li>
+      <li><strong>Treatment Plan</strong> — Language support for clinical case presentations</li>
+      <li><strong>Objection Coach</strong> — Responses to price, insurance, and hesitation objections</li>
+      <li><strong>Education Coach</strong> — Deep-dive on bruxism, sleep, and device science</li>
+    </ul>
+
+    <div class="divider"></div>
+    <button class="btn btn-primary" onclick="navigate('coach')">Open AI Coach &rarr;</button>
+  </section>
+
+</main>
+
+<script>
+  function navigate(target) {
+    window.parent.postMessage({ type: 'bytesense-navigate', target }, '*');
+  }
+
+  // Sidebar active state on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body></html>

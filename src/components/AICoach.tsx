@@ -3,8 +3,10 @@ import { C } from '@/data/constants';
 import { t, Lang } from '@/data/translations';
 import { toast } from 'sonner';
 import { Brain, Copy, Star, Trash2, MessageSquare, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AICoachProps {
+  isOpen: boolean;
   onClose: () => void;
   initialMode?: string;
   lang?: Lang;
@@ -30,8 +32,9 @@ const TypingDots = () => (
   </div>
 );
 
-export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachProps) {
+export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: AICoachProps) {
   const T = (key: string) => t(lang, key);
+  const isMobile = useIsMobile();
 
   const MODES = [
     { id: "general", label: T("ask_anything"), desc: T("ask_anything_desc"), icon: "✦" },
@@ -52,6 +55,20 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
   useEffect(() => {
     chatEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Lock body scroll when panel is open
+  useEffect(() => {
+    if (isOpen) { document.body.style.overflow = 'hidden'; }
+    else { document.body.style.overflow = ''; }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   const sendMessage = useCallback(async (overrideText?: string) => {
     const msg = (overrideText || input).trim();
@@ -111,10 +128,17 @@ export default function AICoach({ onClose, initialMode, lang = "en" }: AICoachPr
 
   return (
     <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
+      position: "fixed",
+      top: 0, right: 0, bottom: 0,
+      left: isMobile ? 0 : "calc(var(--bs-sidebar-w, 220px) + var(--bs-roleplay-w, 0px))",
+      zIndex: isMobile ? 300 : 200,
       display: "flex", flexDirection: "column",
       background: `radial-gradient(ellipse at top, #1a1a24, ${C.dark})`,
       fontFamily: C.fn,
+      transform: isOpen ? "translateX(0)" : "translateX(105%)",
+      transition: "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
+      willChange: "transform",
+      boxShadow: isOpen ? "-8px 0 40px rgba(0,0,0,0.5)" : "none",
     }}>
       {/* Header */}
       <div style={{

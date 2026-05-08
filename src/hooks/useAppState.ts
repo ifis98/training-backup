@@ -29,6 +29,7 @@ export interface AppState {
   spk: boolean;
   signed: boolean;
   lang: string;
+  theme: 'dark' | 'light';
   intakeDone: boolean;
   mainBlocker: string;
   monthlyVolume: string;
@@ -56,6 +57,7 @@ const defaultState: AppState = {
   spk: false,
   signed: false,
   lang: 'en',
+  theme: 'dark',
   intakeDone: false,
   mainBlocker: '',
   monthlyVolume: '',
@@ -63,6 +65,7 @@ const defaultState: AppState = {
 
 /** Pass the Clerk user ID so we can sync to the DB without calling supabase.auth */
 export function useAppState(clerkUserId: string | null = null) {
+  const [dbLoaded, setDbLoaded] = useState(false);
   const [s, setS] = useState<AppState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -123,7 +126,7 @@ export function useAppState(clerkUserId: string | null = null) {
 
   // Load from DB on mount (when we have a Clerk user)
   useEffect(() => {
-    if (!clerkUserId) return;
+    if (!clerkUserId) { setDbLoaded(true); return; } // no DB check needed for unauthenticated
     (async () => {
       try {
         const { data } = await supabase
@@ -136,9 +139,10 @@ export function useAppState(clerkUserId: string | null = null) {
           const restoredName = (data as any).name || '';
           const restoredPractice = (data as any).practice || '';
           setS(prev => {
-            const hasProgress = data.done_modules?.length > 0 || data.training_roles?.length > 0;
-            // If they have a DB record with name or roles, they've already done intake
-            const alreadyDoneIntake = !!(restoredName || data.training_roles?.length);
+            // Any DB row means the user completed onboarding — training_progress rows are only
+            // created after intake finishes (sync fires when phase !== 'splash').
+            // Don't rely on name/roles being present; they may be empty if the first sync failed.
+            const alreadyDoneIntake = true;
             return {
               ...prev,
               roles: data.training_roles?.length ? data.training_roles : prev.roles,
@@ -149,12 +153,14 @@ export function useAppState(clerkUserId: string | null = null) {
               signed: data.signed || prev.signed,
               name: restoredName || prev.name,
               practice: restoredPractice || prev.practice,
-              intakeDone: alreadyDoneIntake ? true : prev.intakeDone,
-              phase: (restoredName && hasProgress && prev.phase === 'splash') ? 'dashboard' : prev.phase,
+              intakeDone: true,
+              // Redirect stale splash/setup phases to dashboard when DB row exists
+              phase: (prev.phase === 'splash' || prev.phase === 'setup') ? 'dashboard' : prev.phase,
             };
           });
         }
       } catch {}
+      finally { setDbLoaded(true); }
     })();
   }, [clerkUserId]);
 
@@ -186,5 +192,5 @@ export function useAppState(clerkUserId: string | null = null) {
     setS(defaultState);
   }, []);
 
-  return { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset };
+  return { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded };
 }

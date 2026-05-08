@@ -1,0 +1,750 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>byteSense — Contact & Support</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Outfit+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0A0A0A;
+    --surface: #111111;
+    --card: #181818;
+    --card-hover: #1F1F1F;
+    --border: #252525;
+    --border-light: #2E2E2E;
+    --red: #D01B1B;
+    --red-bright: #E63434;
+    --red-muted: #3A1515;
+    --teal: #00B4AD;
+    --teal-muted: #003D3B;
+    --white: #F4F4F4;
+    --white-dim: #A0A0A0;
+    --white-faint: #555555;
+    --font: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--black);
+    color: var(--white);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px; min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+  .logo-wordmark { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--white); }
+  .logo-wordmark span { color: var(--red); }
+  .sidebar-badge { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--red); background: var(--red-muted); border: 1px solid #5a1010; padding: 3px 10px; display: inline-block; margin-top: 8px; }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+  .nav-section { padding: 8px 24px 4px; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: var(--white-faint); text-transform: uppercase; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 24px; font-size: 13px; font-weight: 500;
+    color: var(--white-dim); text-decoration: none;
+    transition: all 0.2s; cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { color: var(--white); background: var(--card); }
+  .nav-item.active { color: var(--red-bright); border-left-color: var(--red); background: var(--red-muted); }
+
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--white-faint); flex-shrink: 0; }
+  .nav-item.active .nav-dot { background: var(--red-bright); }
+
+  .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); }
+  .support-card { background: var(--red-muted); border: 1px solid #5a1010; padding: 14px; }
+  .support-card .label { font-size: 9px; letter-spacing: 2px; color: var(--red-bright); font-weight: 700; margin-bottom: 6px; }
+  .support-card .name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .support-card .phone { font-size: 13px; color: var(--white-dim); }
+
+  /* MAIN */
+  .main { margin-left: 260px; flex: 1; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 64px; display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left { font-size: 12px; color: var(--white-faint); letter-spacing: 1px; }
+  .topbar-right { display: flex; gap: 12px; align-items: center; }
+  .btn { padding: 8px 20px; font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: 1px; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-outline { background: transparent; color: var(--white-dim); border: 1px solid var(--border-light); }
+  .btn-outline:hover { color: var(--white); border-color: var(--white-faint); }
+
+  /* SECTIONS */
+  .section { padding: 72px 64px; border-bottom: 1px solid var(--border); max-width: 900px; }
+  .section:last-child { border-bottom: none; }
+  section[id] { scroll-margin-top: 24px; }
+
+  .section-tag { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--red); text-transform: uppercase; margin-bottom: 12px; }
+  .section-title { font-size: 38px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 8px; color: var(--white); }
+  .section-title .accent { color: var(--red-bright); }
+  .section-subtitle { font-size: 16px; color: var(--white-dim); font-weight: 400; margin-bottom: 40px; max-width: 600px; }
+
+  /* COMPONENTS */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  .card { background: var(--card); border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .card-body { font-size: 14px; color: var(--white-dim); line-height: 1.7; }
+  .card-red { border-left: 3px solid var(--red); }
+  .card-teal { border-left: 3px solid var(--teal); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+
+  .highlight-box { background: var(--red-muted); border: 1px solid #5a1010; padding: 24px 28px; margin: 24px 0; }
+  .highlight-box .label { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 10px; color: var(--red-bright); }
+  .highlight-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .highlight-box p { font-size: 14px; color: var(--white-dim); line-height: 1.7; }
+
+  /* ACCORDION */
+  .accordion { margin-top: 4px; }
+  .accordion-item { background: var(--card); border: 1px solid var(--border); margin-bottom: 6px; overflow: hidden; transition: border-color 0.2s; }
+  .accordion-item.open { border-color: var(--teal); }
+  .accordion-trigger {
+    width: 100%; padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    background: none; border: none; color: var(--teal); font-size: 14px; font-weight: 700;
+    font-family: var(--font); cursor: pointer; text-align: left; line-height: 1.5; transition: background 0.15s;
+  }
+  .accordion-trigger:hover { background: rgba(0,180,173,0.05); }
+  .accordion-icon { font-size: 20px; font-weight: 300; color: var(--white-faint); flex-shrink: 0; line-height: 1; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), color 0.2s; margin-top: 1px; }
+  .accordion-item.open .accordion-icon { transform: rotate(45deg); color: var(--teal); }
+  .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .accordion-body.open { max-height: 800px; }
+  .accordion-body-inner { padding: 0 20px 18px; font-size: 14px; color: var(--white-dim); line-height: 1.75; border-top: 1px solid var(--border); }
+
+  /* ACCORDION SUB-HEADER */
+  .accordion-subheader {
+    font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--white-faint); padding: 20px 0 8px; margin-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* PRINT */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 40px 48px; }
+    body { font-size: 13px; }
+    .section-title { font-size: 28px; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 48px 20px; }
+    .two-col { grid-template-columns: 1fr; }
+    .section-title { font-size: 26px; letter-spacing: -0.5px; }
+    .card { padding: 20px 18px; }
+    .topbar { padding: 12px 20px; }
+    .topbar-left { display: none; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wordmark">byte<span>Sense</span></div>
+    <div class="sidebar-badge">BETA PARTNER</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Support</div>
+    <a class="nav-item active" href="#policies"><span class="nav-dot"></span>Policies</a>
+    <a class="nav-item" href="#staff-faq"><span class="nav-dot"></span>Staff FAQ</a>
+    <a class="nav-item" href="#patient-faq"><span class="nav-dot"></span>Patient FAQ</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="support-card">
+      <div class="label">Contact Support</div>
+      <div class="name">+1 (888) 397-7073</div>
+      <div class="phone">support@bytesense.ai</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">byteSense — Contact &amp; Support — Confidential Beta</div>
+    <div class="topbar-right">
+      <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+
+  <!-- POLICIES (renamed from Support & Warranty) -->
+  <section id="policies" class="section">
+    <div class="section-tag">Section 15 — Support</div>
+    <h2 class="section-title"><span class="accent">Policies</span></h2>
+    <p class="section-subtitle">You are never alone in this. Here is exactly how to get help — for anything.</p>
+
+    <!-- Dr. Hendrik Lai — Main Dentist Contact -->
+    <div class="card card-teal" style="margin-bottom:20px;">
+      <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--teal); margin-bottom:12px;">MAIN DENTIST CONTACT</div>
+      <div style="font-size:20px; font-weight:800; margin-bottom:4px;">Dr. Hendrik Lai</div>
+      <div style="font-size:13px; color:var(--white-dim); margin-bottom:12px;">Lead Dentist &mdash; Practice Point of Contact</div>
+      <div style="font-size:24px; font-weight:700; color:var(--teal); margin-bottom:4px;">+1 (920) 331-7128</div>
+      <div style="font-size:12px; color:var(--white-faint);">Call or text for clinical questions, patient care decisions, and in-practice support.</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card card-red">
+        <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--red-bright); margin-bottom:12px;">YOUR DEDICATED BYTESENSE CONTACT</div>
+        <div style="font-size:20px; font-weight:800; margin-bottom:4px;">Natasha L. Blake</div>
+        <div style="font-size:13px; color:var(--white-dim); margin-bottom:2px;">Chief Strategy & Innovation Officer</div>
+        <div style="font-size:13px; color:var(--white-dim); margin-bottom:16px;">byteSense</div>
+        <div style="font-size:24px; font-weight:700; color:var(--red-bright); margin-bottom:4px;">909-527-9602</div>
+        <div style="font-size:12px; color:var(--white-faint);">Call or text — Natasha responds personally to all Beta partner inquiries</div>
+        <div class="divider" style="margin:16px 0;"></div>
+        <div style="font-size:13px; color:var(--white-dim);">
+          <strong style="color:var(--white);">Use for:</strong> Clinical questions, team training support, scan submission help, case status, pricing discussions, partnership questions, any concern about the program — anything at all.
+        </div>
+      </div>
+      <div>
+        <div class="card card-teal" style="margin-bottom:16px;">
+          <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--teal); margin-bottom:12px;">PATIENT TECHNICAL SUPPORT</div>
+          <div style="font-size:16px; font-weight:700; margin-bottom:4px;">support@bytesense.ai</div>
+          <div style="font-size:13px; color:var(--white-dim);">For patient-facing technical questions: app issues, device connectivity, data interpretation, account support.</div>
+        </div>
+        <div class="card" style="border-left:3px solid var(--white-faint);">
+          <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--white-faint); margin-bottom:12px;">BYTESENSE WEBSITE</div>
+          <div style="font-size:16px; font-weight:700; margin-bottom:4px;">bytesense.ai</div>
+          <div style="font-size:13px; color:var(--white-dim);">Direct patients here for product information, FAQs, and company background. Also useful for your team's ongoing education.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">Warranty Information</h3>
+    <div class="card card-teal">
+      <div class="card-title">12-Month Device Warranty</div>
+      <div class="card-body" style="margin-top:8px;">Every bioSense™ device is covered by a 12-month warranty from the date of delivery. The warranty covers manufacturing defects in the device and sensor systems. It does not cover loss, patient-caused damage, or normal wear from extended use. For warranty-related concerns, contact Natasha Blake or support@bytesense.ai with the patient name, case number, and description of the issue. Warranty decisions are made in partnership with the practice — your patient's satisfaction is our satisfaction.</div>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">A Final Word From byteSense</h3>
+    <div class="highlight-box">
+      <div class="label">Our Commitment to You</div>
+      <h3>We Are In This Together</h3>
+      <p>Your success with bioSense™ is not just our goal — it is our responsibility. If something isn't working, we want to know immediately. If your team needs additional training, we will provide it. If a patient has a concern, we will address it. You accepted the risk of being an early partner. We accept the responsibility of making that risk worthwhile. Call us. Text us. Show up on our doorstep if you need to. We are here.</p>
+    </div>
+  </section>
+
+  <!-- STAFF FAQ -->
+  <section id="staff-faq" class="section">
+    <div class="section-tag">Section 12 — Reference</div>
+    <h2 class="section-title">Staff <span class="accent">FAQ</span></h2>
+    <p class="section-subtitle">Answers to the most common questions your team will ask.</p>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How is bioSense™ different from a night guard?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">bioSense™ is categorically not a night guard. A night guard provides passive mechanical protection. bioSense™ provides that same protection PLUS active biometric monitoring through six embedded sensor systems. The device monitors heart rate, HRV, SpO₂, respiratory rate, body temperature, bruxism activity, and motion — delivering nightly health intelligence to a smartphone app. The protection is a feature. The intelligence is the product.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is this a medical device? Will we need special licensing to offer it?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">No. bioSense™ is a wellness device — in the same regulatory category as consumer health wearables like the Oura Ring or Apple Watch. It is not a medical device and does not require special licensing beyond your standard practice scope. Always use the Wellness Device Consent Form and never make claims that it diagnoses, treats, cures, or prevents any disease or medical condition.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How do we code and bill this?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">bioSense™ is currently billed as a patient-pay wellness device. It is not submitted to insurance. You may choose to use existing occlusal guard CDT codes for the appliance component for record-keeping purposes, but insurance filing for the full bioSense™ device is not currently supported. Collect payment at time of scan or prior to delivery.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What if the patient has questions about the app or device data?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">For technical questions about the app, device pairing, or interpreting their data, patients can contact byteSense directly at support@bytesense.ai. You are not expected to provide technical support. If there is a clinical concern related to data the patient shares (e.g., concerning oxygen readings), treat it as you would any patient-reported clinical information — using your clinical judgment and referring appropriately.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What if a patient wants to return the device?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Because bioSense™ is a custom-fabricated device, returns are not available after delivery. This is clearly stated in the patient consent form. However, we stand behind the fit and quality of every device. If there is a clinical issue with fit, adjustments are covered. Contact Natasha Blake at 909-527-9602 to discuss any patient satisfaction concerns — we will work with you to find a resolution.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What if a scan is rejected by the lab?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">The lab will notify you of the rejection and the specific reason. Rescan the patient per the corrected criteria and resubmit via Medit. There is no additional lab fee for a resubmission caused by scan quality issues. Contact Natasha Blake or the lab directly if you need guidance on the specific issue causing rejection.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How long does it take to receive the device after submission?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Typical fabrication and delivery time from Florida Oral Labs is currently 10–14 business days from case submission. Set patient expectations at approximately 2–3 weeks from the scan date. The delivery appointment should be pre-scheduled for approximately 3 weeks out at the time of scanning.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What if a patient says they're claustrophobic or can't wear something in their mouth while sleeping?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Acknowledge their concern with empathy. Many patients who believe they can't wear an appliance find that a precisely custom-fit device is far more tolerable than they expected. Offer to show them the device and discuss the gradual wear-in protocol (start with 1–2 hours during relaxation, then progress to full-night wear). For patients who are genuinely unable to wear any intraoral appliance, bioSense™ is not the right fit at this time.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What if the device doesn't fit?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">byteSense offers a free one-time remake if: fit issues result from byteSense fabrication, the submitted scan met technical standards, and the issue is reported within 3 business days of delivery. We'll help verify scan quality before you submit.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What scanning formats does byteSense support?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">We accept STL files from all major scanners, including iTero, 3Shape, Medit, and others. Files are uploaded securely via our provider portal.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What happens if my impression isn't usable?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Our lab technicians check every file for fit accuracy. If your impression is rejected, we'll notify you (or your provider) within 24 hours and ship a replacement kit or request a new scan.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How secure is byteSense data?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">All data is encrypted end-to-end, stored on HIPAA-compliant infrastructure, and fully controlled by the user.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What makes byteSense different from traditional night guards?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">While traditional guards provide passive protection, byteSense empowers users with self-monitoring capabilities. Its integrated sensor tracks jaw activity and syncs with an app to encourage awareness — not treatment.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is the Oral Wearable billable to dental or medical insurance?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">No. The Oral Wearable is a general wellness product and is not billed to dental or medical insurance. It is offered as an out-of-pocket, elective purchase, similar to other consumer devices sold in practices. There are no insurance submissions, claims, or reimbursements associated with its use.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Are there CDT or CPT codes associated with the Bitely Oral Wearable?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">No. There are no CDT or CPT codes associated with the Bitely Oral Wearable. It should not be coded or submitted as a dental or medical device. This eliminates coding complexity and avoids any risk related to improper insurance billing.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Does recommending this Oral Wearable increase my professional or regulatory liability?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">No. Recommending the Oral Wearable does not require diagnosis, clinical interpretation, or treatment planning. The data presented is intended for customer self-awareness, and responsibility for interpretation remains with the customer. The product includes built-in disclaimers and usage boundaries to ensure it remains within general wellness scope, similar to other consumer wellness products (sports mouthguards, etc) offered in dental practices.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Can providers access patient data?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Only with the patient's permission. Patients control all sharing through the app and can export summaries in PDF format or invite their provider to view select data points.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How is the Oral Wearable classified from a regulatory standpoint?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">byteSense Oral Wearable is positioned as a general wellness product. It is designed to support awareness of sleep-related and oral habits and to provide lifestyle-oriented insights. It is not intended to diagnose, treat, cure, or prevent any disease or medical condition, and it is not marketed or used as a medical device.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is this Oral Wearable a medical device or a general wellness product?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">This Oral Wearable is positioned and marketed strictly as a general wellness product. It is not intended to diagnose, treat, monitor, or prevent any disease or medical condition. All insights provided are designed to support awareness of patterns, habits, and lifestyle-related signals, not clinical decision-making. As such, it does not require FDA clearance for its current use and does not create a medical or diagnostic obligation for the dental professional.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is byteSense a diagnostic tool?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">No. byteSense is a general wellness device. It is not intended to diagnose, treat, or prevent any condition.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How do I order byteSense?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">You can order directly from our website. After checkout, you'll receive an at-home impression kit or can schedule a scan with a partner provider. Dental offices can also order on behalf of patients and manage multiple units via our provider dashboard.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What is the turnaround time?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Once your impression or scan is received, your custom byteSense night guard is typically fabricated and shipped within 7–10 business days.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What's the return or refund policy?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">You may cancel your order for a full refund anytime before the device ships. After shipment, our support team will assist with any fit issues, adjustments, or warranty questions.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Can byteSense be adjusted after delivery?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">If retention or comfort is off, our team will assess the issue. In some cases, a refit may be required. In-office chairside adjustments are not recommended due to embedded electronics.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is there a warranty for adjustment issues?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Yes. byteSense offers a satisfaction guarantee for first-time fits. If your device requires rework due to manufacturing issues, we'll replace it at no cost.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What does byteSense look and feel like?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">byteSense is a slim, ergonomic oral appliance weighing just 25 grams. It's designed to fit snugly on your upper arch without interfering with breathing, speaking, or sleep.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is it comfortable to wear all night?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Yes. byteSense is engineered for overnight use. Its custom-molded design ensures secure, low-profile fit that minimizes bulk and maximizes comfort.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What kind of data does byteSense collect?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">byteSense includes a built-in bruxism detection sensor that tracks the number and duration of nighttime clenching and grinding episodes. This behavior data is visible in the byteSense mobile app.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What does the byteSense app do?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">The app syncs with the device via Bluetooth and shows a daily summary of jaw activity. Patients can view trends, download reports, and optionally share them with a dental provider.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What is byteSense made from?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">The device is constructed using BPA-free, biocompatible, FDA-compliant dental resin. All materials are safe for extended intraoral use.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How long does byteSense last?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">With proper care, byteSense can last between 18 to 60 months, depending on usage habits. The electronics are sealed for protection and can be recalibrated or replaced if necessary.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How should it be cleaned?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">We recommend using an ultrasonic cleaner with water or a non-abrasive solution. Avoid alcohol-based or harsh chemicals that could degrade the material or sensor casing.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PATIENT FAQ -->
+  <section id="patient-faq" class="section">
+    <div class="section-tag">Section 13 — Patient Resources</div>
+    <h2 class="section-title">Patient <span class="accent">FAQ</span></h2>
+    <p class="section-subtitle">What your patients will ask — and exactly what to say. Feel free to print and provide this to patients.</p>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What exactly does the bioSense™ do?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">bioSense™ is a custom-fit oral appliance with medical-grade sensors built in. While you sleep, it measures six things simultaneously: your heart rate, your heart rate variability (a key stress and recovery indicator), your blood oxygen levels, your breathing rate, your body temperature, and your grinding activity — including exactly how long and how hard you grind. All of this data goes to an app on your phone. Every morning you see a health score and detailed breakdown of what your body did while you slept.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is this the same as a night guard?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Not at all. A night guard is protective — it prevents your upper and lower teeth from damaging each other when you grind. bioSense™ provides that same protection, but it also monitors your body all night long. Think of the difference between a seatbelt (which only protects you) and a car with a complete dashboard of sensors (which protects you AND tells you everything that's happening). bioSense™ is the complete dashboard.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Will my insurance cover this?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">bioSense™ is a wellness monitoring device — similar to an Apple Watch or Oura Ring — so it is not currently covered by dental or medical insurance. It is a patient-pay wellness investment. Your practice may be able to run your flex spending (FSA) or health savings account (HSA) funds toward this purchase — ask your coordinator.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: How is the device made?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">The process starts with a digital scan of your teeth — there's no messy impression material. The scan data is sent to our specialized lab, where the device is custom-fabricated precisely to your dental arch. It arrives back at your dental office within approximately 2–3 weeks, and your dentist delivers and fits it at a separate appointment.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is it comfortable to sleep in?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Because it's completely custom-fit to your mouth, it's far more comfortable than a generic appliance. Like any new oral appliance, there's a brief adjustment period of 3–7 nights for most people. Within two weeks, the majority of patients report they don't notice it while sleeping and feel something is missing on nights they forget to wear it.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What does the app show me?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Every morning you'll see your byteSense Score™ — a composite health intelligence rating — along with detailed breakdowns: Bruxism duration and episodes, resting heart rate, heart rate variability, overnight oxygen levels, respiratory rate, body temperature trends, and movement data. You can track trends over days, weeks, and months. Many patients find the data reveals patterns they had no awareness of — and that awareness empowers real health changes.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: Is this device safe?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Absolutely. bioSense™ is fabricated from biocompatible dental materials and built to dental laboratory standards. The embedded sensors are sealed within the appliance and are passive monitoring systems — they emit no signals and require no radiation. The device is a wellness monitoring tool, not a medical instrument, and is designed for safe nightly use.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What happens to my health data?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Your health data is collected and stored securely through the byteSense platform. For detailed information about data privacy, security practices, and how your information is used, please review the byteSense privacy policy at bytesense.ai. By signing the Patient Wellness Device Consent Form, you authorize the collection and processing of your biometric wellness data for health monitoring purposes.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <button class="accordion-trigger">
+        <span>Q: What if I have a problem with the device or the app?</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">For clinical issues with the fit or physical device, contact your dental practice directly. For technical questions about the app, data, or device connectivity, contact byteSense support at support@bytesense.ai. The byteSense team is available to help you get the most from your device.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; padding-top:32px; border-top:1px solid var(--border); text-align:center;">
+      <div style="font-size:11px; color:var(--white-faint); letter-spacing:2px; margin-bottom:8px;">BYTESENSE · bytesense.ai</div>
+      <div style="font-size:10px; color:var(--white-faint);">Beta Partner Onboarding Package · Confidential · Not for Distribution</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Sidebar active on scroll (with programmatic scroll guard)
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+  let programmaticScroll = false;
+
+  const observer = new IntersectionObserver((entries) => {
+    if (programmaticScroll) return;
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (!target) return;
+      // Set active immediately on click
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      // Block observer for 900ms while scroll animation plays
+      programmaticScroll = true;
+      setTimeout(() => { programmaticScroll = false; }, 900);
+      target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Accordion toggle
+  document.querySelectorAll('.accordion-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('open');
+      // Close all others in same section
+      const section = item.closest('section');
+      if (section) {
+        section.querySelectorAll('.accordion-item.open').forEach(openItem => {
+          if (openItem !== item) {
+            openItem.classList.remove('open');
+            openItem.querySelector('.accordion-body').classList.remove('open');
+          }
+        });
+      }
+      item.classList.toggle('open', !isOpen);
+      body.classList.toggle('open', !isOpen);
+    });
+  });
+</script>
+
+</body></html>

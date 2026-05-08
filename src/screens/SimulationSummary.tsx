@@ -72,8 +72,8 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
   const scoreColor = (score: number) => score >= 80 ? C.green : score >= 60 ? C.teal : score >= 40 ? C.gold : C.red;
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.dark, minHeight: "100vh" }}>
-      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", borderBottom: `1px solid ${C.borderD}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: "100vh" }}>
+      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", borderBottom: "1px solid var(--bs-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: C.gold, textTransform: "uppercase", fontWeight: 700 }}>{T("session_summary")}</div>
         <div style={{ fontSize: 13, color: C.ash }}>{s.simP}/3 {T("patients_guided")}</div>
       </div>

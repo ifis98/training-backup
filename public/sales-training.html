@@ -1,0 +1,1767 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>byteSense — Practice Welcome & Onboarding Package</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Outfit+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0A0A0A;
+    --surface: #111111;
+    --card: #181818;
+    --card-hover: #1F1F1F;
+    --border: #252525;
+    --border-light: #2E2E2E;
+    --red: #D01B1B;
+    --red-bright: #E63434;
+    --red-muted: #3A1515;
+    --teal: #00B4AD;
+    --teal-muted: #003D3B;
+    --white: #F4F4F4;
+    --white-dim: #A0A0A0;
+    --white-faint: #555555;
+    --font: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--black);
+    color: var(--white);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .logo-hex {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .logo-wordmark {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--white);
+  }
+
+  .logo-wordmark span { color: var(--red); }
+
+  .sidebar-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--red);
+    background: var(--red-muted);
+    border: 1px solid #5a1010;
+    padding: 3px 10px;
+    display: inline-block;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+
+  .nav-section {
+    padding: 8px 24px 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--white-faint);
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white-dim);
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover { color: var(--white); background: var(--card); }
+  .nav-item.active { color: var(--red-bright); border-left-color: var(--red); background: var(--red-muted); }
+
+  .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--white-faint);
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-dot { background: var(--red-bright); }
+
+  .sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .support-card {
+    background: var(--red-muted);
+    border: 1px solid #5a1010;
+    padding: 14px;
+  }
+
+  .support-card .label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--red-bright);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .support-card .name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .support-card .phone { font-size: 13px; color: var(--white-dim); }
+
+  /* MAIN */
+  .main { margin-left: 260px; flex: 1; }
+
+  /* SECTIONS */
+  .section {
+    padding: 72px 64px;
+    border-bottom: 1px solid var(--border);
+    max-width: 900px;
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  /* SECTION HEADERS */
+  .section-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    color: var(--white);
+  }
+
+  .section-title .accent { color: var(--red-bright); }
+
+  .section-subtitle {
+    font-size: 16px;
+    color: var(--white-dim);
+    font-weight: 400;
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+
+  /* HERO SECTION */
+  .hero {
+    background: linear-gradient(135deg, #0A0A0A 0%, #1a0a0a 50%, #0A0A0A 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(208, 27, 27, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-title {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+
+  .hero-title .red { color: var(--red-bright); }
+
+  .hero-body {
+    font-size: 17px;
+    color: var(--white-dim);
+    max-width: 580px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .stat-item { }
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--white);
+  }
+  .stat-value .unit { font-size: 16px; color: var(--red-bright); font-weight: 600; }
+  .stat-label { font-size: 11px; color: var(--white-faint); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+
+  /* COMPONENTS */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card-body {
+    font-size: 14px;
+    color: var(--white-dim);
+    line-height: 1.7;
+  }
+
+  .card-red { border-left: 3px solid var(--red); }
+  .card-teal { border-left: 3px solid var(--teal); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .highlight-box {
+    background: var(--red-muted);
+    border: 1px solid #5a1010;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  .highlight-box-teal {
+    background: var(--teal-muted);
+    border: 1px solid #1a5c5a;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+
+  .highlight-box .label, .highlight-box-teal .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .highlight-box .label { color: var(--red-bright); }
+  .highlight-box-teal .label { color: var(--teal); }
+
+  .highlight-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .highlight-box-teal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--teal); }
+
+  .highlight-box p, .highlight-box-teal p {
+    font-size: 14px;
+    color: var(--white-dim);
+    line-height: 1.7;
+  }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    margin: 3px 3px 3px 0;
+  }
+
+  .tag-red { background: var(--red-muted); color: var(--red-bright); border: 1px solid #5a1010; }
+  .tag-teal { background: var(--teal-muted); color: var(--teal); border: 1px solid #1a5c5a; }
+  .tag-gray { background: #1E1E1E; color: var(--white-dim); border: 1px solid var(--border); }
+
+  /* LISTS */
+  .feature-list { list-style: none; }
+  .feature-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--white-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.6;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+
+  .feature-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  .feature-list li strong { color: var(--white); }
+
+  .check-list { list-style: none; }
+  .check-list li {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--white-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before {
+    content: '✓';
+    color: var(--teal);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .x-list { list-style: none; }
+  .x-list li {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--white-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .x-list li:last-child { border-bottom: none; }
+  .x-list li::before { content: '✗'; color: var(--red-bright); font-weight: 700; flex-shrink: 0; }
+
+  /* SCRIPT BOX */
+  .script-box {
+    background: #0D1A1A;
+    border: 1px solid #1a3535;
+    border-left: 3px solid var(--teal);
+    padding: 24px 28px;
+    margin: 20px 0;
+    font-style: italic;
+    position: relative;
+  }
+
+  .script-box .script-role {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-style: normal;
+  }
+
+  .script-box p {
+    font-size: 14px;
+    color: #C8D8D8;
+    line-height: 1.75;
+  }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white-dim);
+    border-bottom: 1px solid var(--border-light);
+    background: var(--surface);
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--white-dim);
+    vertical-align: top;
+  }
+
+  td strong { color: var(--white); }
+  td.red { color: var(--red-bright); font-weight: 600; }
+  td.teal { color: var(--teal); font-weight: 600; }
+
+  /* NUMBER BLOCKS */
+  .step-block {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    background: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .step-content .step-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .step-content .step-body {
+    font-size: 14px;
+    color: var(--white-dim);
+    line-height: 1.7;
+  }
+
+  /* WARNING/NOTICE */
+  .notice {
+    border: 1px solid #5a1010;
+    background: #1A0A0A;
+    padding: 20px 24px;
+    margin: 24px 0;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .notice-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  .notice-content .notice-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red-bright);
+    margin-bottom: 4px;
+  }
+
+  .notice-content p {
+    font-size: 13px;
+    color: var(--white-dim);
+    line-height: 1.65;
+  }
+
+  .notice-success {
+    border-color: #1a5c5a;
+    background: #0A1a1a;
+  }
+
+  .notice-success .notice-title { color: var(--teal); }
+
+  /* LETTER */
+  .letter {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 48px 56px;
+    position: relative;
+  }
+
+  .letter::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--red-bright), #FF4444);
+  }
+
+  .letter-date {
+    font-size: 12px;
+    color: var(--white-faint);
+    margin-bottom: 32px;
+    letter-spacing: 1px;
+  }
+
+  .letter-salutation {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .letter p {
+    font-size: 15px;
+    color: var(--white-dim);
+    line-height: 1.8;
+    margin-bottom: 16px;
+    max-width: 680px;
+  }
+
+  .letter-sig {
+    margin-top: 36px;
+  }
+
+  .letter-sig .sig-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .letter-sig .sig-title {
+    font-size: 12px;
+    color: var(--red-bright);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .letter-sig .sig-company {
+    font-size: 12px;
+    color: var(--white-faint);
+    margin-top: 2px;
+  }
+
+  /* PRINT */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 40px 48px; }
+    .hero { padding: 40px 48px; }
+    body { font-size: 13px; }
+    .section-title { font-size: 28px; }
+    .hero-title { font-size: 36px; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 48px 20px; }
+    .hero { padding: 48px 20px; }
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .hero-title { font-size: 34px; }
+    .section-title { font-size: 26px; letter-spacing: -0.5px; }
+    .letter { padding: 32px 20px; }
+    .hero-stats { gap: 24px; }
+    /* Tables: scrollable on mobile */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 24px 0; border: 1px solid var(--border); }
+    .table-wrap table { margin: 0; min-width: 520px; }
+    /* Price cards: ensure left-aligned text */
+    .price-card { text-align: left; }
+    .price-amount { text-align: left; }
+    /* Script boxes: reduce padding */
+    .script-box { padding: 18px 16px; }
+    /* Cards: reduce padding */
+    .card { padding: 20px 18px; }
+    /* Topbar: reduce padding */
+    .topbar { padding: 12px 20px; }
+    .topbar-left { display: none; }
+  }
+
+  /* SCROLL OFFSET */
+  section[id] { scroll-margin-top: 24px; }
+
+  /* TABLE WRAP — always scrollable */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-wrap table { margin: 0; }
+
+  .page-break { page-break-before: always; }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-left {
+    font-size: 12px;
+    color: var(--white-faint);
+    letter-spacing: 1px;
+  }
+
+  .topbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 8px 20px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: white;
+  }
+
+  .btn-primary:hover { background: var(--red-bright); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--white-dim);
+    border: 1px solid var(--border-light);
+  }
+
+  .btn-outline:hover { color: var(--white); border-color: var(--white-faint); }
+
+  /* TIMELINE */
+  .timeline { margin: 24px 0; }
+  .timeline-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  .timeline-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .timeline-connector {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    min-height: 24px;
+    margin: 4px 0;
+  }
+
+  .timeline-content {
+    padding-bottom: 28px;
+    flex: 1;
+  }
+
+  .timeline-week {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .timeline-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .timeline-body {
+    font-size: 13px;
+    color: var(--white-dim);
+    line-height: 1.65;
+  }
+
+  /* PRICE TABLE */
+  .price-card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 28px;
+    text-align: center;
+  }
+
+  .price-card.featured {
+    border-color: var(--red);
+    background: var(--red-muted);
+  }
+
+  .price-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white-faint);
+    margin-bottom: 8px;
+  }
+
+  .price-card.featured .price-label { color: var(--red-bright); }
+
+  .price-amount {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .price-note {
+    font-size: 12px;
+    color: var(--white-faint);
+    margin-bottom: 16px;
+  }
+
+  .price-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .price-features { list-style: none; text-align: left; }
+  .price-features li {
+    font-size: 13px;
+    color: var(--white-dim);
+    padding: 6px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+  }
+  .price-features li::before { content: '—'; color: var(--white-faint); flex-shrink: 0; margin-top: 1px; }
+
+  /* CHECKLIST — strong title on its own line */
+  .check-list li strong {
+    display: block;
+    color: var(--white);
+    margin-bottom: 3px;
+  }
+
+  /* ACCORDION */
+  .accordion-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .accordion-item.open { border-color: var(--teal); }
+  .accordion-trigger {
+    width: 100%;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    background: none;
+    border: none;
+    color: var(--teal);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.5;
+    transition: background 0.15s;
+  }
+  .accordion-trigger:hover { background: rgba(0,180,173,0.05); }
+  .accordion-icon {
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--white-faint);
+    flex-shrink: 0;
+    line-height: 1;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), color 0.2s;
+    margin-top: 1px;
+  }
+  .accordion-item.open .accordion-icon {
+    transform: rotate(45deg);
+    color: var(--teal);
+  }
+  .accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  .accordion-body.open { max-height: 600px; }
+  .accordion-body-inner {
+    padding: 0 20px 18px;
+    font-size: 14px;
+    color: var(--white-dim);
+    line-height: 1.75;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><span class="logo-wordmark">byte<span style="color:#E63434;">Sense</span></span></div>
+    <span class="sidebar-badge">BETA PARTNER</span>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Training Curriculum</div>
+    <a class="nav-item" href="#training-module"><span class="nav-dot"></span>Sales Training Module</a>
+
+    <div class="nav-section" style="margin-top:8px;">Getting Started</div>
+    <a class="nav-item" href="#about"><span class="nav-dot"></span>About bioSense™</a>
+    <a class="nav-item" href="#beta"><span class="nav-dot"></span>Your Beta Program</a>
+
+    <div class="nav-section" style="margin-top:8px;">Sales &amp; Growth</div>
+    <a class="nav-item" href="#pricing"><span class="nav-dot"></span>Pricing Strategy</a>
+    <a class="nav-item" href="#sales"><span class="nav-dot"></span>Sales Training &amp; Scripts</a>
+    <a class="nav-item" href="#objections"><span class="nav-dot"></span>Objection Handling</a>
+    <a class="nav-item" href="#marketing"><span class="nav-dot"></span>Marketing Toolkit</a>
+
+    <div class="nav-section" style="margin-top:8px;">Operations</div>
+    <a class="nav-item" href="#patient-faq"><span class="nav-dot"></span>Patient FAQ</a>
+    <a class="nav-item" href="#support"><span class="nav-dot"></span>Support &amp; Warranty</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="support-card">
+      <div class="label">Contact Support</div>
+      <div class="name">+1 (888) 397-7073</div>
+      <div class="phone">support@bytesense.ai</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+    <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">byteSense — Practice Welcome & Onboarding Package — Confidential Beta</div>
+    <div class="topbar-right">
+      <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+
+
+  <!-- SALES TRAINING MODULE -->
+  <section id="training-module" class="section" style="max-width:900px;">
+    <div class="section-tag">Training Curriculum</div>
+    <h2 class="section-title">Sales Training <span class="accent">Module</span></h2>
+    <p class="section-subtitle">Complete training curriculum — all phases, all roles. Expand any module to read the full lesson.</p>
+    <div id="tm-container"></div>
+  </section>
+
+    <section id="about" class="section">
+    <div class="section-tag">Section 02 — Product Education</div>
+    <h2 class="section-title">The <span class="accent">bioSense™</span><br>Platform</h2>
+    <p class="section-subtitle">Not a night guard. Not a mouthguard. An entirely new category of health intelligence.</p>
+
+    <div class="notice">
+      <div class="notice-icon">⚑</div>
+      <div class="notice-content">
+        <div class="notice-title">Critical Messaging Directive — Read This First</div>
+        <p>bioSense™ is <strong>NEVER</strong> to be introduced, described, or positioned as a "night guard" or "mouthguard." These terms commoditize the device and collapse its value to $50–$300. bioSense™ is a <strong>wellness health intelligence platform</strong> that happens to protect teeth. Lead with intelligence, monitoring, and body data — always. Protection is a benefit, not the identity.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:20px; font-weight:700; margin:32px 0 16px;">What is the bioSense™?</h3>
+    <p style="color:var(--white-dim); line-height:1.8; margin-bottom:24px;">The bioSense™ is a custom-fit oral appliance embedded with medical-grade biometric sensors. Worn during sleep, it passively monitors six distinct health metrics simultaneously — delivering a comprehensive picture of the patient's nocturnal health to a smartphone app. Think of it as an Oura Ring or WHOOP device — but one that lives in the mouth, where biometric data is dramatically more accurate than the wrist or finger.</p>
+
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:16px; color:var(--white-dim); letter-spacing:1px; text-transform:uppercase; font-size:11px;">Six Embedded Sensor Systems</h3>
+    <div class="table-wrap"><table>
+      <thead>
+        <tr>
+          <th>Sensor</th>
+          <th>What It Measures</th>
+          <th>Clinical Relevance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PPG Optical</strong></td>
+          <td>Heart Rate (HR) & Heart Rate Variability (HRV)</td>
+          <td>Cardiovascular health, autonomic nervous system, stress load, recovery quality</td>
+        </tr>
+        <tr>
+          <td><strong>Oral SpO₂</strong></td>
+          <td>Blood oxygen saturation during sleep</td>
+          <td>Detects oxygen desaturation events — OSA risk indicator. Oral measurement is 7 seconds faster and more accurate than finger/wrist sensors.</td>
+        </tr>
+        <tr>
+          <td><strong>Respiratory Rate</strong></td>
+          <td>Breath cycles per minute during sleep</td>
+          <td>Identifies mouth breathing, airway restriction, respiratory disturbance</td>
+        </tr>
+        <tr>
+          <td><strong>Temperature</strong></td>
+          <td>Core body temperature fluctuation</td>
+          <td>Illness detection, hormonal cycling, metabolic rate, recovery status</td>
+        </tr>
+        <tr>
+          <td><strong>EMG / Force</strong></td>
+          <td>Jaw muscle activation — bruxism episodes, duration, intensity</td>
+          <td>Objective bruxism data — first-ever quantified clinical evidence of grinding for each patient</td>
+        </tr>
+        <tr>
+          <td><strong>Motion / Accelerometer</strong></td>
+          <td>Head and jaw movement, sleep position</td>
+          <td>Sleep stage inference, positional OSA, restlessness markers</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="highlight-box-teal">
+      <div class="label">The Oral Advantage — Why the Mouth Wins</div>
+      <h3>Oral SpO₂ Is Categorically More Accurate Than Wrist or Finger Sensors</h3>
+      <p>Published clinical research demonstrates that oral SpO₂ sensors detect oxygen desaturation events <strong>7 seconds faster</strong> than peripheral sensors. The mouth is immune to vasoconstriction that degrades peripheral readings. Oral data correlates more closely with arterial blood gas measurements — the gold standard — and provides a clearer signal of brain oxygenation. This is not incremental improvement. It is a different category of accuracy.</p>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">The byteSense Score™</h3>
+    <p style="color:var(--white-dim); line-height:1.8; margin-bottom:16px;">Every morning, the patient's app displays a byteSense Score™ — a composite daily health intelligence rating derived from all six sensor streams. This single number becomes the patient's daily engagement anchor, driving habitual app interaction and long-term data accumulation that reveals health patterns invisible to any single-night measurement.</p>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">Who Is This Device?</h3>
+    <div class="three-col">
+      <div class="card card-red">
+        <div class="card-title">The Bruxism Patient</div>
+        <div class="card-body">Any patient showing wear facets, fractured cusps, flattened teeth, cervical abfractions, or reporting jaw pain, morning headaches, or partner-reported grinding. This is your core addressable market.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-title">The Sleep-Concerned Patient</div>
+        <div class="card-body">Patients who are fatigued despite adequate sleep duration, partners of known snorers, patients who have declined CPAP, or anyone wanting to understand their sleep health without the burden of a sleep study.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-title">The Health Optimizer</div>
+        <div class="card-body">The biohacker, the executive, the athlete, the parent who reads health content. These patients are already wearing fitness trackers and understand the value of biometric data. This is the logical next layer.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-title">The Stress-Driven Patient</div>
+        <div class="card-body">High-stress professionals, healthcare workers, teachers, first responders — anyone whose occupation correlates with elevated cortisol and clenching. HRV monitoring makes this connection tangible.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-title">The Longevity Patient</div>
+        <div class="card-body">Patients who understand that chronic undetected disease is the enemy of long life. They invest in their health ahead of symptoms. bioSense™ is a core pillar of any preventive longevity protocol.</div>
+      </div>
+      <div class="card card-red">
+        <div class="card-title">The OSA Risk Patient</div>
+        <div class="card-body">Patients with confirmed or suspected airway issues, high Epworth scores, snoring, hypertension, or metabolic syndrome. bioSense™ provides nightly oxygen monitoring without a prescription referral.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">How bioSense™ Compares — The Competitive Truth</h3>
+    <div class="table-wrap"><table>
+      <thead>
+        <tr>
+          <th>Device</th>
+          <th>Form Factor</th>
+          <th>SpO₂ Accuracy</th>
+          <th>Bruxism Data</th>
+          <th>Custom Fit</th>
+          <th>Protection</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>bioSense™</strong></td>
+          <td class="teal">Intraoral</td>
+          <td class="teal">Oral (Superior)</td>
+          <td class="teal">Yes — clinical grade</td>
+          <td class="teal">Yes</td>
+          <td class="teal">Yes</td>
+        </tr>
+        <tr>
+          <td>Oura Ring</td>
+          <td>Finger ring</td>
+          <td>Peripheral — limited</td>
+          <td>No</td>
+          <td>Sizing only</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>WHOOP</td>
+          <td>Wrist band</td>
+          <td>Peripheral — limited</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Apple Watch</td>
+          <td>Wrist watch</td>
+          <td>Periodic only</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Traditional Night Guard</td>
+          <td>Intraoral</td>
+          <td>None</td>
+          <td>No</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <div class="highlight-box">
+      <div class="label">The Core Positioning Statement</div>
+      <h3>The Rolls Royce of Wearables — Made for the Oral Environment</h3>
+      <p>bioSense™ is the only device that combines the protection of a precision occlusal splint with the intelligence of a clinical-grade health monitoring platform. No other wearable offers this combination. This is not a feature comparison — this is a category of one.</p>
+    </div>
+  </section>
+
+    <section id="beta" class="section">
+    <div class="section-tag">Section 03 — Beta Program</div>
+    <h2 class="section-title">Your <span class="accent">Beta Partner</span><br>Program</h2>
+    <p class="section-subtitle">90 days. Full support. Zero onboarding cost. Everything you need to succeed.</p>
+
+    <div class="highlight-box-teal">
+      <div class="label">Beta Partner Commitment</div>
+      <h3>What byteSense Provides to You</h3>
+      <p>All training, onboarding, and educational resources are provided at zero cost during your 90-day Beta period. You are responsible only for lab fees per appliance, billed directly by the lab at your exclusive Beta partner discounted rate. No monthly fees. No platform fees. No minimum case volumes required.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:24px;">
+      <div class="card card-teal">
+        <div class="card-title">byteSense Provides</div>
+        <ul class="check-list" style="margin-top:12px;">
+          <li>This complete onboarding package</li>
+          <li>Full team training resources</li>
+          <li>Sales scripts & marketing templates</li>
+          <li>Dedicated support from Natasha Blake</li>
+          <li>All consent and compliance documentation</li>
+          <li>Patient FAQs, brochures & education tools</li>
+          <li>Direct line to our clinical and technical team</li>
+          <li>Beta pricing for the full 90-day window</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left:3px solid var(--white-faint)">
+        <div class="card-title">Your Practice Provides</div>
+        <ul class="check-list" style="margin-top:12px;">
+          <li>Designate a Primary Practice Advocate</li>
+          <li>Designate a Secondary Advocate</li>
+          <li>Complete lab setup via Medit (Step-by-step included)</li>
+          <li>Submit completed patient consent forms per case</li>
+          <li>Upload quality intraoral scans per protocol</li>
+          <li>Lab fee per device (discounted Beta rate)</li>
+          <li>Share feedback to improve the platform</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">90-Day Beta Timeline</h3>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="timeline-week">Week 1–2 — Launch</div>
+          <div class="timeline-title">Onboarding, Setup & First Team Training</div>
+          <div class="timeline-body">Complete this package. Assign your Practice Advocates. Add Florida Oral Labs to your Medit account. Review inclusion/exclusion criteria. Identify your first 5–10 ideal patients. Begin introductory conversations.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="timeline-week">Week 3–4 — First Cases</div>
+          <div class="timeline-title">First Patient Presentations & Case Submissions</div>
+          <div class="timeline-body">Begin presenting bioSense™ to pre-identified patients. Submit your first scans following the protocol in Section 6. Call Natasha with any questions — this is what she's here for. Celebrate your first yes.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="timeline-week">Week 5–8 — Momentum</div>
+          <div class="timeline-title">Build Cadence, Collect Feedback, Grow Revenue</div>
+          <div class="timeline-body">Establish a regular cadence of presenting bioSense™ as part of every qualifying exam and hygiene appointment. Track conversion rates. Begin in-office patient displays and education materials. Collect testimonials from early adopters.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot"></div></div>
+        <div class="timeline-content">
+          <div class="timeline-week">Week 9–12 — Optimize</div>
+          <div class="timeline-title">Refine, Scale & Transition to Full Program</div>
+          <div class="timeline-body">Your team is now experienced presenters. Optimize your intro offer. Begin planning your full-program pricing structure ($850–$1,500). Provide feedback to byteSense on platform improvements. Prepare to become a Certified Provider.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <section id="pricing" class="section">
+    <div class="section-tag">Section 08 — Revenue Strategy</div>
+    <h2 class="section-title">Pricing <span class="accent">Strategy</span></h2>
+    <p class="section-subtitle">Structured to maximize early adoption while establishing the premium positioning this device commands.</p>
+
+    <div class="highlight-box-teal">
+      <div class="label">Beta Pricing Philosophy</div>
+      <h3>Build the Story. Build the Value. Then Build the Price.</h3>
+      <p>During your 90-day Beta, we recommend offering an exclusive introductory price to your patients. This creates urgency, rewards your early adopters, and builds a powerful foundation of testimonials that justify full pricing afterward. The goal of the Beta period is not maximum revenue per device — it is maximum adoption, maximum data, and maximum word-of-mouth. Profitability at scale comes in Month 4.</p>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">Recommended Pricing Structure</h3>
+    <div class="three-col">
+      <div class="price-card featured">
+        <div class="price-label">Beta Introduction</div>
+        <div class="price-amount">$495<span style="font-size:18px;font-weight:400;">–$695</span></div>
+        <div class="price-note">First 90 days — exclusive to Beta</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>Device + sensors included</li>
+          <li>App access included</li>
+          <li>12-month device warranty</li>
+          <li>Delivery appointment included</li>
+          <li>2-week follow-up included</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="price-label">Standard Program</div>
+        <div class="price-amount">$850<span style="font-size:18px;font-weight:400;">–$1,100</span></div>
+        <div class="price-note">Post-Beta certified pricing</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>All Beta inclusions</li>
+          <li>Certified Provider badge</li>
+          <li>Provider directory listing</li>
+          <li>Enhanced support tier</li>
+          <li>Annual refresh pricing</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="price-label">Premium Tier</div>
+        <div class="price-amount">$1,200<span style="font-size:18px;font-weight:400;">–$1,500</span></div>
+        <div class="price-note">High-value practice positioning</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>All Standard inclusions</li>
+          <li>White-glove delivery experience</li>
+          <li>Quarterly data review appointment</li>
+          <li>Priority support channel</li>
+          <li>Practice co-marketing inclusion</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">Handling the Insurance Question</h3>
+    <p style="color:var(--white-dim); line-height:1.8; margin-bottom:16px;">Insurance does not currently cover the bioSense™ platform. It is positioned and priced as a wellness device — consistent with Oura Ring, Apple Watch, and WHOOP. This is a patient-pay offering. Here is how to present this with confidence:</p>
+
+    <div class="script-box">
+      <div class="script-role">Team Script — Insurance Objection Pre-emption</div>
+      <p>"Because the bioSense™ is a health intelligence platform — think of it like a medical-grade Oura Ring for your mouth — it's in the same category as other wellness devices. Insurance covers your watch battery about as well as they cover your Apple Watch. The difference is that this investment gives you actual clinical data about what's happening in your body every single night, and that data can literally save you thousands in preventable dental damage and future health costs. Most patients tell us it's the most valuable health investment they've ever made."</p>
+    </div>
+  </section>
+
+    <section id="sales" class="section">
+    <div class="section-tag">Section 09 — Sales Training</div>
+    <h2 class="section-title"><span class="accent">Sales Training</span><br>& Conversation Scripts</h2>
+    <p class="section-subtitle">Word-for-word scripts for every clinical scenario. Adapt to your voice — never memorize robotically.</p>
+
+    <div class="highlight-box">
+      <div class="label">Sales Philosophy</div>
+      <h3>You Are Not Selling. You Are Revealing.</h3>
+      <p>The most effective bioSense™ presentations never feel like sales. You are sharing clinical information the patient needs to know, offering them a tool that addresses a real health concern, and inviting them to take action. Your belief in the product is the most powerful sales tool you have. If you find it genuinely valuable — your patient will too.</p>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:28px 0 16px;">The Hygienist Conversation — During Exam</h3>
+    <div class="script-box">
+      <div class="script-role">Hygienist Script — Bruxism Discovery</div>
+      <p>"[Name], while I was cleaning today I noticed some wear on these surfaces here [point or show image]. This is a pattern we associate with grinding or clenching during sleep — most people do it completely unconsciously. Are you aware of any grinding, or has anyone told you that you grind at night?"</p>
+      <br>
+      <p>[After patient responds:] "What's really exciting is that we now have something that goes way beyond a traditional night guard. It's called the bioSense™, and it's honestly remarkable — it's a custom-fit oral device that monitors six different aspects of your health while you sleep. We're talking heart rate, oxygen levels, breathing, your actual grinding activity — all delivered to an app on your phone so you can literally see what your body does every night. Think of it like a Fitbit, but one that lives in your mouth where the measurements are actually most accurate. I'd love for Dr. [Name] to tell you more about it when they come in."</p>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:28px 0 16px;">The Doctor Recommendation</h3>
+    <div class="script-box">
+      <div class="script-role">Doctor Script — Clinical Recommendation</div>
+      <p>"I've looked at your X-rays and I've reviewed what [hygienist] documented today. I'm seeing evidence of significant bruxism — the wear pattern on your [upper anterior / posterior] teeth tells me you're grinding with real force during sleep. Here's the thing: traditionally we'd just give you a night guard, and you'd wear it for years, not knowing if things were getting better or worse. We have something different to offer now."</p>
+      <br>
+      <p>"It's called bioSense™, and I'm genuinely excited to offer it to my patients. It's a precision-fit oral appliance — so it protects your teeth completely — but it also has medical-grade sensors built right in. Every night it measures your grinding activity, your oxygen levels, your heart rate, even your breathing patterns. All of that goes to an app. Your grind score, your oxygen score, everything. We can actually track whether your bruxism is improving over time, and you get a comprehensive picture of your sleep health. This is the future of how we care for your health."</p>
+      <br>
+      <p>"I'd like to have [coordinator name] sit down with you and share the details. This is something I genuinely recommend."</p>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:28px 0 16px;">The Treatment Coordinator Close</h3>
+    <div class="script-box">
+      <div class="script-role">Treatment Coordinator Script — Presentation & Close</div>
+      <p>"[Name], so Dr. [Name] wanted me to walk you through the bioSense™ that he mentioned. Let me show you what this actually does [if available, show app images or device]. This is really more like a health intelligence platform than anything we've offered before."</p>
+      <br>
+      <p>"It's completely custom-fit to your mouth — so it fits like a precision night guard. But built into it are six different sensors that track your health every single night. Your heart rate, your oxygen saturation — which is really important for breathing issues — your actual grinding activity, your body temperature, and your sleep movement. Every morning you wake up and you have a health score on your phone. Patients absolutely love it."</p>
+      <br>
+      <p>"Right now we're in a special introductory period, so the investment is [price] — which includes everything: the device, the sensors, the app, and your delivery appointment. That's significantly less than it will be later in the year. Would you like to start with your scans today, or would Tuesday work better for you?"</p>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:28px 0 16px;">Closing Techniques</h3>
+
+    <div class="card card-teal">
+      <div class="card-title">The Assumptive Close</div>
+      <div class="card-body">"I'm going to have [name] pull up our schedule right now to get your scans set up. Does this week or next week work better for you?" — Used when patient is clearly interested and engaged. Skip asking if they want to proceed; assume they do and move to scheduling.</div>
+    </div>
+
+    <div class="card card-teal">
+      <div class="card-title">The Alternative Close</div>
+      <div class="card-body">"Would you prefer to do the scans today and have everything ready to go, or would you rather schedule a dedicated 20-minute appointment next week?" — Two options that both move forward. Never give the option of not proceeding.</div>
+    </div>
+
+    <div class="card card-teal">
+      <div class="card-title">The Urgency Close</div>
+      <div class="card-body">"I want to make sure you're aware — the introductory pricing we're offering is only available through [date/end of beta period]. After that, the device will be at its standard investment of $850 or more. Getting started today secures the best price we'll ever offer." — Use with hesitant patients who are interested but not yet committed.</div>
+    </div>
+
+    <div class="card card-teal">
+      <div class="card-title">The Concern Close</div>
+      <div class="card-body">"I completely understand needing a moment. What specific question or concern would I need to answer for you to feel fully comfortable moving forward today?" — Listen carefully. Address the specific concern directly. Often it's just hesitation, not a real objection.</div>
+    </div>
+
+    <div class="card card-teal">
+      <div class="card-title">The Future-Cost Close</div>
+      <div class="card-body">"I want to put this in perspective. The wear we're seeing will eventually require crown replacements — that's $1,500 to $3,000 per tooth, and it's not a matter of if but when. The bioSense™ at [price] monitors and protects you every single night. What's the cost of doing nothing?" — Use with patients who say "that seems expensive."</div>
+    </div>
+  </section>
+
+    <section id="objections" class="section">
+    <div class="section-tag">Section 10 — Sales Training</div>
+    <h2 class="section-title">Objection<br><span class="accent">Handling Playbook</span></h2>
+    <p class="section-subtitle">Every objection is a request for more information. Here is exactly what to say.</p>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"I don't think I grind my teeth."</div>
+      <div class="card-body" style="margin-bottom:12px;">This is the single most common objection. Most bruxism patients genuinely don't know they grind.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"That's actually one of the most remarkable things about bruxism — research shows the majority of people who grind their teeth at night have absolutely no idea they're doing it. Your body doesn't feel it. That's exactly what makes the bioSense™ so valuable — it gives you objective proof, one way or the other. And here's the thing: if you don't grind, that data will confirm it. But based on what I'm seeing clinically today, I think you'll be surprised."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"Will my insurance cover this?"</div>
+      <div class="card-body" style="margin-bottom:12px;">This is not a no — it's a question about affordability. Address it directly and confidently.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"The bioSense™ is a wellness device — similar to an Apple Watch or an Oura Ring — so insurance doesn't cover it currently, just as they don't cover those devices. What I can tell you is that the data this device provides can help prevent thousands of dollars in future dental treatment. Many patients see it as the most valuable healthcare investment they make — not a cost, but a savings account for their health. And right now we have an introductory price that makes it very accessible."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"That's too expensive."</div>
+      <div class="card-body" style="margin-bottom:12px;">Reframe price as value. Always anchor to the cost of doing nothing.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"I completely understand wanting to make sure it's worth it. Here's some perspective: a single crown replacement is $1,500 to $3,000. A broken tooth requiring an implant is $4,000 to $6,000. The wear we're seeing today tells me that without intervention, you'll face those costs. The bioSense™ at [price] doesn't just protect your teeth — it monitors your heart rate, your oxygen, your sleep quality every single night. That's less than a dollar fifty a day. People spend more than that on a daily coffee."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"I already have a night guard."</div>
+      <div class="card-body" style="margin-bottom:12px;">This patient is already convicted of the problem — they just need the upgrade narrative.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"That's great — so you already know protection is important. But here's the honest truth: a traditional night guard protects your teeth but tells you nothing. You have no idea if your grinding is getting better, worse, or changing. bioSense™ does everything your night guard does — full custom-fit protection — plus it monitors your grinding intensity and duration, your oxygen levels, your heart rate, your sleep quality. You'd be trading a blindfold for a complete health dashboard. Most patients who've worn a guard for years say this changes everything."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"I need to think about it."</div>
+      <div class="card-body" style="margin-bottom:12px;">This usually means there's a specific unaddressed concern. Find it and address it.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"Of course — I want you to feel completely comfortable with any decision you make here. Can I ask: what specific question or concern would I need to address for you to feel confident moving forward? [Listen.] Also — I do want you to know that our introductory pricing is only available for the next [timeframe], so I want to make sure you have all the information you need to decide while that's still an option."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"I need to talk to my spouse / partner first."</div>
+      <div class="card-body" style="margin-bottom:12px;">Respect the decision process while keeping momentum alive.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"Absolutely — that's completely understandable for any significant health investment. Let me send you home with our patient information and a link to our website at bytesense.ai. Could we schedule a quick call for you and your partner with our Patient Care Coordinator? We can answer all your questions together in about 10 minutes. That way neither of you is making a decision without the full picture."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"Is this FDA approved?"</div>
+      <div class="card-body" style="margin-bottom:12px;">Answer confidently and accurately. This is a wellness device — regulatory framing matters.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"The bioSense™ is a wellness monitoring device — the same regulatory category as an Oura Ring or Apple Watch. It's designed to track and provide health insights, and it's built and positioned exactly the same way those devices are. It's not classified as a medical device and isn't intended to diagnose, treat, or cure any medical condition — just like your fitness tracker. What it does incredibly well is give you objective, nightly health intelligence that most people have never had access to before."</div>
+    </div>
+
+    <div class="card card-red" style="margin-bottom:16px;">
+      <div class="card-title" style="color:var(--red-bright);">"Will it be comfortable to sleep in?"</div>
+      <div class="card-body" style="margin-bottom:12px;">Normalize the adjustment period. Most patients adapt quickly.</div>
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--teal); margin-bottom:8px;">YOUR RESPONSE</div>
+      <div class="card-body">"Like any oral appliance, it takes a brief adjustment period — usually 3 to 7 nights. Most patients find that within the first week they're sleeping with it comfortably and within two weeks they feel strange without it. The device is custom-fabricated from your exact digital scan, so the fit is highly precise. We also schedule a follow-up appointment to ensure everything is feeling right and make any needed adjustments."</div>
+    </div>
+  </section>
+
+    <section id="marketing" class="section">
+    <div class="section-tag">Section 11 — Growth Toolkit</div>
+    <h2 class="section-title">Marketing <span class="accent">Toolkit</span></h2>
+    <p class="section-subtitle">Ideas and strategies to drive patient awareness, interest, and conversion.</p>
+
+    <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">In-Office Strategies</h3>
+    <ul class="feature-list" style="margin-bottom:24px;">
+      <li><strong>Treatment Room Display:</strong> Print and frame the bioSense™ device and app image in every treatment room. Patients will ask about it. "What is that?" is your opening.</li>
+      <li><strong>Front Desk Conversation Starter:</strong> Train front desk to mention bioSense™ at checkout for any patient who had wear noted in their chart. "By the way, were you told about the new health monitoring device we offer?"</li>
+      <li><strong>Waiting Room Display:</strong> A 5x7 or 8x10 card near the front desk: "Introducing bioSense™ — Know What Your Body Does While You Sleep." Include QR code to bytesense.ai.</li>
+      <li><strong>Hygiene Chart Flag:</strong> Flag charts of bruxism patients 1–2 days before appointments as bioSense™ candidates so the hygienist is prepared to have the conversation.</li>
+      <li><strong>Recall Cards & Appointment Reminders:</strong> Add a line to recall communications: "Ask us about bioSense™ — the first oral health intelligence platform."</li>
+      <li><strong>Patient Testimonial Wall:</strong> After first 5–10 patients receive their device, collect brief written testimonials. Post them in the treatment room. Social proof is the most powerful conversion tool available.</li>
+    </ul>
+
+    <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">Social Media Ideas</h3>
+    <ul class="feature-list" style="margin-bottom:24px;">
+      <li><strong>Device Unboxing Reel:</strong> Film a 15–30 second reel showing the bioSense™ device arriving, being inserted, and the app data. No narration needed — the visual is the story. Caption: "This is not a night guard. This is health intelligence. #byteSense #bioSense #SleepHealth"</li>
+      <li><strong>Patient Data Reveal (with permission):</strong> Share anonymized or willing-patient screenshots of their morning health score with a caption about what the data revealed. Performance, recovery, oxygen — real data is irresistible content.</li>
+      <li><strong>"Did You Know?" Series:</strong> Weekly educational posts on bruxism, sleep, HRV, SpO₂ — each one positioning bioSense™ as the solution. Example: "Did you know 1 in 3 adults grind their teeth at night without knowing it? The damage can take years to show up on X-rays — by then it's expensive."</li>
+      <li><strong>Staff Experience Post:</strong> If a team member wears the device, post their experience and data. Authenticity from inside the practice is powerful social content.</li>
+      <li><strong>Sleep Health Tips + byteSense CTA:</strong> "5 Signs You're a Night Grinder" — educational content that ends with: "Ask us about the device that monitors it all while you sleep."</li>
+      <li><strong>Before/After Wear Comparison:</strong> Clinical photography showing documented wear facets with the caption: "This patient had no idea. Now they do — and now they're protected." (Always use patient-consented images.)</li>
+    </ul>
+
+    <h3 style="font-size:18px; font-weight:700; margin-bottom:16px;">Patient Communication — Email & Text</h3>
+    <div class="card card-teal">
+      <div class="card-title">Recall Email Template — byteSense Introduction</div>
+      <div class="card-body" style="margin-top:8px; font-style:italic;">"Hi [Name], we're looking forward to seeing you for your appointment on [date]. We have something exciting to share with you — we now offer an advanced health monitoring device called bioSense™ that many of our patients are finding transformational. It monitors your sleep, your oxygen levels, your heart rate, and your grinding activity every single night — all from a custom-fit oral appliance. We'd love to tell you more when you come in. Visit bytesense.ai to learn more before your appointment."</div>
+    </div>
+
+    <div class="highlight-box-teal" style="margin-top:16px;">
+      <div class="label">Introductory Offer — Beta Period Only</div>
+      <h3>Suggested Patient-Facing Offer Language</h3>
+      <p>"We are proud to offer the bioSense™ health intelligence platform exclusively to our patients during a limited Beta introduction. For a short time, the device is available at our introductory member price of just $[495–$695] — a significant savings from our standard investment. This offer is available for the next 90 days. Ask us how to get started."</p>
+    </div>
+  </section>
+
+    <section id="patient-faq" class="section">
+    <div class="section-tag">Section 13 — Patient Resources</div>
+    <h2 class="section-title">Patient <span class="accent">FAQ</span></h2>
+    <p class="section-subtitle">What your patients will ask — and exactly what to say. Feel free to print and provide this to patients.</p>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: What exactly does the bioSense™ do?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">bioSense™ is a custom-fit oral appliance with medical-grade sensors built in. While you sleep, it measures six things simultaneously: your heart rate, your heart rate variability (a key stress and recovery indicator), your blood oxygen levels, your breathing rate, your body temperature, and your grinding activity — including exactly how long and how hard you grind. All of this data goes to an app on your phone. Every morning you see a health score and detailed breakdown of what your body did while you slept.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: Is this the same as a night guard?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">Not at all. A night guard is protective — it prevents your upper and lower teeth from damaging each other when you grind. bioSense™ provides that same protection, but it also monitors your body all night long. Think of the difference between a seatbelt (which only protects you) and a car with a complete dashboard of sensors (which protects you AND tells you everything that's happening). bioSense™ is the complete dashboard.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: Will my insurance cover this?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">bioSense™ is a wellness monitoring device — similar to an Apple Watch or Oura Ring — so it is not currently covered by dental or medical insurance. It is a patient-pay wellness investment. Your practice may be able to run your flex spending (FSA) or health savings account (HSA) funds toward this purchase — ask your coordinator.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: How is the device made?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">The process starts with a digital scan of your teeth — there's no messy impression material. The scan data is sent to our specialized lab, where the device is custom-fabricated precisely to your dental arch. It arrives back at your dental office within approximately 2–3 weeks, and your dentist delivers and fits it at a separate appointment.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: Is it comfortable to sleep in?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">Because it's completely custom-fit to your mouth, it's far more comfortable than a generic appliance. Like any new oral appliance, there's a brief adjustment period of 3–7 nights for most people. Within two weeks, the majority of patients report they don't notice it while sleeping and feel something is missing on nights they forget to wear it.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: What does the app show me?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">Every morning you'll see your byteSense Score™ — a composite health intelligence rating — along with detailed breakdowns: Bruxism duration and episodes, resting heart rate, heart rate variability, overnight oxygen levels, respiratory rate, body temperature trends, and movement data. You can track trends over days, weeks, and months. Many patients find the data reveals patterns they had no awareness of — and that awareness empowers real health changes.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: Is this device safe?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">Absolutely. bioSense™ is fabricated from biocompatible dental materials and built to dental laboratory standards. The embedded sensors are sealed within the appliance and are passive monitoring systems — they emit no signals and require no radiation. The device is a wellness monitoring tool, not a medical instrument, and is designed for safe nightly use.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: What happens to my health data?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">Your health data is collected and stored securely through the byteSense platform. For detailed information about data privacy, security practices, and how your information is used, please review the byteSense privacy policy at bytesense.ai. By signing the Patient Wellness Device Consent Form, you authorize the collection and processing of your biometric wellness data for health monitoring purposes.</div>
+  </div>
+</div>
+
+    <div class="accordion-item">
+  <button class="accordion-trigger">
+    <span>Q: What if I have a problem with the device or the app?</span>
+    <span class="accordion-icon">+</span>
+  </button>
+  <div class="accordion-body">
+    <div class="accordion-body-inner">For clinical issues with the fit or physical device, contact your dental practice directly. For technical questions about the app, data, or device connectivity, contact byteSense support at support@bytesense.ai. The byteSense team is available to help you get the most from your device.</div>
+  </div>
+</div>
+  </section>
+
+    <section id="support" class="section">
+    <div class="section-tag">Section 15 — Support</div>
+    <h2 class="section-title">Support<br><span class="accent">& Warranty</span></h2>
+    <p class="section-subtitle">You are never alone in this. Here is exactly how to get help — for anything.</p>
+
+    <!-- Dr. Hendrik Lai — Main Dentist Contact -->
+    <div class="card card-teal" style="margin-bottom:20px;">
+      <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--teal); margin-bottom:12px;">MAIN DENTIST CONTACT</div>
+      <div style="font-size:20px; font-weight:800; margin-bottom:4px;">Dr. Hendrik Lai</div>
+      <div style="font-size:13px; color:var(--white-dim); margin-bottom:12px;">Lead Dentist &mdash; Practice Point of Contact</div>
+      <div style="font-size:24px; font-weight:700; color:var(--teal); margin-bottom:4px;">+1 (920) 331-7128</div>
+      <div style="font-size:12px; color:var(--white-faint);">Call or text for clinical questions, patient care decisions, and in-practice support.</div>
+    </div>
+
+
+
+    <div class="two-col">
+      <div class="card card-red">
+        <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--red-bright); margin-bottom:12px;">YOUR DEDICATED BYTESENSE CONTACT</div>
+        <div style="font-size:20px; font-weight:800; margin-bottom:4px;">Natasha L. Blake</div>
+        <div style="font-size:13px; color:var(--white-dim); margin-bottom:2px;">Chief Strategy & Innovation Officer</div>
+        <div style="font-size:13px; color:var(--white-dim); margin-bottom:16px;">byteSense</div>
+        <div style="font-size:24px; font-weight:700; color:var(--red-bright); margin-bottom:4px;">909-527-9602</div>
+        <div style="font-size:12px; color:var(--white-faint);">Call or text — Natasha responds personally to all Beta partner inquiries</div>
+        <div class="divider" style="margin:16px 0;"></div>
+        <div style="font-size:13px; color:var(--white-dim);">
+          <strong style="color:var(--white);">Use for:</strong> Clinical questions, team training support, scan submission help, case status, pricing discussions, partnership questions, any concern about the program — anything at all.
+        </div>
+      </div>
+      <div>
+        <div class="card card-teal" style="margin-bottom:16px;">
+          <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--teal); margin-bottom:12px;">PATIENT TECHNICAL SUPPORT</div>
+          <div style="font-size:16px; font-weight:700; margin-bottom:4px;">support@bytesense.ai</div>
+          <div style="font-size:13px; color:var(--white-dim);">For patient-facing technical questions: app issues, device connectivity, data interpretation, account support.</div>
+        </div>
+        <div class="card" style="border-left:3px solid var(--white-faint);">
+          <div style="font-size:10px; font-weight:700; letter-spacing:2px; color:var(--white-faint); margin-bottom:12px;">BYTESENSE WEBSITE</div>
+          <div style="font-size:16px; font-weight:700; margin-bottom:4px;">bytesense.ai</div>
+          <div style="font-size:13px; color:var(--white-dim);">Direct patients here for product information, FAQs, and company background. Also useful for your team's ongoing education.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">Warranty Information</h3>
+    <div class="card card-teal">
+      <div class="card-title">12-Month Device Warranty</div>
+      <div class="card-body" style="margin-top:8px;">Every bioSense™ device is covered by a 12-month warranty from the date of delivery. The warranty covers manufacturing defects in the device and sensor systems. It does not cover loss, patient-caused damage, or normal wear from extended use. For warranty-related concerns, contact Natasha Blake or support@bytesense.ai with the patient name, case number, and description of the issue. Warranty decisions are made in partnership with the practice — your patient's satisfaction is our satisfaction.</div>
+    </div>
+
+    <h3 style="font-size:18px; font-weight:700; margin:32px 0 16px;">A Final Word From byteSense</h3>
+    <div class="highlight-box">
+      <div class="label">Our Commitment to You</div>
+      <h3>We Are In This Together</h3>
+      <p>Your success with bioSense™ is not just our goal — it is our responsibility. If something isn't working, we want to know immediately. If your team needs additional training, we will provide it. If a patient has a concern, we will address it. You accepted the risk of being an early partner. We accept the responsibility of making that risk worthwhile. Call us. Text us. Show up on our doorstep if you need to. We are here.</p>
+    </div>
+
+    <div style="margin-top:40px; padding-top:32px; border-top:1px solid var(--border); text-align:center;">
+      <div style="font-size:11px; color:var(--white-faint); letter-spacing:2px; margin-bottom:8px;">BYTESENSE · bytesense.ai</div>
+      <div style="font-size:10px; color: var(--white-faint);">Beta Partner Onboarding Package · Confidential · Not for Distribution</div>
+      <div style="font-size:10px; color: var(--white-faint); margin-top:4px;">This document is provided exclusively to byteSense Beta Practice Partners and contains proprietary operational information.</div>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+  // Sidebar active state on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Smooth nav click
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Accordion toggle
+  document.querySelectorAll('.accordion-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('open');
+      const section = item.closest('section');
+      if (section) {
+        section.querySelectorAll('.accordion-item.open').forEach(openItem => {
+          if (openItem !== item) {
+            openItem.classList.remove('open');
+            openItem.querySelector('.accordion-body').classList.remove('open');
+          }
+        });
+      }
+      item.classList.toggle('open', !isOpen);
+      body.classList.toggle('open', !isOpen);
+    });
+  });
+
+</script>
+
+<script>
+// ── Training Module Renderer ──────────────────────────────────────────────
+const PHASES = [
+  { key: 'beginner',   label: 'Beginner Foundations' },
+  { key: 'core',       label: 'Core Fundamentals' },
+  { key: 'product',    label: 'Product Knowledge' },
+  { key: 'sales',      label: 'Sales Psychology' },
+  { key: 'financial',  label: 'Financial Confidence' },
+  { key: 'operations', label: 'Operations' },
+  { key: 'advanced',   label: 'Advanced Communication' },
+  { key: 'flywheel',   label: 'Growth & Flywheel' },
+  { key: 'role-specific', label: 'Role-Specific Training' },
+];
+
+const MODULES = [
+  {id:'b1',phase:'beginner',title:'Dental Office Communication 101',time:'4 min',content:`**How to Talk to Patients About Health**\n\nThe most important skill in any dental office is communication — not clinical knowledge. A patient who trusts you will accept treatment. A patient who doesn't trust you won't, even if the treatment is perfect.\n\n**The 3 Rules of Patient Communication:**\n\n1. USE THEIR NAME — Say their name at least 3 times during the interaction. It signals respect and personal attention.\n\n2. ASK BEFORE YOU TELL — "Can I share something I noticed?" is 10x more effective than launching into an explanation. Asking permission makes the patient feel in control.\n\n3. EXPLAIN IN THEIR LANGUAGE — Never use clinical jargon without immediately explaining it.\n\n**The 7-Second Rule:**\nPatients decide if they trust you in the first 7 seconds. Eye contact. Warm smile. Say their name. That's it. Everything else builds on those 7 seconds.`},
+  {id:'b2',phase:'beginner',title:'Understanding a Dental Exam (For Non-Clinical Staff)',time:'3 min',content:`**What Happens During an Exam and Why It Matters to You**\n\nEven if you never look in a patient's mouth, understanding what the clinical team finds helps you support the sale.\n\n**What the Hygienist Looks For:**\n- Flat or shiny spots on teeth (grinding evidence)\n- Chips, cracks, or broken pieces of teeth\n- Grooves or notches near the gumline\n- Jaw tenderness when pressing on the joint\n- The patient mentioning headaches, jaw pain, or poor sleep\n\n**What the Doctor Confirms:**\nThe doctor verifies the hygienist's findings and makes the clinical recommendation. When the doctor says "I recommend ByteSense," that carries the authority of their medical degree.\n\n**Why This Matters to You:**\nWhether you're at the front desk, managing the schedule, or coordinating treatment — knowing what the clinical team found helps you have confident conversations afterward.`},
+  {id:'b3',phase:'beginner',title:'Reading a Health History: Clues Hiding in Plain Sight',time:'4 min',content:`**You Don't Need a Medical Degree to Spot the Clues**\n\nEvery patient fills out a health history form. Inside that form are clues that tell you whether this patient is a ByteSense candidate — before anyone even looks in their mouth.\n\n**Medications That Signal Grinding Risk:**\n- Blood pressure medication (lisinopril, amlodipine, metoprolol)\n- Anti-anxiety or antidepressant medication (sertraline, escitalopram, alprazolam)\n- Sleep medication (zolpidem, trazodone, melatonin)\n- Acid reflux medication (omeprazole, pantoprazole)\n- Pain medication for headaches or jaw pain\n\n**Conditions That Signal Grinding Risk:**\n- High blood pressure, Anxiety or depression, Sleep apnea, TMJ or jaw pain, Chronic headaches, Diabetes, Chronic fatigue\n\n**Lifestyle Clues:**\n- High-stress occupation (healthcare, law, finance, teaching, first responder)\n- Reports poor sleep quality\n- Uses a fitness tracker or health app\n\n**What to Do:** Flag the chart. Add a note: "Review for ByteSense — health history indicators." Bring it up in the morning huddle.`},
+  {id:'c1',phase:'core',title:'Teeth Grinding: The Silent Epidemic',time:'4 min',content:`**What Is Teeth Grinding?**\nInvoluntary grinding or clenching during sleep. 31–70 million Americans. 60–80% have no idea.\n\n**What to Look For:**\n- Flat or shiny spots on teeth — enamel ground away\n- Cracked/chipped teeth, especially back teeth\n- V-shaped notches near the gumline (clenching force, NOT brushing)\n- Bony bumps on roof of mouth or inside lower jaw\n- White line on inner cheek\n- Scalloped tongue edges\n\n**Beyond Teeth:** Connected to heart stress, poor sleep, TMJ, headaches, anxiety, depression.\n\n**Cost of Missing It:** $15,000–$40,000 in damage over 10 years.`},
+  {id:'c2',phase:'core',title:'Traditional Guards vs. Health Intelligence',time:'3 min',content:`**Guards Do:** Protect teeth, reduce wear, barrier between arches.\n**Guards Don't:** Track grinding intensity, measure sleep, provide data, connect to phone, change behavior.\n\n**The Gap:** Protection without intelligence. Seatbelt without speedometer.\n\n**ByteSense:** Entirely different category. Basic step counter vs. Apple Watch. The protection is a feature — the intelligence is the product.`},
+  {id:'c3',phase:'core',title:'The 8-Stage Patient Journey',time:'5 min',content:`**1. Identification** — Screen during hygiene/exam. Review health history. Flag charts BEFORE appointments. Discuss in morning huddle.\n\n**2. Introduction** — Hygienist/doctor introduces naturally. Clinical observation, not pitch.\n\n**3. Education** — TC explains platform, sensors, daily score.\n\n**4. Decision** — Patient asks questions. Team addresses with care.\n\n**5. Commitment** — Consent signed. Payment. Scan scheduled. Prepare for delivery video.\n\n**6. Scan** — Precision scan submitted to lab. Delivery pre-scheduled.\n\n**7. Delivery** — Device fitted. bitely app paired. Apple/Google Health connected.\n\n**8. Ongoing** — Day 3 text. Day 7 call. Day 14 video + call. Day 30 review. Referrals.\n\nALL notes in BOTH chart AND dashboard.`},
+  {id:'p1',phase:'product',title:'ByteSense: Positioning & Identity',time:'5 min',content:`**RULE #1:** NEVER say "night guard" or "mouthguard." ByteSense is a wellness health intelligence platform.\n\n**What It Is:** Custom-fit oral device with sensors. Monitors health during sleep. Data to bitely app.\n\n**bitely App:** Daily byteSense Score. Connects to Apple Health / Google Health.\n\n**Six Sensors:** 1. HR & HRV  2. Respiratory Rate  3. Temperature  4. Grinding (EMG)  5. Motion  6. Blood Oxygen (SpO2)\n\n**Regulatory:** Wellness device (Apple Watch category). Not medical. No prescription needed.\n\n**ALWAYS:** "Wellness device," "Health intelligence platform"\n**NEVER:** "Night guard," "Diagnoses," "Treats," "FDA approved medical device"`},
+  {id:'p2',phase:'product',title:'The Six Sensors (Plain Language)',time:'4 min',content:`**1. HR & HRV** — Stress/recovery. "Shows what stress does to your body."\n**2. Grinding (EMG)** — First-ever grinding data. "Real data, not guessing."\n**3. Respiratory** — Breathing efficiency. "See if you breathe well at night."\n**4. Temperature** — Illness 1–2 days early. "Know before you feel it."\n**5. Motion** — Sleep quality. "See how restless you really are."\n**6. Blood Oxygen (SpO2)** — "See how well your body is getting the oxygen it needs at night."`},
+  {id:'p3',phase:'product',title:'Patient Identification Mastery',time:'4 min',content:`**Highest Priority:** Flat spots, cracks, jaw pain, headaches, current guard wearer, fitness tracker user.\n**High Priority:** Poor sleep, high-stress job, gumline notches, TMJ clicking.\n**Health History Clues:** BP meds, sleep meds, anxiety meds, GERD, diabetes, fatigue, snoring.\n\n**Before Scanning:** 1–3mm clearance. No severe crowding. 1.7mm thickness tolerance. Flat splint compatible.\n\n**Chart Prep:** Flag patients before appointments. Discuss in morning huddle.`},
+  {id:'p4',phase:'product',title:'The bitely App: What Patients See Every Morning',time:'4 min',content:`**The App Is the Daily Relationship Between Patient and Device**\n\nWithout the app, the device is just a guard. The app is what makes ByteSense a health intelligence platform.\n\n**What Patients See When They Open bitely:**\n\n**The byteSense Score** — A single number (0–100) that summarizes their entire night. Patients check this every morning like checking the weather.\n\n**The Sleep Report** — Heart Rate graph, HRV trend, Grinding activity (episodes, duration, intensity), Respiratory rate, Temperature, Motion.\n\n**Trends Over Time** — After a few nights, patients see weekly and monthly patterns. Grinding spikes during stressful weeks. HRV drops when sleep suffers. The data tells a story.\n\n**Health App Integration** — Connects to Apple Health or Google Health.\n\n**The Opt-In to Beta:** Profile icon → Account Settings → Toggle "Opt-In to Beta" ON.`},
+  {id:'p5',phase:'product',title:'ByteSense vs. Everything Else on the Market',time:'4 min',content:`**ByteSense vs. Traditional Night Guard:**\nGuard: Protects teeth. ByteSense: Protects teeth AND monitors 5 health metrics AND delivers daily intelligence. "Like a locked door vs. locked door with a full security camera system."\n\n**ByteSense vs. Oura Ring:**\nOura: Worn on finger. No grinding data. No tooth protection. ByteSense: Worn in the mouth, closer to core, plus grinding data no wrist device can provide.\n\n**ByteSense vs. Apple Watch:**\nApple Watch: Periodic measurements, worn on wrist. ByteSense: Continuous sleep monitoring, oral environment = more stable readings. "Apple Watch gives daytime snapshots. ByteSense gives the full movie of what happens while you sleep."\n\n**ByteSense vs. WHOOP:**\nWHOOP: Wrist band, subscription, no grinding. ByteSense: One-time investment, no subscription, grinding data, protection.\n\n**ByteSense vs. Sleep Studies:**\nSleep study: One night in a lab, $1,000–$5,000. ByteSense: Every night in your own bed, one-time investment.\n\n**The Ultimate Positioning:** ByteSense is the ONLY device that combines custom tooth protection with clinical-grade health monitoring in the oral environment. It is a category of one.`},
+  {id:'s1',phase:'sales',title:'The 6 Principles of Patient Persuasion',time:'5 min',content:`**Robert Cialdini's 6 Principles — applied to ByteSense:**\n\n**1. Social Proof:** "Other patients like you are already using this." People follow similar people.\n\n**2. Authority:** The doctor's recommendation is 10x more powerful. Doctor should ALWAYS recommend.\n\n**3. Scarcity:** "Introductory pricing is only during our launch period." Real, genuine scarcity.\n\n**4. Reciprocity:** Give value BEFORE asking. The education IS the gift.\n\n**5. Consistency:** Once they say "yes, I grind" — that's a micro-commitment. Build on small yeses.\n\n**6. Liking:** People buy from people they trust. Warmth, eye contact, their name, genuine concern.\n\n**The Emotional Core:** Patients buy relief from a fear they didn't know they had: "What is my body doing while I sleep?"`},
+  {id:'s2',phase:'sales',title:'Elite Objection Handling: 9 Responses',time:'6 min',content:`**Framework: Feel → Felt → Found**\n"I understand how you FEEL. Others have FELT the same. What they FOUND was..."\n\n**1. "Don't think I grind."** → "80% don't know. If you don't, data confirms it. If you do, you'll finally know."\n\n**2. "Too expensive."** → Reframe: "One crown is $1,500–$3,000. Full restoration: $40,000. ByteSense is prevention of your most expensive dental risk."\n\n**3. "Insurance?"** → "Wellness device — like Apple Watch. Patients say the data is worth more than insurance ever covered."\n\n**4. "Have a guard already."** → "Your guard protects. ByteSense protects AND monitors 5 metrics. Locked door vs. locked door with security cameras."\n\n**5. "Think about it."** → ISOLATION: "If everything felt right, would you want this? What's the ONE thing holding you back?" Address THAT.\n\n**6. "Ask spouse."** → "Would a 10-minute call with both of you help?"\n\n**7. "Comfortable?"** → "Custom from your scan. 3–7 nights to adjust. Then feels strange without it."\n\n**8. "FDA approved?"** → "Wellness device — no prescription needed. Start tonight."\n\n**9. "Apple Watch does this."** → "Wrist devices can't measure grinding. ByteSense measures from inside the mouth — dramatically more accurate."`},
+  {id:'s3',phase:'sales',title:'Emotional Architecture of Conversion',time:'5 min',content:`**Big Pharma's 5-Step Formula:**\n1. NAME THE SUFFERING: "Jaw pain? Headaches? Exhaustion despite sleep?"\n2. VALIDATE: "Millions experience this. It's not in your head."\n3. REVEAL HIDDEN CAUSE: "Your body works against itself for hours every night."\n4. PRESENT SOLUTION: "ByteSense shows you exactly what's happening — and protects you."\n5. MAKE ACTION EASY: "We can scan you today."\n\n**5 Emotional Triggers:**\n- FEAR OF THE UNKNOWN: "You don't know what your body does while you sleep." Most powerful.\n- PROTECTION OF LOVED ONES: "Your partner is worried." Stronger than self-protection.\n- LOSS AVERSION: "Every unmonitored night is damage you can't see." 2x more motivating than gain.\n- IDENTITY: "You already invest in health. This is the missing piece."\n- REGRET PREVENTION: "In 5 years, you'll wish you started now."\n\n**The Close:** "Based on everything we're seeing, I think this would be genuinely valuable. This week or next for your scan?"`},
+  {id:'s4',phase:'sales',title:'The Pricing Moment: The 15 Seconds That Make or Break the Sale',time:'4 min',content:`**The Script (Memorize This):**\n"During our introductory program, the investment is [price]. That includes the custom device made from your exact scan, all six sensors, the bitely app with daily health intelligence, and ongoing monitoring. It's a one-time investment."\n\nThen: SILENCE. Do not speak. Do not fidget. Let them process.\n\n**Why Silence Works:**\nThe first person to speak after the price is stated loses frame control. Silence signals confidence that the value is self-evident.\n\n**3 Things That Kill the Pricing Moment:**\n1. APOLOGIZING: "I know it's a lot, but..." — tells the patient you agree it's overpriced.\n2. DISCOUNTING PREMATURELY: "We could maybe work something out..."\n3. OVER-EXPLAINING: More features after the price makes it feel like justification.\n\n**The Value Stack (Do This BEFORE the Price):**\n"You're getting a custom-fabricated device from your exact scan, six medical-grade sensors that monitor your health every single night, a daily health score on your phone, integration with Apple Health and Google Health, and ongoing monitoring that would cost thousands through a sleep clinic. All of that..." THEN state the price.`},
+  {id:'f1',phase:'financial',title:'Owning the Money Conversation',time:'5 min',content:`**Why Most Staff Struggle With Price:**\nYou project your OWN relationship with money onto the patient. If $695 feels expensive to YOU, you'll communicate hesitation — and the patient absorbs it.\n\n**The Reframe:** You are not asking for money. You are offering protection against $15,000–$40,000 in dental damage. That is not expensive. That is the best deal in healthcare.\n\n**Alex Hormozi's Value Stack:**\nThe price is never the issue. The perceived VALUE relative to price is the issue. Stack the value before you state the number.\n\n**Oren Klaff's Frame Control:**\nWhoever controls the frame controls the conversation. Present the price with the same confidence as the clinical recommendation. Then STOP. Silence. Let them process.\n\n**The Three Certainties — Before anyone buys they need:**\n1. The PRODUCT: "This works and it's worth it" ← your education\n2. The COMPANY: "ByteSense is legitimate" ← the brand, the doctor's recommendation\n3. YOU: "I trust this person" ← your warmth, competence, genuine care\n\nIf they say no, one of those three certainties is missing. Find which one.`},
+  {id:'o1',phase:'operations',title:'Precision Scanning Protocol',time:'4 min',content:`**Scan Quality = Device Quality. No exceptions.**\n\n**Required Files:** Upper + Lower + Bite Registration (all three).\n\n**Quality Criteria:**\n- Zero holes in the mesh — complete coverage of all tooth surfaces\n- Minimum 5mm gum tissue capture beyond the gumline\n- Minimum 11mm height from gumline to occlusal surface\n- Correct bite alignment — patient bites naturally, not forced\n- No motion blur\n\n**Submit via:** Medit Link Web → Florida Oral Labs\n\n**Pre-Schedule Delivery:** At the time of the scan, schedule the delivery appointment. Typical lab turnaround: 2–3 weeks.\n\n**At the Scan Appointment:**\n1. Set up for the delivery video (remind the patient)\n2. Pre-schedule the delivery appointment\n3. Confirm contact info for follow-up texts/calls`},
+  {id:'o2',phase:'operations',title:'Device Delivery & App Setup',time:'4 min',content:`**The Delivery Is a 15-Minute Experience, Not a Transaction**\n\n**Step 1 — Fit the Device (3 min):** Place the device. Check fit. Adjust if needed.\n\n**Step 2 — Set Up bitely App (5 min):** Download bitely app. Create account. Pair device via Bluetooth. Connect to Apple/Google Health. Profile → Account Settings → Toggle "Opt-In to Beta" ON.\n\n**Step 3 — First Night Instructions (3 min):** "Wear it tonight. Check your Score in the morning. First few nights are calibration — data gets more accurate each night."\n\n**Step 4 — Record Video Testimonial (2 min):** Ask: "What made you decide to try ByteSense?" Record 30–60 seconds.\n\n**Step 5 — Schedule Follow-Up (2 min):** Schedule 30-day review. Confirm Day 3 text and Day 7 call.`},
+  {id:'o3',phase:'operations',title:'The Consent Form: Every Patient, Every Time',time:'3 min',content:`**No Consent Form = No Case Submission. Period.**\n\n**What the Consent Form Covers:**\n- ByteSense is a wellness monitoring device, not a medical device\n- It does not diagnose, treat, cure, or prevent any disease\n- The patient consents to having their scan data sent to the fabrication lab\n- The investment is non-refundable after fabrication begins\n\n**How to Present It:**\nDO: "Before we get you scanned, I just need you to review and sign this — it explains what ByteSense monitors and confirms you'd like to move forward."\nDON'T: "Here's some paperwork you need to sign."\n\n**The Process:** Present AFTER the patient accepts and BEFORE the scan. Walk them through key points verbally. File original in patient chart. Include copy with lab submission.`},
+  {id:'o4',phase:'operations',title:'Running the Perfect Morning Huddle',time:'4 min',content:`**The Morning Huddle Is Where Cases Are Won Before the Patient Sits Down**\n\n5–7 minutes. Every morning. Non-negotiable.\n\n**The ByteSense Huddle Agenda:**\n\n**Step 1 — Review Today's Schedule (2 min):** Flag anyone as a ByteSense candidate.\n\n**Step 2 — Assign Roles (1 min):** WHO introduces? WHO recommends? WHO presents? Say it out loud.\n\n**Step 3 — Quick Wins from Yesterday (1 min):** Celebrate accepted cases. Pipeline update. Follow-up calls needed today?\n\n**Step 4 — One Skill Reminder (1 min):** One thing from training to reinforce. "Never say 'night guard.' It's a health intelligence platform."\n\n**The Math:** A practice that flags 3 candidates per day and presents to all 3 will close 1 per day at a 33% rate. That's 20+ cases per month.`},
+  {id:'o5',phase:'operations',title:'Recording Patient Video Testimonials',time:'3 min',content:`**Video Testimonials Are Your Most Powerful Marketing Asset**\n\nA 30-second video of a real patient saying "This changed how I understand my sleep" is worth more than $10,000 in advertising.\n\n**Two Opportunities:**\n**Video 1 — At Delivery (Day 0):** "What made you decide to try ByteSense?"\n**Video 2 — At 2-Week Follow-Up (Day 14):** "How has your experience been? What have you noticed?"\n\n**How to Set It Up:** At the SCAN appointment (3 weeks before delivery), plant the seed: "When your device arrives, we'd love a quick 30-second video. Would that be okay?"\n\n**Recording Tips:** Use a smartphone. Landscape orientation. Good lighting. 30–60 seconds. Let them speak naturally.`},
+  {id:'o6',phase:'operations',title:'Handling Device Issues & Patient Concerns',time:'4 min',content:`**Issues Will Happen. How You Handle Them Determines Whether the Patient Becomes a Fan or a Critic.**\n\n**ISSUE 1: "It's uncomfortable."** Normal in the first 3–7 nights. Reassure. If persists past 7 nights → schedule adjustment.\n\n**ISSUE 2: "The app isn't working."** Check Bluetooth, charge level, app update. If none work → direct to support@bytesense.ai.\n\n**ISSUE 3: "My Score seems wrong."** Device needs 4–5 nights to calibrate. Reassure.\n\n**ISSUE 4: "I lost/broke my device."** Contact Natasha Blake directly: 909-527-9602.\n\n**ISSUE 5: "I want a refund."** Don't cite policy first. Ask: "Can you tell me what's not working? Most of the time we can solve it."\n\n**The Recovery Framework:**\n1. LISTEN — Let them express fully.\n2. ACKNOWLEDGE — "I completely understand why that's frustrating."\n3. SOLVE — Fix the actual problem.\n4. FOLLOW UP — Check in 2 days later.`},
+  {id:'a1',phase:'advanced',title:'The Warm Handoff: 3–5x Better Conversion',time:'4 min',content:`**Warm = physically introduce + transfer context. Cold = patient left alone. Warm converts 3–5x better.**\n\n**Hygienist → Doctor:** "Dr. [Name], [Patient] has significant grinding on [teeth]. I mentioned ByteSense — they're interested in your perspective."\n\n**Doctor → TC:** "[Patient], this is [TC]. They'll walk you through ByteSense. [TC], Dr. [Name] recommended it based on the grinding we found."\n\n**What This Creates:** Doctor already knows the patient's interest. Patient hears consistent messaging from multiple people. Social momentum. TC starts with clinical authority already established.\n\n**NEVER:** Leave patient alone between handoffs. Say "someone will talk about pricing." Skip the handoff.`},
+  {id:'a2',phase:'advanced',title:'The 8 Trust Micro-Moments',time:'5 min',content:`**1. First 7 Seconds** — Eye contact, warm smile, their name.\n**2. The Discovery** — "I noticed something I want to share." (Looking out for THEM.)\n**3. Education** — Plain language. No jargon. No condescension.\n**4. Recommendation** — Doctor says "I recommend." Direct. Confident. Caring.\n**5. Handoff** — Physical intro. Context transferred. No repetition.\n**6. Financial** — "Investment," not "cost." Confidence, not apology. SILENCE after price.\n**7. Objection** — "I understand" before anything else. Validate first. Always.\n**8. Close** — "This week or next?" Not "Would you like to..." WHEN, not IF.`},
+  {id:'fw1',phase:'flywheel',title:'Building the Referral & Review Engine',time:'5 min',content:`**The Flywheel:** Great experience → Referral → New patient → Great experience → More referrals → Exponential growth at zero cost.\n\n**When to Ask for Referrals (Day 14–30):** "Who in your life — family, friend, coworker — would benefit from this?"\n\n**When to Ask for Reviews (Day 30):** "Would you share a quick Google review? Your story helps other patients discover this."\n\n**Why This Works:** Every Google review is a permanent persuasion asset. New patients read reviews before calling.\n\n**Creating Raving Fans:**\n- Day 3 text says "We're thinking about you"\n- Day 7 call says "We care about your experience"\n- Day 14 video says "Your story matters to us"\n- Day 30 review says "We're partners in your health"\n\n**The Compound Effect:** 10 patients → 10 referrals → 10 new patients → 10 more referrals. In 6 months: 10 become 80+ without spending a dollar on advertising.`},
+  {id:'fw2',phase:'flywheel',title:'Making Every Patient a Lifetime Advocate',time:'4 min',content:`**Think in Lifetimes, Not Visits**\n\n**The Advocacy Ladder:**\nLevel 1 — Satisfied Patient: Had a good experience. Won't complain.\nLevel 2 — Loyal Patient: Returns consistently. Trusts the practice.\nLevel 3 — Advocate: Recommends to friends unprompted.\nLevel 4 — Raving Fan: Actively evangelizes. Shows people their app. Posts on social media.\nLevel 5 — Ambassador: Identifies with ByteSense as part of who they are.\n\n**How to Move Patients Up the Ladder:**\n- Level 1→2: Consistent follow-up. Remember their name. Ask about their Score.\n- Level 2→3: Ask for the referral. Give them something to share.\n- Level 3→4: Feature their testimonial. Make them feel seen and valued.\n- Level 4→5: Invite them to be a beta tester. Give early access. Make them an insider.`},
+  {id:'fw3',phase:'flywheel',title:'Social Media: Turning Patients Into Content',time:'4 min',content:`**Every ByteSense Patient Is a Potential Social Media Post**\n\n**Post Type 1 — The Data Shot:** A screenshot of a byteSense Score (with patient permission). Caption: "Our patient's first week of ByteSense data. They had no idea they were grinding 47 times per night."\n\n**Post Type 2 — The Video Testimonial:** The 30–60 second delivery video.\n\n**Post Type 3 — The Educational Post:** "Did you know 60–80% of people who grind have no idea? The signs are in your mouth right now."\n\n**Post Type 4 — Behind-the-Scenes:** Morning huddle, a scan, or device delivery.\n\n**Rules:**\n- ALWAYS say "wellness device" or "health intelligence platform"\n- NEVER say "night guard" or "mouthguard"\n- NEVER make diagnostic claims\n- ALWAYS get patient permission before posting\n- At least 1 ByteSense post per week`},
+  {id:'r_tc1',phase:'role-specific',title:'TC: The 5-Phase Presentation',time:'5 min',content:`**Phase 1 — Affirm (60s):** "Dr. [Name] noticed grinding. Do you wake with jaw tightness or soreness?" Listen. Validate.\n\n**Phase 2 — Educate (3 min):** Explain sensors, app, daily Score. Mention Apple/Google Health.\n\n**Phase 3 — Connect (2 min):** "What concerns you most?" Match response to their concern.\n\n**Phase 4 — Investment (90s):** "The investment is [price]. One-time. Includes everything."\n\n**Phase 5 — Close (60s):** "This week or next for your scan?" Both answers = yes.`},
+  {id:'r_hyg1',phase:'role-specific',title:'Hygienist: Screening & Introduction Protocol',time:'4 min',content:`**Before:** Review chart.\n**During:** Watch for flat spots, cracks, notches, jaw tenderness.\n**Introduce:** "[Name], I'm noticing patterns consistent with grinding. We have ByteSense — sensors that monitor heart rate, stress, grinding. Health score on your phone. I think you'd be great. Okay if Dr. [Name] takes a look?"\n\n**Rules:** You introduce. Doctor recommends. TC closes. Never discuss price. Never say "night guard."\n**Bonus:** $25–$50 per accepted case.`},
+  {id:'r_own1',phase:'role-specific',title:'Owner: Culture, Metrics & Leadership',time:'4 min',content:`**Standard:** Every qualifying patient hears about ByteSense.\n\n**Morning Huddle:** Flag patients. Assign who introduces.\n\n**Your 30 Seconds:** "Significant grinding. We have technology that monitors while you sleep. I'd like [TC] to tell you more." Done. TC handles the rest.\n\n**Celebrate:** Announce every case publicly. Tally the board.\n\n**Metrics:** Track monthly. Share with team.\n\n**Lead:** Wear the device yourself. Share your data. When YOU believe in ByteSense — patients feel it.`},
+  {id:'r_fd1',phase:'role-specific',title:'Front Desk: Every Touchpoint Matters',time:'4 min',content:`**Phone:** "ByteSense is a custom health monitoring device — like a fitness tracker for your mouth. Schedule a consultation?"\n\n**Check-in:** "Heard about our new health tech? Ask your hygienist!"\n\n**Checkout:** "Would you like to schedule a follow-up to ask remaining questions?"\n\n**Follow-up Call (48hrs):** "Calling about ByteSense. Any questions?"\n\n**Recall:** Add ByteSense to appointment reminders.\n\n**Referrals:** Capture name and number of anyone mentioned.\n\n**Bonus:** $15–$25 per converted consultation.`},
+  {id:'r_asst1',phase:'role-specific',title:'Assistant: Scanning & Delivery Protocol',time:'4 min',content:`**Scan:** Upper + Lower + Bite. Zero holes. 5mm+ gum. 11mm+ height. Submit Medit Web → Florida Oral Labs.\n\n**At Scan Appointment:** Set up for delivery video. Pre-schedule delivery appointment.\n\n**Delivery (15 min):** Fit device. Download bitely app. Pair via Bluetooth. Connect Apple/Google Health. Toggle "Opt-In to Beta" ON. First night instructions. Record video. Schedule 30-day review.`},
+  {id:'r_om1',phase:'role-specific',title:'Manager: Systems & Accountability',time:'4 min',content:`**Weekly Metrics:** Presentations, acceptances, conversion rate, revenue, scan rejections, delivery time.\n\n**Scheduling:** Scan 30min. Delivery 15min. Review 15min.\n\n**Compliance:** Consent forms. Wellness language. Bonuses paid on time.\n\n**Huddle:** "Today's candidates: [names]. [Who] introduces."\n\n**When Numbers Drop — 7 Root Causes:**\n- Forgot to present\n- Don't understand the product\n- Too busy\n- Missing a specific skill\n- Lack of confidence\n- Bad process\n- Don't believe in it`},
+  {id:'r_assoc1',phase:'role-specific',title:'Associate: The 30-Second Clinical Recommendation',time:'4 min',content:`**Your Superpower: Clinical Authority**\nWhen you say "I recommend this," patients process it differently than when anyone else says it.\n\n**The 30-Second Script:**\n"[Name], I'm seeing clear evidence of grinding forces on your teeth — significant activity while you sleep that you're probably not aware of.\n\nWe now offer ByteSense. It's a custom-fit device worn during sleep that monitors your heart rate, stress levels, grinding intensity, breathing, and more. Every morning, the data goes to an app on your phone.\n\nI'd like [TC name] to walk you through the details — I think this could genuinely change how you understand your health."\n\nThat's it. Under 45 seconds. Then hand off.\n\n**What NOT To Do:** Don't discuss price. Don't minimize it. Don't oversell. Don't skip the handoff.`},
+  {id:'r_tc2',phase:'role-specific',title:'TC: The 48-Hour Follow-Up System',time:'4 min',content:`**Half Your Cases Are Hiding in the "I Need to Think About It" Pile**\n\n60–80% of people who say "I need to think about it" will buy IF followed up within 48 hours.\n\n**Day 1 (Next Day) — The Text:** "Hi [Name], this is [Your Name] from [Practice]. I wanted to follow up on the ByteSense health monitoring we discussed. Any questions I can help with?"\n\n**Day 2 (48 Hours) — The Call (If No Text Response):** "Hi [Name], calling to follow up on the ByteSense device Dr. [Name] recommended. Is there anything I can address?"\n\n**If They Engage — Isolation Technique:** "If everything felt right, would you want this?" [Wait for yes.] "What's the one thing holding you back?" Address THAT.\n\n**The Math:** 12 undecided patients → 30% follow-up conversion → 3.6 additional cases/month → ~$2,500/month recovered from the follow-up system alone.`},
+  {id:'r_hyg2',phase:'role-specific',title:'Hygienist: Handling the First Objections',time:'4 min',content:`**"I don't think I grind."** → "That's what 80% of grinders say — because it happens while you're asleep. That's exactly why this technology shows you what's actually happening."\n\n**"I already have a night guard."** → "This is a completely different thing. It has sensors inside that monitor your health while you sleep. Ask Dr. [Name] about it."\n\n**"How much does it cost?"** → "I'm not the best person to walk you through pricing — [TC name] handles that. Would you like me to have them give you the full picture?" NEVER discuss pricing.\n\n**"Sounds gimmicky."** → "I thought that too at first. But it uses the same sensors as Apple Watch and Oura Ring — except from inside your mouth, which is more accurate."\n\n**"I'm not interested."** → "Totally fine. Just wanted you to know it's available." Don't push. Note it in the chart. The seed is planted.\n\n**Your Mindset:** You are not selling. You are discovering something the patient needs to know about and connecting them to the person who can help.`},
+];
+
+function mdToHtml(text) {
+  // Bold
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Split into paragraphs by \n\n
+  const paras = text.split('\n\n');
+  return paras.map(p => {
+    const lines = p.split('\n');
+    // Bullet list
+    if (lines.some(l => /^- /.test(l))) {
+      const parts = [];
+      let listItems = [];
+      lines.forEach(l => {
+        if (/^- /.test(l)) {
+          listItems.push('<li>' + l.slice(2) + '</li>');
+        } else {
+          if (listItems.length) { parts.push('<ul style="margin:6px 0 6px 18px;">' + listItems.join('') + '</ul>'); listItems = []; }
+          if (l.trim()) parts.push('<p style="margin:0 0 6px;">' + l + '</p>');
+        }
+      });
+      if (listItems.length) parts.push('<ul style="margin:6px 0 6px 18px;">' + listItems.join('') + '</ul>');
+      return parts.join('');
+    }
+    return '<p style="margin:0 0 10px;">' + lines.join('<br>') + '</p>';
+  }).join('');
+}
+
+(function buildTrainingModules() {
+  const container = document.getElementById('tm-container');
+  if (!container) return;
+
+  let html = '';
+  PHASES.forEach(phase => {
+    const phaseMods = MODULES.filter(m => m.phase === phase.key);
+    if (!phaseMods.length) return;
+
+    html += `
+      <div style="margin-bottom:32px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--white-faint);text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">${phase.label}</div>
+        <div class="accordion">
+    `;
+
+    phaseMods.forEach((mod, idx) => {
+      const bodyId = 'tm-body-' + mod.id;
+      const itemId = 'tm-item-' + mod.id;
+      html += `
+        <div class="accordion-item" id="${itemId}">
+          <button class="accordion-trigger tm-trigger">
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--white-faint);background:var(--surface);border:1px solid var(--border);padding:2px 8px;flex-shrink:0;">${mod.time}</span>
+              ${mod.title}
+            </span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body" id="${bodyId}">
+            <div class="accordion-body-inner tm-content">${mdToHtml(mod.content)}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Wire up accordion toggle with dynamic height
+  container.querySelectorAll('.tm-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('open');
+
+      // Close all others in same phase group
+      const group = item.closest('.accordion');
+      if (group) {
+        group.querySelectorAll('.accordion-item.open').forEach(openItem => {
+          if (openItem !== item) {
+            openItem.classList.remove('open');
+            const b = openItem.querySelector('.accordion-body');
+            b.style.maxHeight = '0';
+            b.classList.remove('open');
+          }
+        });
+      }
+
+      if (isOpen) {
+        item.classList.remove('open');
+        body.style.maxHeight = '0';
+        body.classList.remove('open');
+      } else {
+        item.classList.add('open');
+        body.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    });
+  });
+})();
+</script>
+
+
+</body></html>
+</html>

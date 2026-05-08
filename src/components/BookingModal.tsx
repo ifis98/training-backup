@@ -8,6 +8,8 @@ interface BookingModalProps {
   open: boolean;
   onClose: () => void;
   lang: Lang;
+  userName?: string;
+  userEmail?: string;
 }
 
 const glass = {
@@ -47,12 +49,12 @@ function formatDateDisplay(d: Date): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export default function BookingModal({ open, onClose, lang }: BookingModalProps) {
+export default function BookingModal({ open, onClose, lang, userName = '', userEmail = '' }: BookingModalProps) {
   const T = (key: string) => t(lang, key);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState(userName);
+  const [email, setEmail] = useState(userEmail);
   const [notes, setNotes] = useState('');
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,35 +76,29 @@ export default function BookingModal({ open, onClose, lang }: BookingModalProps)
     loadBookings();
   }, [selectedDate]);
 
-  // Pre-fill user info
+  // Pre-fill user info from props when modal opens
   useEffect(() => {
     if (!open) return;
-    const fill = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setEmail(user.email || '');
-        const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
-        if (profile) setName(profile.full_name);
-      }
-    };
-    fill();
-  }, [open]);
+    if (userName) setName(userName);
+    if (userEmail) setEmail(userEmail);
+  }, [open, userName, userEmail]);
 
   const handleBook = async () => {
     if (!selectedDate || !selectedTime || !name || !email) return;
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { error } = await supabase.from('support_bookings').insert({
-      user_id: user.id,
-      name,
-      email,
-      booking_date: formatDate(selectedDate),
-      booking_time: selectedTime,
-      notes,
-    } as any);
+    try {
+      const clerkUserId = (window as any).__clerkUserId as string | undefined;
+      const { error } = await supabase.from('support_bookings').insert({
+        clerk_user_id: clerkUserId || null,
+        name,
+        email,
+        booking_date: formatDate(selectedDate),
+        booking_time: selectedTime,
+        notes,
+      } as any);
+      if (!error) setSuccess(true);
+    } catch {}
     setLoading(false);
-    if (!error) setSuccess(true);
   };
 
   const handleClose = () => {

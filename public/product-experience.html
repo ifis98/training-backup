@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>byteSense — Product Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Outfit+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0A0A0A;
+    --surface: #111111;
+    --card: #181818;
+    --border: #252525;
+    --border-light: #2E2E2E;
+    --red: #D01B1B;
+    --red-bright: #E63434;
+    --red-muted: #3A1515;
+    --teal: #00B4AD;
+    --teal-muted: #003D3B;
+    --white: #F4F4F4;
+    --white-dim: #A0A0A0;
+    --white-faint: #555555;
+    --font: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--black);
+    color: var(--white);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 260px; min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; bottom: 0;
+    overflow-y: auto; z-index: 100;
+    display: flex; flex-direction: column;
+  }
+
+  .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+  .logo-wordmark { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--white); }
+  .logo-wordmark span { color: var(--red); }
+  .sidebar-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    color: var(--red); background: var(--red-muted);
+    border: 1px solid #5a1010; padding: 3px 10px;
+    display: inline-block; margin-top: 10px;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+
+  .nav-section {
+    padding: 10px 24px 4px; font-size: 9px; font-weight: 700;
+    letter-spacing: 2.5px; color: var(--white-faint); text-transform: uppercase;
+  }
+  .nav-section + .nav-section { margin-top: 8px; }
+
+  /* Top-level nav item (not used in this file, kept for parity) */
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 24px; font-size: 13px; font-weight: 500;
+    color: var(--white-dim); text-decoration: none;
+    transition: all 0.2s; cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { color: var(--white); background: var(--card); }
+  .nav-item.active { color: var(--red-bright); border-left-color: var(--red); background: var(--red-muted); }
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--white-faint); flex-shrink: 0; }
+  .nav-item.active .nav-dot { background: var(--red-bright); }
+
+  /* Sub-nav items — match .nav-item sizing from sales-training */
+  .nav-sub-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 24px;
+    font-size: 13px; font-weight: 500;
+    color: var(--white-dim); text-decoration: none;
+    transition: all 0.2s; cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .nav-sub-item:hover { color: var(--white); background: var(--card); }
+  .nav-sub-item.active {
+    color: var(--red-bright); font-weight: 600;
+    border-left-color: var(--red); background: var(--red-muted);
+  }
+  .nav-sub-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--white-faint); flex-shrink: 0;
+  }
+  .nav-sub-item.active .nav-sub-dot { background: var(--red-bright); }
+
+  .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); }
+  .support-card { background: var(--red-muted); border: 1px solid #5a1010; padding: 14px; }
+  .support-card .label { font-size: 9px; letter-spacing: 2px; color: var(--red-bright); font-weight: 700; margin-bottom: 6px; }
+  .support-card .name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .support-card .phone { font-size: 13px; color: var(--white-dim); }
+
+  /* ── MAIN ── */
+  .main { margin-left: 260px; flex: 1; }
+
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 64px; display: flex;
+    justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left { font-size: 12px; color: var(--white-faint); letter-spacing: 1px; }
+  .topbar-right { display: flex; gap: 12px; align-items: center; }
+  .btn { padding: 8px 20px; font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: 1px; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-outline { background: transparent; color: var(--white-dim); border: 1px solid var(--border-light); }
+  .btn-outline:hover { color: var(--white); border-color: var(--white-faint); }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 72px 64px;
+    border-bottom: 1px solid var(--border);
+    max-width: 900px;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    color: var(--red); text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 38px; font-weight: 800; line-height: 1.1;
+    letter-spacing: -1px; margin-bottom: 8px; color: var(--white);
+  }
+  .section-title .accent { color: var(--red-bright); }
+
+  .section-subtitle {
+    font-size: 16px; color: var(--white-dim); font-weight: 400;
+    margin-bottom: 40px; max-width: 600px;
+  }
+
+  /* ── ACCORDION ── */
+  .accordion-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    scroll-margin-top: 80px;
+  }
+  .accordion-item.open { border-color: var(--red); }
+  .accordion-item.highlight { border-color: var(--red); }
+
+  .accordion-trigger {
+    width: 100%; padding: 16px 20px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    background: none; border: none;
+    color: var(--white); font-size: 15px; font-weight: 600;
+    font-family: var(--font); cursor: pointer; text-align: left; line-height: 1.4;
+    transition: background 0.15s;
+  }
+  .accordion-trigger:hover { background: rgba(208,27,27,0.05); }
+
+  .accordion-icon {
+    font-size: 20px; font-weight: 300; color: var(--white-faint);
+    flex-shrink: 0; line-height: 1;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), color 0.2s;
+    margin-top: 1px;
+  }
+  .accordion-item.open .accordion-icon { transform: rotate(45deg); color: var(--red-bright); }
+
+  .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .accordion-body.open { max-height: 600px; }
+
+  .accordion-body-inner {
+    padding: 4px 20px 18px;
+    font-size: 14px; color: var(--white-dim);
+    line-height: 1.75; border-top: 1px solid var(--border);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 40px 48px; }
+  }
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .section { padding: 48px 20px; }
+    .section-title { font-size: 26px; letter-spacing: -0.5px; }
+    .topbar { padding: 12px 20px; }
+    .topbar-left { display: none; }
+  }
+
+  section[id] { scroll-margin-top: 24px; }
+
+  /* Slim dark scrollbars */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2E2E2E; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #444444; }
+  * { scrollbar-width: thin; scrollbar-color: #2E2E2E transparent; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wordmark">byte<span>Sense</span></div>
+    <div class="sidebar-badge">BETA PARTNER</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">Office Benefits</div>
+    <a class="nav-sub-item active" data-accordion="ob-revenue"><span class="nav-sub-dot"></span>Increase Practice Revenue</a>
+    <a class="nav-sub-item" data-accordion="ob-retention"><span class="nav-sub-dot"></span>Create Ongoing Patient Follow-Up</a>
+    <a class="nav-sub-item" data-accordion="ob-trust"><span class="nav-sub-dot"></span>Augment Patient Trust &amp; Loyalty</a>
+    <a class="nav-sub-item" data-accordion="ob-positioning"><span class="nav-sub-dot"></span>Enhance Practice Positioning</a>
+    <a class="nav-sub-item" data-accordion="ob-liability"><span class="nav-sub-dot"></span>Liability Protection via Compliance</a>
+    <a class="nav-sub-item" data-accordion="ob-premium"><span class="nav-sub-dot"></span>Premium Practice Differentiation</a>
+
+    <div class="nav-section">Consumer Benefits</div>
+    <a class="nav-sub-item" data-accordion="cb-sleep"><span class="nav-sub-dot"></span>Track Sleep &amp; Recovery</a>
+    <a class="nav-sub-item" data-accordion="cb-readiness"><span class="nav-sub-dot"></span>Daily Readiness (HR/HRV)</a>
+    <a class="nav-sub-item" data-accordion="cb-morning"><span class="nav-sub-dot"></span>Morning Outlook &amp; Personalized Insights</a>
+    <a class="nav-sub-item" data-accordion="cb-circulation"><span class="nav-sub-dot"></span>Intra-Oral Blood Circulation Tracking</a>
+    <a class="nav-sub-item" data-accordion="cb-position"><span class="nav-sub-dot"></span>Sleep Position-Aware Insights</a>
+    <a class="nav-sub-item" data-accordion="cb-oral"><span class="nav-sub-dot"></span>Oral Intelligence for Sleep &amp; Recovery</a>
+    <a class="nav-sub-item" data-accordion="cb-discover"><span class="nav-sub-dot"></span>Discover What Impacts Your Sleep</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="support-card">
+      <div class="label">Contact Support</div>
+      <div class="name">+1 (888) 397-7073</div>
+      <div class="phone">support@bytesense.ai</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">byteSense — Product Experience — Beta Partner Resource</div>
+    <div class="topbar-right">
+      <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+
+  <!-- OFFICE BENEFITS -->
+  <section id="office-benefits" class="section">
+    <div class="section-tag">For Your Practice — bytesense.ai/professionals</div>
+    <h2 class="section-title">Office <span class="accent">Benefits</span></h2>
+    <p class="section-subtitle">Why forward-thinking practices are adding bioSense™ to their protocol.</p>
+
+    <div class="accordion-item open" id="ob-revenue">
+      <button class="accordion-trigger">
+        <span>Increase Practice Revenue</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body open">
+        <div class="accordion-body-inner">Support more personalized conversations around enhanced options — starting with a comfortable, high-quality intraoral wearable. Once consumers are engaged, it becomes easier to naturally introduce topics like sleep quality, muscle tension, or long-term oral wellness. Turn insights into $3K+ cases.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="ob-retention">
+      <button class="accordion-trigger">
+        <span>Enhance Patient Retention &amp; Follow Up</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Wellness tracking builds lasting engagement by giving consumers something to stay curious about — their own habits. A simple wearable keeps oral wellness top-of-mind between check-ins, encouraging ongoing interaction and creating natural opportunities to explore optional enhancements. Earn $10–$30/month per patient through a recurring engagement model.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="ob-trust">
+      <button class="accordion-trigger">
+        <span>Enhance Trust &amp; Loyalty</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">When consumers feel seen beyond the surface, trust deepens. Framing oral care in the context of whole-body wellness invites more meaningful dialogue, strengthens credibility, and positions your brand as a thoughtful guide on their broader health journey. More trust = more retained revenue, more referrals, and more reactivations.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="ob-positioning">
+      <button class="accordion-trigger">
+        <span>Enhance Practice Positioning</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Offer data-enriched dentistry without changing your workflow. Use wellness insights to spark more informed consumer dialogues — boost patient engagement and confidence with real-time, personalized wellness insights. Elevate your care model and deliver more tailored recommendations without disrupting your clinical flow.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="ob-liability">
+      <button class="accordion-trigger">
+        <span>Liability Protection via Compliance Tracking</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Verified wear-time data eliminates the "I wore it every night" ambiguity. Certain behavioral patterns may suggest the need for further evaluation — enabling more informed wellness conversations. Track nighttime behavior trends and gain visibility into consumer oral behavior patterns over time, from daily usage to abnormal jaw behavior patterns, helping promote proactive care.</div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="ob-premium">
+      <button class="accordion-trigger">
+        <span>Premium Practice Positioning &amp; Differentiation</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">Build trust and loyalty through personalized wellness engagement — open the door to ongoing conversations grounded in consumer-led insight and behavioral awareness. Integrate with other wellness providers: behavioral insights may help inform referrals to broader wellness providers when appropriate. Infer from objective data — consumer wear data becomes a valuable reference point in discussing oral health behavior.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSUMER BENEFITS -->
+  <section id="consumer-benefits" class="section">
+    <div class="section-tag">For Your Patients — bytesense.ai/consumers</div>
+    <h2 class="section-title">Consumer <span class="accent">Benefits</span></h2>
+    <p class="section-subtitle">What patients gain every night — turning passive protection into active health intelligence.</p>
+
+    <div class="accordion-item" id="cb-sleep">
+      <button class="accordion-trigger">
+        <span>Track Sleep &amp; Recovery</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Get a daily wellness snapshot of nighttime behavior — including trends in mouth movement and duration.<br><br>
+          <strong style="color:var(--white);">What's tracked:</strong><br>
+          • One number that sums up your night's rest — combines total sleep length, interruptions, and overall quality into a single easy-to-track metric<br>
+          • Breakdown of light, deep, and REM stages — see how much time in each stage and whether you're getting enough restorative sleep<br>
+          • Total hours of rest — tracks how long you slept to see if you're meeting nightly sleep goals
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="cb-readiness">
+      <button class="accordion-trigger">
+        <span>Daily Readiness (HR/HRV)</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Gauge your body's resilience — byteSense integrates HRV, sleep quality, and jaw activity data into a single recovery snapshot. Learn how well you're bouncing back from daily stressors.<br><br>
+          <strong style="color:var(--white);">What's tracked:</strong><br>
+          • How ready you are to tackle the day — analyzes HRV, bruxism intensity, and sleep quality<br>
+          • Monitor your heart rate variability (HRV) — tracks changes over time, reflecting your body's resilience to stress and capacity for recovery<br>
+          • Correlate HRV, sleep, and grinding metrics to decode stress responses and recovery patterns
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="cb-morning">
+      <button class="accordion-trigger">
+        <span>Morning Outlook &amp; Personalized Insights</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Recommended focus for better rest and recovery — get behavioral nudges rooted in your personal sleep rhythm and nighttime activity. Whether it's optimizing your evening routine or adjusting sleep posture, byteSense supports self-guided wellness improvement.<br><br>
+          <strong style="color:var(--white);">What's delivered:</strong><br>
+          • Personalized nudges for a healthier you — tailor-made insights and alerts to help you make better choices in real time<br>
+          • Celebrate positive trends — track usage and progress over time to support habit formation and oral health awareness<br>
+          • See how daily habits may influence oral activity — your app reveals how factors like stress, caffeine, or screen time correlate with jaw activity
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="cb-circulation">
+      <button class="accordion-trigger">
+        <span>Intra-Oral Blood Circulation Tracking</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Oral PPG sensor captures heart rate through palatal blood flow — the most stable position on the body. Oral SpO₂ detects oxygen desaturation events 7 seconds faster than peripheral sensors at the wrist or finger.<br><br>
+          <strong style="color:var(--white);">Why oral wins:</strong><br>
+          • The mouth is immune to vasoconstriction that degrades peripheral readings<br>
+          • Oral data correlates more closely with arterial blood gas measurements — the gold standard<br>
+          • Provides a clearer signal of brain oxygenation — not incremental improvement, a different category of accuracy
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="cb-position">
+      <button class="accordion-trigger">
+        <span>Sleep Position-Aware Insights</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Using movement and jaw activity data, get advanced insights into how your body reacts to stress and fatigue. 3-axis accelerometer detects sleep position, correlating posture with bruxism and airway events.<br><br>
+          <strong style="color:var(--white);">What's tracked:</strong><br>
+          • Head and jaw movement throughout the night<br>
+          • Correlation between sleep position and grinding intensity<br>
+          • Positional OSA patterns and restlessness markers
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="cb-oral">
+      <button class="accordion-trigger">
+        <span>Oral Intelligence for Sleep &amp; Recovery</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Passive, mouth-worn wearable promotes awareness — not diagnosis — so you can better understand how your body responds to daily stress or sleep patterns. Smart sensors passively track nighttime jaw activity patterns, helping you understand behavioral trends that may correlate with stress, tension, or rest quality.<br><br>
+          <strong style="color:var(--white);">What's surfaced:</strong><br>
+          • Abnormal jaw activity detection: episodes and duration<br>
+          • Jaw activity patterns while you sleep<br>
+          • Correlation between behavioral indicators (like abnormal bite activity and HRV) and nighttime routines
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item" id="cb-discover">
+      <button class="accordion-trigger">
+        <span>Discover What Impacts Your Sleep</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">
+          Longitudinal data over weeks and months reveals the specific habits, patterns, and conditions that improve or degrade sleep quality for each individual patient.<br><br>
+          <strong style="color:var(--white);">Lifestyle tracking:</strong><br>
+          • Track how consumption of caffeine affects sleep — see if late-day caffeine intake aligns with more frequent grinding or restless sleep<br>
+          • Record habits like diet and exercise — log daily routines to spot patterns affecting nighttime grinding and sleep quality<br>
+          • Guided exercises and tips to wind down — quick stress-relief techniques before bed, potentially reducing bruxism episodes<br>
+          • Quick snapshot of your daily habits to quantify how much potential damage byteSense helped you avert
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; padding-top:32px; border-top:1px solid var(--border); text-align:center;">
+      <div style="font-size:11px; color:var(--white-faint); letter-spacing:2px; margin-bottom:8px;">BYTESENSE · bytesense.ai</div>
+      <div style="font-size:10px; color:var(--white-faint);">Beta Partner Resource · Confidential · Not for Distribution</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const subItems = document.querySelectorAll('.nav-sub-item[data-accordion]');
+  let programmaticScroll = false;
+  let scrollLockTimer = null;
+
+  function setActiveSubItem(id) {
+    subItems.forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-accordion') === id);
+    });
+  }
+
+  function openAccordion(target) {
+    const body = target.querySelector('.accordion-body');
+    const section = target.closest('section');
+    if (section) {
+      section.querySelectorAll('.accordion-item.open').forEach(openItem => {
+        if (openItem !== target) {
+          openItem.classList.remove('open');
+          openItem.querySelector('.accordion-body').classList.remove('open');
+        }
+      });
+    }
+    target.classList.add('open');
+    body.classList.add('open');
+  }
+
+  // Click sub-nav item
+  subItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.getAttribute('data-accordion');
+      const target = document.getElementById(id);
+      if (!target) return;
+
+      openAccordion(target);
+      setActiveSubItem(id);
+
+      // Lock observer so scroll animation doesn't override active state
+      programmaticScroll = true;
+      if (scrollLockTimer) clearTimeout(scrollLockTimer);
+      scrollLockTimer = setTimeout(() => { programmaticScroll = false; }, 900);
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Accordion trigger button click
+  document.querySelectorAll('.accordion-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.accordion-item');
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('open');
+      const section = item.closest('section');
+      if (section) {
+        section.querySelectorAll('.accordion-item.open').forEach(openItem => {
+          if (openItem !== item) {
+            openItem.classList.remove('open');
+            openItem.querySelector('.accordion-body').classList.remove('open');
+          }
+        });
+      }
+      item.classList.toggle('open', !isOpen);
+      body.classList.toggle('open', !isOpen);
+      if (!isOpen && item.id) setActiveSubItem(item.id);
+    });
+  });
+
+  // IntersectionObserver: highlight sidebar as user scrolls manually
+  const allAccordions = document.querySelectorAll('.accordion-item[id]');
+  const scrollObserver = new IntersectionObserver((entries) => {
+    if (programmaticScroll) return;
+    // Pick the entry closest to the top of the viewport
+    let best = null;
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (!best || entry.boundingClientRect.top < best.boundingClientRect.top) {
+          best = entry;
+        }
+      }
+    });
+    if (best) setActiveSubItem(best.target.getAttribute('id'));
+  }, { rootMargin: '-5% 0px -60% 0px', threshold: 0 });
+
+  allAccordions.forEach(el => scrollObserver.observe(el));
+</script>
+
+</body></html>

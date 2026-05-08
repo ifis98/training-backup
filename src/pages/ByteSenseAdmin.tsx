@@ -49,7 +49,7 @@ interface SupportBooking {
 }
 
 export default function ByteSenseAdmin() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, isByteSenseAdmin } = useAuth();
   const navigate = useNavigate();
   const email = (user?.email || '').toLowerCase();
   const SUPER_USERS = ['nbc1079@gmail.com', 'natasha@bytesense.ai', 'majid@bytesense.ai', 'john@bytesense.ai'];
@@ -91,14 +91,12 @@ export default function ByteSenseAdmin() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate('/login'); return; }
-    (async () => {
-      const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
-      const isAdmin = data?.some(r => r.role === 'bytesense_admin') ?? false;
-      setIsBSAdmin(isAdmin);
-      setChecking(false);
-      if (!isAdmin) { toast.error('Access denied'); navigate('/app'); }
-    })();
-  }, [user, authLoading, navigate]);
+    // Role is now determined from Clerk publicMetadata via useAuth
+    const allowed = isByteSenseAdmin;
+    setIsBSAdmin(allowed);
+    setChecking(false);
+    if (!allowed) { toast.error('Access denied'); navigate('/app'); }
+  }, [user, authLoading, isByteSenseAdmin, navigate]);
 
   const loadData = useCallback(async () => {
     const [codesRes, practicesRes, demosRes, adminRolesRes, alertsRes, bookingsRes] = await Promise.all([

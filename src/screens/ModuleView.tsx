@@ -26,8 +26,8 @@ export default function ModuleView({ s, u, myM, getQuestion, lang = "en" }: Modu
   const q = getQuestion(mod.id);
 
   return (
-    <div style={{ fontFamily: C.fn, background: C.snow, minHeight: "100vh" }}>
-      <div style={{ background: C.dark, padding: isMobile ? "12px 16px" : "14px 24px" }}>
+    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: "100vh" }}>
+      <div style={{ background: "var(--bs-bg2)", padding: isMobile ? "12px 16px" : "14px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 44 }}>
           <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); u({ spk: false }); scrollTop(); }}
             style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>

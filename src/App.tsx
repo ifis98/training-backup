@@ -9,7 +9,8 @@ import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import ByteSenseAdmin from "./pages/ByteSenseAdmin";
 import NotFound from "./pages/NotFound";
-import DashboardSwitcher from "./components/DashboardSwitcher";
+import SalesTrainingView from "./screens/SalesTrainingView";
+import OfficeWorkflowView from "./screens/OfficeWorkflowView";
 import { C } from "@/data/constants";
 
 const queryClient = new QueryClient();
@@ -151,7 +152,7 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
 
 function AppRoutes() {
   const { user: clerkUser, isLoaded } = useUser();
-  const { loading, isByteSenseAdmin, isSuperUser } = useAuth();
+  const { loading, isByteSenseAdmin } = useAuth();
 
   if (!isLoaded || loading) {
     return (
@@ -165,7 +166,7 @@ function AppRoutes() {
   }
 
   const isSignedIn = !!clerkUser;
-  const appRoute = (isByteSenseAdmin && !isSuperUser) ? "/bytesense-admin" : "/app";
+  const appRoute = isByteSenseAdmin ? "/bytesense-admin" : "/app";
 
   return (
     <>
@@ -178,14 +179,15 @@ function AppRoutes() {
         <Route path="/register/*" element={!isSignedIn ? <AuthScreen mode="sign-up" /> : <Navigate to={appRoute} />} />
 
         {/* Protected app — new users see intake, existing users see dashboard (handled inside Index) */}
-        <Route path="/app" element={isSignedIn ? ((isByteSenseAdmin && !isSuperUser) ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/login" />} />
+        <Route path="/app" element={isSignedIn ? (isByteSenseAdmin ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/login" />} />
+        <Route path="/sales-training" element={isSignedIn ? <SalesTrainingView /> : <Navigate to="/login" />} />
+        <Route path="/office-workflow" element={isSignedIn ? <OfficeWorkflowView /> : <Navigate to="/login" />} />
         <Route path="/staff" element={isSignedIn ? <Index forceView="staff" /> : <Navigate to="/login" />} />
         <Route path="/owner" element={isSignedIn ? <Index forceView="owner" /> : <Navigate to="/login" />} />
         <Route path="/bytesense-admin" element={isSignedIn ? <ByteSenseAdmin /> : <Navigate to="/login" />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {isSignedIn && isSuperUser && <DashboardSwitcher />}
     </>
   );
 }

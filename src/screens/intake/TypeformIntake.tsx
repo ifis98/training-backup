@@ -9,7 +9,7 @@
  * - Smooth slide-up (forward) / slide-down (back) transitions
  * - Thin teal progress bar at very top
  */
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useIntakeState, IntakeData } from '@/hooks/useIntakeState';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -551,7 +551,7 @@ export default function TypeformIntake({ clerkUserId, onDone }: Props) {
   // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div style={{
-      fontFamily: C.fn, background: '#0A0A0C', minHeight: '100vh',
+      fontFamily: C.fn, background: 'var(--bs-bg)', minHeight: '100vh',
       display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
     }}>
       {/* Progress bar */}
@@ -605,7 +605,7 @@ export default function TypeformIntake({ clerkUserId, onDone }: Props) {
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10,
           padding: isMobile ? '14px 20px 20px' : '16px 32px 24px',
-          background: 'linear-gradient(to top, #0A0A0C 60%, transparent)',
+          background: 'linear-gradient(to top, var(--bs-bg) 60%, transparent)',
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12,
         }}>
           {current.type !== 'radio' && (

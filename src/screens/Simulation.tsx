@@ -92,10 +92,10 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   return (
     // height: 100dvh = dynamic viewport height (shrinks when iOS keyboard appears)
     // overflow: hidden = outer shell never scrolls; only the chat list scrolls internally
-    <div style={{ fontFamily: C.fn, background: C.dark, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
       {/* ── Header (fixed top) ── */}
-      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
+      <div style={{ padding: isMobile ? "12px 16px" : "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--bs-border)", flexShrink: 0 }}>
         <button onClick={() => { if (s.simMsgs.length > 0) { u({ phase: "simSummary" }); } else { u({ phase: "dashboard" }); } scrollTop(); }}
           style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
           <ChevronLeft size={16} strokeWidth={2} /> {T("back")}
@@ -153,7 +153,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
           return (
             <div key={i} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ maxWidth: isMobile ? "88%" : "75%", background: C.dark2, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13, lineHeight: 1.6 }}>
+                <div style={{ maxWidth: isMobile ? "88%" : "75%", background: "var(--bs-bg2)", color: "var(--bs-text)", padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13, lineHeight: 1.6 }}>
                   <div style={{ fontSize: 9, color: C.ash, marginBottom: 4 }}>{patient.name}</div>
                   {patientText}
                 </div>
@@ -169,7 +169,7 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         })}
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}>
-            <div style={{ background: C.dark2, color: C.ash, padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>{T("typing").replace("{name}", patient.name)}</div>
+            <div style={{ background: "var(--bs-bg2)", color: "var(--bs-ash)", padding: "10px 14px", borderRadius: "14px 14px 14px 4px", fontSize: 13 }}>{T("typing").replace("{name}", patient.name)}</div>
           </div>
         )}
         <div ref={chatEnd} />
@@ -179,9 +179,9 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
       <div style={{
         padding: isMobile ? "10px 12px" : "12px 24px",
         paddingBottom: isMobile ? "calc(10px + env(safe-area-inset-bottom))" : "12px",
-        borderTop: `1px solid ${C.borderD}`,
+        borderTop: `1px solid var(--bs-border)`,
         display: "flex", gap: 8, alignItems: "center",
-        background: C.dark, flexShrink: 0,
+        background: "var(--bs-bg)", flexShrink: 0,
       }}>
         <button onClick={handleMic}
           style={{ width: 40, height: 40, background: s.lst ? `${C.red}25` : "rgba(255,255,255,0.06)", border: `1px solid ${s.lst ? C.red : "rgba(255,255,255,0.1)"}`, borderRadius: "50%", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
