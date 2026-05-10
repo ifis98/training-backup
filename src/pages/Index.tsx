@@ -12,13 +12,15 @@ import ModuleView from '@/screens/ModuleView';
 import Simulation from '@/screens/Simulation';
 import SimulationSummary from '@/screens/SimulationSummary';
 import Report from '@/screens/Report';
-import RoleplayHub from '@/screens/RoleplayHub';
 import SalesTrainingScreen from '@/screens/SalesTrainingScreen';
-import PanelView from '@/screens/PanelView';
+import ProductExperienceScreen from '@/screens/ProductExperienceScreen';
+import OfficeWorkflowScreen from '@/screens/OfficeWorkflowScreen';
+import ContactSupportScreen from '@/screens/ContactSupportScreen';
+import RoleplaySimulationScreen from '@/screens/RoleplaySimulationScreen';
 import AICoach from '@/components/AICoach';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import SlidingPanel from '@/components/SlidingPanel';
 import SettingsModal from '@/components/SettingsModal';
+import BookingModal from '@/components/BookingModal';
 import { Lang } from '@/data/translations';
 import { BL } from '@/data/constants';
 import { C } from '@/data/constants';
@@ -34,17 +36,14 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   // Make Clerk user ID accessible to legacy screens that can't receive it as a prop
   if (clerkUserId) (window as any).__clerkUserId = clerkUserId;
 
-  const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded } = useAppState(clerkUserId);
+  const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync } = useAppState(clerkUserId);
   const { isStaff, isAdmin } = useAuth();
   const lang = (s.lang || 'en') as Lang;
 
   // Global coach state
   const [showCoach, setShowCoach] = useState(false);
+  const [showBookingGlobal, setShowBookingGlobal] = useState(false);
   const [coachMode, setCoachMode] = useState('general');
-
-  // Global panel state (Sales Training, Office Workflow, etc.)
-  const [panelSrc, setPanelSrc] = useState<string | null>(null);
-  const [panelTitle, setPanelTitle] = useState('');
 
   // Global settings state
   const [showSettings, setShowSettings] = useState(false);
@@ -57,10 +56,9 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   }, []);
 
 
-  // Close coach + panels whenever the user navigates to a new phase
+  // Close coach whenever the user navigates to a new phase
   useEffect(() => {
     setShowCoach(false);
-    setPanelSrc(null);
   }, [s.phase]);
 
   const openCoach = (mode: string) => {
@@ -76,7 +74,6 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach,
     onOpenSettings: () => setShowSettings(true),
     onSignOut: handleSignOut,
-    onOpenPanel: (src: string, title: string) => { setPanelSrc(src); setPanelTitle(title); },
   };
 
   const renderContent = () => {
@@ -96,7 +93,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           clerkUserId={clerkUserId}
           onDone={(staffRoles, intakeData) => {
             const seed = Date.now() % 100000;
-            u({
+            const update = {
               intakeDone: true,
               roles: staffRoles,
               name: intakeData.primary_name || '',
@@ -108,7 +105,9 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
               blIdx: 0,
               bl: [],
               blQs: BL.map((v, i) => v[(seed + i) % v.length]),
-            });
+            };
+            u(update);
+            immediateSync(update);
           }}
         />
       );
@@ -132,18 +131,18 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
 
     // ── URL-based section routing ────────────────────────────────────────
-    if (forcePhase === 'sales-training')    return <PanelView src="/sales-training.html" />;
-    if (forcePhase === 'product-experience') return <PanelView src="/product-experience.html" />;
-    if (forcePhase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
-    if (forcePhase === 'contact-support')   return <PanelView src="/contact-support.html" />;
-    if (forcePhase === 'roleplay')          return <RoleplayHub s={s} u={u} lang={lang} />;
+    if (forcePhase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
+    if (forcePhase === 'product-experience') return <ProductExperienceScreen />;
+    if (forcePhase === 'office-workflow')   return <OfficeWorkflowScreen />;
+    if (forcePhase === 'contact-support')   return <ContactSupportScreen />;
+    if (forcePhase === 'roleplay')          return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
 
     // ── Phase-state routing (used internally, e.g. from mobile menu) ─────
-    if (s.phase === 'sales-training')    return <PanelView src="/sales-training.html" />;
-    if (s.phase === 'product-experience') return <PanelView src="/product-experience.html" />;
-    if (s.phase === 'office-workflow')   return <PanelView src="/office-workflow.html" />;
-    if (s.phase === 'contact-support')   return <PanelView src="/contact-support.html" />;
-    if (s.phase === 'roleplay') return <RoleplayHub s={s} u={u} lang={lang} />;
+    if (s.phase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
+    if (s.phase === 'product-experience') return <ProductExperienceScreen />;
+    if (s.phase === 'office-workflow')   return <OfficeWorkflowScreen />;
+    if (s.phase === 'contact-support')   return <ContactSupportScreen />;
+    if (s.phase === 'roleplay') return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
 
     if (forceView === 'staff') return <StaffDashboard {...dashboardProps} />;
     if (forceView === 'owner') return <Dashboard {...dashboardProps} />;
@@ -165,8 +164,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           openCoach={openCoach}
           onSignOut={handleSignOut}
           onOpenSettings={() => setShowSettings(true)}
-          onOpenPanel={(src, title) => { setPanelSrc(src); setPanelTitle(title); }}
-          activePanel={panelSrc}
+          onOpenBooking={() => setShowBookingGlobal(true)}
           lang={lang}
         />
 
@@ -176,15 +174,16 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           minWidth: 0,
           marginLeft: isMobile ? 0 : 'var(--bs-sidebar-w, 220px)',
           transition: 'margin-left 0.3s ease',
+          paddingTop: isMobile ? 60 : 0,
           paddingBottom: 0,
         }}>
           {renderContent()}
         </div>
 
         {/* Global overlays */}
-        <SlidingPanel src={panelSrc} title={panelTitle} onClose={() => setPanelSrc(null)} />
         <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} s={s} u={u} lang={lang} />
         <AICoach isOpen={showCoach} onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />
+        <BookingModal open={showBookingGlobal} onClose={() => setShowBookingGlobal(false)} lang={lang} />
       </div>
     );
   }

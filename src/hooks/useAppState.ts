@@ -5,6 +5,7 @@ import { ShuffledQuestion, shuffleQuestion } from '@/lib/helpers';
 import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'bsa6';
+const storageKey = (uid: string) => `bsa6_${uid}`; // per-user scoped key
 const SYNC_DEBOUNCE = 2000;
 
 export interface AppState {
@@ -94,10 +95,13 @@ export function useAppState(clerkUserId: string | null = null) {
   useEffect(() => {
     if (s.phase !== 'splash') {
       try {
+        if (clerkUserId) {
+          localStorage.setItem(storageKey(clerkUserId), JSON.stringify({ ...s, lst: false }));
+        }
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, lst: false }));
       } catch {}
     }
-  }, [s]);
+  }, [s, clerkUserId]);
 
   // Debounced sync to database
   useEffect(() => {
@@ -124,9 +128,44 @@ export function useAppState(clerkUserId: string | null = null) {
     return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
   }, [clerkUserId, s.roles, s.blScore, s.done, s.xp, s.simP, s.signed, s.name, s.practice]);
 
+  // Immediate (non-debounced) DB write — call this right after intake completes
+  const immediateSync = useCallback(async (state: Partial<AppState>) => {
+    if (!clerkUserId) return;
+    try {
+      await supabase.from('training_progress').upsert({
+        clerk_user_id: clerkUserId,
+        training_roles: state.roles ?? [],
+        baseline_score: state.blScore ?? null,
+        done_modules: state.done ?? [],
+        xp: state.xp ?? 0,
+        sim_patients: state.simP ?? 0,
+        signed: state.signed ?? false,
+        completed_at: state.signed ? new Date().toISOString() : null,
+        name: state.name ?? '',
+        practice: state.practice ?? '',
+      }, { onConflict: 'clerk_user_id' });
+    } catch {}
+  }, [clerkUserId]);
+
   // Load from DB on mount (when we have a Clerk user)
   useEffect(() => {
-    if (!clerkUserId) { setDbLoaded(true); return; } // no DB check needed for unauthenticated
+    setDbLoaded(false);
+    if (!clerkUserId) { setDbLoaded(true); return; }
+
+    // Check if THIS specific user has confirmed intake on this device
+    let locallyKnownDone = false;
+    try {
+      const scoped = localStorage.getItem(storageKey(clerkUserId));
+      if (scoped) {
+        const d = JSON.parse(scoped);
+        if (d?.intakeDone === true) locallyKnownDone = true;
+        // Override (possibly cross-user) state with this user's scoped record
+        if (d?.phase && d.phase !== 'splash') {
+          setS({ ...defaultState, ...d, phase: d.phase === 'module' ? 'dashboard' : d.phase, lst: false });
+        }
+      }
+    } catch {}
+
     (async () => {
       try {
         const { data } = await supabase
@@ -136,31 +175,30 @@ export function useAppState(clerkUserId: string | null = null) {
           .maybeSingle();
 
         if (data) {
-          const restoredName = (data as any).name || '';
-          const restoredPractice = (data as any).practice || '';
-          setS(prev => {
-            // Any DB row means the user completed onboarding — training_progress rows are only
-            // created after intake finishes (sync fires when phase !== 'splash').
-            // Don't rely on name/roles being present; they may be empty if the first sync failed.
-            const alreadyDoneIntake = true;
-            return {
-              ...prev,
-              roles: data.training_roles?.length ? data.training_roles : prev.roles,
-              blScore: data.baseline_score ?? prev.blScore,
-              done: data.done_modules?.length ? data.done_modules : prev.done,
-              xp: data.xp || prev.xp,
-              simP: data.sim_patients || prev.simP,
-              signed: data.signed || prev.signed,
-              name: restoredName || prev.name,
-              practice: restoredPractice || prev.practice,
-              intakeDone: true,
-              // Redirect stale splash/setup phases to dashboard when DB row exists
-              phase: (prev.phase === 'splash' || prev.phase === 'setup') ? 'dashboard' : prev.phase,
-            };
-          });
+          setS(prev => ({
+            ...prev,
+            roles: data.training_roles?.length ? data.training_roles : prev.roles,
+            blScore: data.baseline_score ?? prev.blScore,
+            done: data.done_modules?.length ? data.done_modules : prev.done,
+            xp: data.xp || prev.xp,
+            simP: data.sim_patients || prev.simP,
+            signed: data.signed || prev.signed,
+            name: (data as any).name || prev.name,
+            practice: (data as any).practice || prev.practice,
+            intakeDone: true,
+            phase: (prev.phase === 'splash' || prev.phase === 'setup') ? 'dashboard' : prev.phase,
+          }));
+        } else if (!locallyKnownDone) {
+          // No DB row AND no scoped localStorage for this user — reset to show intake.
+          // Handles cross-user contamination from the shared 'bsa6' key.
+          setS(prev => ({ ...prev, intakeDone: false, phase: 'splash' }));
+          // If locallyKnownDone is true but no DB row → sync failed, trust localStorage
         }
-      } catch {}
-      finally { setDbLoaded(true); }
+      } catch {
+        // DB error — don't reset, trust whatever state we have
+      } finally {
+        setDbLoaded(true);
+      }
     })();
   }, [clerkUserId]);
 
@@ -189,8 +227,9 @@ export function useAppState(clerkUserId: string | null = null) {
 
   const reset = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
+    if (clerkUserId) localStorage.removeItem(storageKey(clerkUserId));
     setS(defaultState);
-  }, []);
+  }, [clerkUserId]);
 
-  return { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded };
+  return { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync };
 }

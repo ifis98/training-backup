@@ -6,6 +6,7 @@
 /* overflow-x: clip instead of hidden — hidden breaks position:sticky on all descendants */
 html, body {
   overflow-x: clip;
+  overscroll-behavior-x: none;
 }
 
 *, *::before, *::after {

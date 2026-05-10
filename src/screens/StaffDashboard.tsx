@@ -11,6 +11,8 @@ import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import BookingModal from '@/components/BookingModal';
 import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2, Plus, Briefcase, Clock, XCircle, Settings } from 'lucide-react';
+import DashboardSidebar from '@/components/DashboardSidebar';
+import SettingsModal from '@/components/SettingsModal';
 
 interface StaffDashboardProps {
   s: AppState;
@@ -48,6 +50,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   const [showAddCase, setShowAddCase] = useState(false);
   const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
   const [showBooking, setShowBooking] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [panelSrc, setPanelSrc] = useState<string | null>(null);
+  const [panelTitle, setPanelTitle] = useState('');
+  const handleSignOut = onSignOut;
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
@@ -618,7 +624,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
       <BookingModal open={showBooking} onClose={() => setShowBooking(false)} lang={lang}
         userName={s.name} userEmail={clerkUser?.primaryEmailAddress?.emailAddress || ''} />
       <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} s={s} u={u} lang={lang} />
-      <SlidingPanel src={panelSrc} title={panelTitle} onClose={() => setPanelSrc(null)} />
     </div>
   );
 }

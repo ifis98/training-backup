@@ -10,7 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Tooltip } from 'recharts';
 import BookingModal from '@/components/BookingModal';
-import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save, Menu, X, LogOut, Settings, Phone, MessageSquare } from 'lucide-react';
+import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save, Settings, Phone, MessageSquare } from 'lucide-react';
 
 interface DashboardProps {
   s: AppState;
@@ -49,7 +49,6 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   const displayName = clerkUser?.firstName || clerkUser?.fullName || s.name || '';
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [staffData, setStaffData] = useState<any[]>([]);
   const [simReviews, setSimReviews] = useState<any[]>([]);
@@ -386,20 +385,8 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               </div>
             </div>
 
-            {/* Right: Settings gear (desktop) OR [schedule call + hamburger] (mobile) */}
-            {isMobile ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <button onClick={() => setShowBooking(true)}
-                  style={{ background: "var(--bs-card2)", border: `1px solid var(--bs-border)`, color: "var(--bs-ash)", height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 6, padding: "0 12px", cursor: "pointer", flexShrink: 0, fontSize: 12, fontWeight: 600, fontFamily: C.fn }}>
-                  <Phone size={13} strokeWidth={2} />
-                  Schedule Call
-                </button>
-                <button onClick={() => setShowMobileMenu(true)}
-                  style={{ background: "var(--bs-card2)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-                  <Menu size={18} strokeWidth={2} />
-                </button>
-              </div>
-            ) : (
+            {/* Right: Schedule call button + settings (desktop only) */}
+            {isMobile ? null : (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <button onClick={() => setShowBooking(true)}
                   style={{ background: C.teal, border: "none", color: "#000", height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 7, padding: "0 14px", cursor: "pointer", flexShrink: 0, fontSize: 12, fontWeight: 700, fontFamily: C.fn, transition: "all 0.15s" }}>
@@ -433,67 +420,6 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         </div>
       </div>
 
-      {/* ── Mobile slide-in menu ── */}
-      {isMobile && (
-        <>
-          {/* Backdrop */}
-          <div onClick={() => setShowMobileMenu(false)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(2px)", opacity: showMobileMenu ? 1 : 0, pointerEvents: showMobileMenu ? "auto" : "none", transition: "opacity 0.25s ease" }} />
-          {/* Drawer */}
-          <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 280, background: "var(--bs-bg)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderLeft: `1px solid var(--bs-border)`, zIndex: 201, display: "flex", flexDirection: "column", transform: showMobileMenu ? "translateX(0)" : "translateX(100%)", transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)", boxShadow: showMobileMenu ? "-20px 0 60px var(--bs-shadow)" : "none" }}>
-
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 16px", borderBottom: `1px solid var(--bs-border)`, flexShrink: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800, flexShrink: 0 }}>
-                  {(displayName || 'U')[0].toUpperCase()}
-                </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--bs-text)" }}>{displayName || 'Menu'}</div>
-                  <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 1 }}>{s.practice}</div>
-                </div>
-              </div>
-              <button onClick={() => setShowMobileMenu(false)}
-                style={{ background: "none", border: "none", color: "var(--bs-ash)", cursor: "pointer", padding: 4 }}>
-                <X size={20} strokeWidth={2} />
-              </button>
-            </div>
-
-            {/* Nav items */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
-              {[
-                { label: "Dashboard", action: () => { u({ phase: "dashboard" }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "Sales Training", action: () => { u({ phase: 'sales-training' }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "Product Experience", action: () => { u({ phase: 'product-experience' }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "Office Workflow", action: () => { u({ phase: 'office-workflow' }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "Roleplay Simulation", action: () => { u({ phase: "roleplay" }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "AI Simulations", action: () => { u({ phase: "simulation" }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "AI Coach", action: () => { openCoach("general"); setShowMobileMenu(false); } },
-                { label: "Reports & Certificates", disabled: !allComplete && !s.signed, action: () => { u({ phase: "report" }); scrollTop(); setShowMobileMenu(false); } },
-                { label: "Contact Support", action: () => { window.location.href = "mailto:support@bytesense.ai"; setShowMobileMenu(false); } },
-              ].map((item) => (
-                <button key={item.label}
-                  onClick={item.disabled ? undefined : item.action}
-                  style={{ display: "flex", alignItems: "center", width: "100%", padding: "13px 20px", background: "none", border: "none", borderBottom: `1px solid var(--bs-border)`, color: item.disabled ? "var(--bs-ash)" : "var(--bs-text)", fontSize: 14, fontWeight: 500, cursor: item.disabled ? "not-allowed" : "pointer", fontFamily: C.fn, opacity: item.disabled ? 0.35 : 1, textAlign: "left" as const }}>
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Bottom actions */}
-            <div style={{ padding: "12px 16px", borderTop: `1px solid var(--bs-border)`, display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-              <button onClick={() => { setShowMobileMenu(false); onOpenSettings(); }}
-                style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "11px 16px", background: "var(--bs-card)", border: `1px solid var(--bs-border)`, borderRadius: 8, color: "var(--bs-ash)", fontSize: 14, cursor: "pointer", fontFamily: C.fn }}>
-                <Settings size={16} strokeWidth={1.5} /> Settings
-              </button>
-              <button onClick={() => { onSignOut(); setShowMobileMenu(false); }}
-                style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "11px 16px", background: "rgba(204,16,16,0.08)", border: `1px solid rgba(204,16,16,0.2)`, borderRadius: 8, color: "#FF5555", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: C.fn }}>
-                <LogOut size={16} strokeWidth={1.5} /> Sign Out
-              </button>
-            </div>
-          </div>
-        </>
-      )}
 
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "12px 12px 40px" : "28px 28px 60px" }}>
 

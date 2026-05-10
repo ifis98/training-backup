@@ -33,6 +33,8 @@ export default function SettingsModal({ open, onClose, s, u, lang }: SettingsMod
   };
 
   const handleSignOut = async () => {
+    const uid = (window as any).__clerkUserId;
+    if (uid) localStorage.removeItem(`bsa6_${uid}`);
     localStorage.removeItem('bsa6');
     await signOut({ redirectUrl: '/' });
   };
