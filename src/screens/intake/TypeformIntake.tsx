@@ -425,11 +425,20 @@ const QUESTIONS: QuestionDef[] = [
 interface Props {
   clerkUserId: string | null;
   onDone: (staffRoles: string[], intakeData: IntakeData) => void;
+  prefilledPracticeName?: string;
 }
 
-export default function TypeformIntake({ clerkUserId, onDone }: Props) {
+export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeName }: Props) {
   const { data, update, complete } = useIntakeState(clerkUserId);
   const isMobile = useIsMobile();
+
+  // Pre-fill practice name from invite code if the field is still empty
+  useEffect(() => {
+    if (prefilledPracticeName && !data.practice_name) {
+      update({ practice_name: prefilledPracticeName });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefilledPracticeName]);
 
   // Visible question index (into QUESTIONS array, after filtering showIf)
   const [qIdx, setQIdx] = useState(0);

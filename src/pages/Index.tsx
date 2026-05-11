@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,6 +31,7 @@ interface IndexProps { forceView?: 'staff' | 'owner'; forcePhase?: string; }
 const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
+  const navigate = useNavigate();
   const clerkUserId = clerkUser?.id ?? null;
   const isMobile = useIsMobile();
 
@@ -55,6 +57,17 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  // Invite code gate: new users without a redeemed code are sent to the landing page.
+  // Existing users (intakeDone: true) are grandfathered — no code required.
+  const POST_INTAKE_PHASES = ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report'];
+  useEffect(() => {
+    if (!dbLoaded) return;
+    if (s.intakeDone) return;
+    if (POST_INTAKE_PHASES.includes(s.phase)) return;
+    if (!localStorage.getItem('bsa6_invite')) {
+      navigate('/');
+    }
+  }, [dbLoaded, s.intakeDone, s.phase, navigate]);
 
   // Close coach whenever the user navigates to a new phase
   useEffect(() => {
@@ -88,10 +101,14 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
 
     // ── Intake flow (first-time setup) ──────────────────────────────────
     if (!s.intakeDone && !['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report'].includes(s.phase)) {
+      const inviteRaw = localStorage.getItem('bsa6_invite');
+      const inviteData = inviteRaw ? (() => { try { return JSON.parse(inviteRaw); } catch { return null; } })() : null;
       return (
         <IntakeFlow
           clerkUserId={clerkUserId}
+          prefilledPracticeName={inviteData?.practice_name || ''}
           onDone={(staffRoles, intakeData) => {
+            localStorage.removeItem('bsa6_invite'); // consume the stored invite
             const seed = Date.now() % 100000;
             const update = {
               intakeDone: true,

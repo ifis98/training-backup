@@ -23,6 +23,39 @@ export default function Welcome() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const isSignedIn = !!clerkUser;
+  // Invite code gate state
+  const [codeInput, setCodeInput] = useState('');
+  const [codeStatus, setCodeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [inviteResult, setInviteResult] = useState<{ practice_name: string } | null>(null);
+  const [codeError, setCodeError] = useState('');
+
+  const handleCodeSubmit = async () => {
+    const code = codeInput.trim().toUpperCase();
+    if (!code || codeStatus === 'loading') return;
+    setCodeStatus('loading');
+    setCodeError('');
+    try {
+      const { data, error } = await supabase.rpc('redeem_registration_code', { _code: code });
+      if (error) throw error;
+      if (!data?.success) {
+        setCodeStatus('error');
+        setCodeError(data?.error || 'Invalid or expired code. Please try again.');
+        return;
+      }
+      localStorage.setItem('bsa6_invite', JSON.stringify({
+        code,
+        practice_name: data.practice_name,
+        rep_name: data.rep_name,
+        redeemedAt: new Date().toISOString(),
+      }));
+      setInviteResult({ practice_name: data.practice_name });
+      setCodeStatus('success');
+    } catch (err: any) {
+      setCodeStatus('error');
+      setCodeError(err.message || 'Something went wrong. Please try again.');
+    }
+  };
+
   const [showDemo, setShowDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [demoData, setDemoData] = useState({
@@ -117,6 +150,72 @@ export default function Welcome() {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Invite code gate */}
+      <div style={{ maxWidth: 480, margin: isMobile ? "8px auto 0" : "12px auto 0", padding: isMobile ? "0 16px" : 0 }}>
+        {codeStatus !== 'success' ? (
+          <div style={{ ...glass, padding: isMobile ? "18px 16px" : "22px 28px" }}>
+            <div style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 14, textAlign: "center" }}>
+              Have an Invite Code?
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <input
+                value={codeInput}
+                onChange={e => {
+                  setCodeInput(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ''));
+                  setCodeStatus('idle');
+                  setCodeError('');
+                }}
+                onKeyDown={e => e.key === 'Enter' && handleCodeSubmit()}
+                placeholder="ENTER CODE"
+                maxLength={8}
+                disabled={codeStatus === 'loading'}
+                style={{
+                  flex: 1, padding: "12px 14px", fontSize: 18, fontFamily: "monospace", fontWeight: 700,
+                  background: "rgba(255,255,255,0.04)",
+                  border: `1.5px solid ${codeStatus === 'error' ? C.red : C.glassBorder}`,
+                  color: C.white, outline: "none", borderRadius: C.radiusSm,
+                  letterSpacing: 4, textAlign: "center", textTransform: "uppercase",
+                  transition: "border-color 0.2s",
+                }}
+              />
+              <button
+                onClick={handleCodeSubmit}
+                disabled={!codeInput.trim() || codeStatus === 'loading'}
+                style={{
+                  background: codeInput.trim() && codeStatus !== 'loading' ? C.gradTeal : "rgba(255,255,255,0.06)",
+                  color: codeInput.trim() && codeStatus !== 'loading' ? C.dark : C.ash,
+                  border: "none", padding: "12px 20px", fontSize: 14, fontWeight: 800,
+                  fontFamily: C.fn, cursor: codeInput.trim() && codeStatus !== 'loading' ? "pointer" : "default",
+                  borderRadius: C.radiusSm, transition: "all 0.2s", whiteSpace: "nowrap",
+                }}>
+                {codeStatus === 'loading' ? '···' : 'Continue →'}
+              </button>
+            </div>
+            {codeStatus === 'error' && (
+              <div style={{ marginTop: 10, fontSize: 12, color: C.red, textAlign: "center" }}>{codeError}</div>
+            )}
+          </div>
+        ) : (
+          <div style={{ ...glass, padding: isMobile ? "18px 16px" : "22px 28px", borderColor: `${C.green}40`, textAlign: "center" }}>
+            <div style={{ fontSize: 22, marginBottom: 6, color: C.green }}>✓</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.green, marginBottom: 4 }}>Code Accepted</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: C.gold, marginBottom: 18 }}>
+              {inviteResult?.practice_name}
+            </div>
+            <button
+              onClick={() => navigate(isSignedIn ? '/app' : '/register')}
+              style={{
+                background: C.gradTeal, color: C.white, border: "none",
+                padding: "14px 32px", fontSize: 15, fontWeight: 800, fontFamily: C.fn,
+                cursor: "pointer", borderRadius: C.radiusSm,
+                boxShadow: C.glow(C.teal, 0.3), width: "100%",
+              }}>
+              {isSignedIn ? 'Continue to App →' : 'Create Your Account →'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Stats */}
