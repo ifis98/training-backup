@@ -102,7 +102,7 @@ export default function ByteSenseAdmin() {
       supabase.from('registration_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('practices').select('*, profiles(user_id, full_name, created_at), training_progress(user_id, done_modules, xp, completed_at, updated_at)').order('created_at', { ascending: false }),
       supabase.from('demo_requests').select('*').order('created_at', { ascending: false }),
-      supabase.from('user_roles').select('user_id').eq('role', 'bytesense_admin'),
+      supabase.from('user_roles').select('clerk_user_id').eq('role', 'bytesense_admin'),
       supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }),
       supabase.from('support_bookings').select('*').order('created_at', { ascending: false }),
     ]);
@@ -117,10 +117,14 @@ export default function ByteSenseAdmin() {
       setDemoNotes(notes);
     }
     if (adminRolesRes.data) {
-      const ids = adminRolesRes.data.map(r => r.user_id);
-      if (ids.length) {
-        const { data: profs } = await supabase.from('profiles').select('user_id, full_name, created_at').in('user_id', ids);
-        setAdmins(profs || []);
+      const clerkIds = adminRolesRes.data.map(r => r.clerk_user_id).filter(Boolean);
+      if (clerkIds.length) {
+        const { data: profs } = await supabase.from('profiles').select('clerk_user_id, full_name, created_at').in('clerk_user_id', clerkIds);
+        const profileMap = Object.fromEntries((profs || []).map(p => [p.clerk_user_id, p]));
+        // Always show an entry even if the profile row doesn't exist yet
+        setAdmins(clerkIds.map(id => profileMap[id] || { clerk_user_id: id, full_name: null, created_at: null }));
+      } else {
+        setAdmins([]);
       }
     }
   }, []);
@@ -855,7 +859,7 @@ export default function ByteSenseAdmin() {
                         <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Assign to</label>
                         <select value={b.assigned_to ?? ''} onChange={e => updateBooking(b.id, { assigned_to: e.target.value || null, triage_status: e.target.value ? 'in_progress' : b.triage_status })} style={{ ...inputStyle, marginTop: 4 }}>
                           <option value="">Unassigned</option>
-                          {admins.map((a: any) => <option key={a.user_id} value={a.user_id}>{a.full_name || a.user_id.slice(0, 8)}</option>)}
+                          {admins.map((a: any) => <option key={a.clerk_user_id} value={a.clerk_user_id}>{a.full_name || a.clerk_user_id.slice(0, 12)}</option>)}
                         </select>
                       </div>
                       <div>
@@ -919,9 +923,9 @@ export default function ByteSenseAdmin() {
                 <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14 }}>Current Admins ({admins.length})</div>
                 {admins.length === 0 && <div style={{ fontSize: 12, color: C.slate }}>No admins found</div>}
                 {admins.map((a: any) => (
-                  <div key={a.user_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${C.glassBorder}` }}>
+                  <div key={a.clerk_user_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${C.glassBorder}` }}>
                     <div style={{ fontSize: 13, color: C.white, fontWeight: 600 }}>{a.full_name || '(no name)'}</div>
-                    <div style={{ fontSize: 11, color: C.slate, fontFamily: 'monospace' }}>{a.user_id.slice(0, 8)}…</div>
+                    <div style={{ fontSize: 11, color: C.slate, fontFamily: 'monospace' }}>{a.clerk_user_id.slice(0, 12)}…</div>
                   </div>
                 ))}
               </div>
@@ -957,7 +961,7 @@ export default function ByteSenseAdmin() {
               <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Assigned to</label>
               <select value={selectedAlert.assigned_to ?? ''} onChange={e => updateAlert(selectedAlert.id, { assigned_to: e.target.value || null })} style={inputStyle}>
                 <option value="">Unassigned</option>
-                {admins.map((a: any) => <option key={a.user_id} value={a.user_id}>{a.full_name || a.user_id.slice(0, 8)}</option>)}
+                {admins.map((a: any) => <option key={a.clerk_user_id} value={a.clerk_user_id}>{a.full_name || a.clerk_user_id.slice(0, 12)}</option>)}
               </select>
             </div>
             <div style={{ marginBottom: 16 }}>
