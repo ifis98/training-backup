@@ -51,9 +51,8 @@ interface SupportBooking {
 export default function ByteSenseAdmin() {
   const { user, loading: authLoading, signOut, isByteSenseAdmin } = useAuth();
   const navigate = useNavigate();
-  const email = (user?.email || '').toLowerCase();
-  const SUPER_USERS = ['nbc1079@gmail.com', 'natasha@bytesense.ai', 'majid@bytesense.ai', 'john@bytesense.ai'];
-  const appDashboardPath = SUPER_USERS.includes(email) ? '/owner' : '/';
+  // All bytesense_admin users are internal staff — always route to /owner dashboard
+  const appDashboardPath = '/owner';
   const [isBSAdmin, setIsBSAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState<ExtendedTab>('overview');
