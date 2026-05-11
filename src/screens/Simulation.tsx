@@ -140,16 +140,30 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         )}
         {s.simMsgs.map((msg, i) => {
           if (msg.r === "user") {
+            // Look ahead to the next AI message — it contains the coaching tip that evaluates THIS message
+            const nextMsg = s.simMsgs[i + 1];
+            const coachTip = nextMsg?.r === "ai" ? parseCoaching(nextMsg.t).coachTip : null;
             return (
-              <div key={i} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-                <div style={{ maxWidth: isMobile ? "88%" : "75%", background: C.teal, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 4px 14px", fontSize: 13, lineHeight: 1.6 }}>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>{T("you_label")} ({sRoles.map(r => r.short).join(", ")})</div>
-                  {msg.t}
+              <div key={i} style={{ marginBottom: coachTip ? 6 : 10 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div style={{ maxWidth: isMobile ? "88%" : "75%", background: C.teal, color: C.white, padding: "10px 14px", borderRadius: "14px 14px 4px 14px", fontSize: 13, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", marginBottom: 4 }}>{T("you_label")} ({sRoles.map(r => r.short).join(", ")})</div>
+                    {msg.t}
+                  </div>
                 </div>
+                {coachTip && (
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6, marginBottom: 4 }}>
+                    <div style={{ maxWidth: isMobile ? "92%" : "80%", background: "rgba(212,175,55,0.08)", borderLeft: `3px solid ${C.gold}`, borderRadius: "0 8px 8px 0", padding: "10px 14px" }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{T("training_tip")}</div>
+                      <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>{coachTip}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           }
-          const { patientText, coachTip } = parseCoaching(msg.t);
+          // AI patient message — strip the coaching tag (tip is shown below the user's message above)
+          const { patientText } = parseCoaching(msg.t);
           return (
             <div key={i} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "flex-start" }}>
@@ -158,12 +172,6 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
                   {patientText}
                 </div>
               </div>
-              {coachTip && (
-                <div style={{ marginTop: 8, marginLeft: 8, maxWidth: isMobile ? "92%" : "80%", background: "rgba(212,175,55,0.08)", borderLeft: `3px solid ${C.gold}`, borderRadius: "0 8px 8px 0", padding: "10px 14px" }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{T("training_tip")}</div>
-                  <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>{coachTip}</div>
-                </div>
-              )}
             </div>
           );
         })}

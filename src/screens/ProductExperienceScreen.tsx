@@ -66,7 +66,7 @@ const sectionTitle: React.CSSProperties = {
 
 const sectionSubtitle: React.CSSProperties = {
   fontSize: 16, color: DIM, fontWeight: 400,
-  marginBottom: 40, maxWidth: 600, fontFamily: C.fn,
+  marginBottom: 0, maxWidth: 600, fontFamily: C.fn,
 };
 
 const accent: React.CSSProperties = { color: RED_B };
@@ -2628,7 +2628,7 @@ export default function ProductExperienceScreen() {
         <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
 
           {/* Office Benefits header */}
-          <div style={{ maxWidth: 900, padding: isMobile ? '24px 16px 16px' : '72px 64px 32px', fontFamily: C.fn }}>
+          <div style={{ maxWidth: 900, padding: isMobile ? '24px 16px 0' : '48px 64px 0', fontFamily: C.fn }}>
             <div style={sectionTag}>For Your Practice — bytesense.ai/professionals</div>
             <h2 style={sectionTitle}>Office <span style={accent}>Benefits</span></h2>
             <p style={sectionSubtitle}>Why forward-thinking practices are adding bioSense™ to their protocol.</p>
@@ -2651,7 +2651,7 @@ export default function ProductExperienceScreen() {
           )}
 
           {/* Consumer Benefits header */}
-          <div style={{ maxWidth: 900, padding: isMobile ? '24px 16px 16px' : '72px 64px 32px', borderTop: `2px solid ${BORDER}`, fontFamily: C.fn }}>
+          <div style={{ maxWidth: 900, padding: isMobile ? '24px 16px 0' : '48px 64px 0', borderTop: `2px solid ${BORDER}`, fontFamily: C.fn }}>
             <div style={sectionTag}>For Your Patients — bytesense.ai/consumers</div>
             <h2 style={sectionTitle}>Consumer <span style={accent}>Benefits</span></h2>
             <p style={sectionSubtitle}>What patients gain every night — turning passive protection into active health intelligence.</p>

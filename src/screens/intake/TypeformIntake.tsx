@@ -239,9 +239,9 @@ const OPTS = {
     { key: 'B', label: 'Associate Dentist', value: 'associate' },
     { key: 'C', label: 'Hygienist', value: 'hygienist' },
     { key: 'D', label: 'Treatment Coordinator', value: 'tc' },
-    { key: 'E', label: 'Office Manager', value: 'manager' },
+    { key: 'E', label: 'Office Manager', value: 'om' },
     { key: 'F', label: 'Dental Assistant', value: 'assistant' },
-    { key: 'G', label: 'Front Desk', value: 'front' },
+    { key: 'G', label: 'Front Desk', value: 'frontdesk' },
   ],
   PROFILE: [
     { key: 'A', label: 'Existing bruxism patient', value: 'existing_bruxism' },
@@ -308,7 +308,7 @@ const QUESTIONS: QuestionDef[] = [
     type: 'fields',
     num: '04',
     question: 'Who is your Backup Contact?',
-    description: 'Who should we reach if your primary advocate is unavailable? (Optional)',
+    description: 'A different person to reach when your primary advocate is unavailable. (Optional — skip if not applicable)',
     fields: [
       { id: 'secondary_name', label: 'Full Name', placeholder: 'John Smith' },
       { id: 'secondary_role', label: 'Role / Title', placeholder: 'e.g. Front Desk Manager' },

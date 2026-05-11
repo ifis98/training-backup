@@ -151,7 +151,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   };
 
   // Show the sidebar layout for all screens once intake is complete (or on a section URL)
-  const showLayout = !!forcePhase || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'roleplay', 'contact-support'].includes(s.phase);
+  const showLayout = !!forcePhase || !!forceView || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'roleplay', 'contact-support'].includes(s.phase);
 
   if (showLayout) {
     return (

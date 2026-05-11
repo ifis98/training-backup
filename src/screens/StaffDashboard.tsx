@@ -11,7 +11,6 @@ import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import BookingModal from '@/components/BookingModal';
 import { Target, BarChart3, ClipboardList, Zap, Mail, Shield, BookOpen, Award, Star, FileText, Trophy, Printer, ChevronRight, ArrowRight, CheckCircle2, Plus, Briefcase, Clock, XCircle, Settings } from 'lucide-react';
-import DashboardSidebar from '@/components/DashboardSidebar';
 import SettingsModal from '@/components/SettingsModal';
 
 interface StaffDashboardProps {
@@ -51,8 +50,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
   const [showBooking, setShowBooking] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [panelSrc, setPanelSrc] = useState<string | null>(null);
-  const [panelTitle, setPanelTitle] = useState('');
   const handleSignOut = onSignOut;
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
@@ -213,9 +210,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
   return (
     <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, var(--bs-bg2), var(--bs-bg))`, minHeight: "100vh", color: "var(--bs-text)", display: "flex" }}>
-      <DashboardSidebar s={s} u={u} allD={allD} allComplete={allComplete} openCoach={openCoach} onSignOut={handleSignOut} onOpenSettings={() => setShowSettings(true)} onOpenPanel={(src, title) => { setPanelSrc(src); setPanelTitle(title); }} activePanel={panelSrc} lang={lang} />
-
-      <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0, marginLeft: isMobile ? 0 : "var(--bs-sidebar-w, 220px)", transition: "margin-left 0.3s ease" }}>
+      <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
       {/* Header */}
       <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid var(--bs-border)`, color: "#F0F0F4" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
