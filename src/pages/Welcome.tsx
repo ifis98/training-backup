@@ -116,7 +116,8 @@ export default function Welcome() {
           Together, we're giving patients the power to understand what their body does while they sleep.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", flexDirection: isMobile ? "column" : "row", padding: isMobile ? "0 8px" : 0 }}>
-          <button onClick={() => navigate('/register')}
+          <button
+            onClick={() => document.getElementById('invite-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
             style={{ background: C.gradRed, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", letterSpacing: 0.5, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3), transition: "all 0.3s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
@@ -153,7 +154,7 @@ export default function Welcome() {
       </div>
 
       {/* Invite code gate */}
-      <div style={{ maxWidth: 480, margin: isMobile ? "8px auto 0" : "12px auto 0", padding: isMobile ? "0 16px" : 0 }}>
+      <div id="invite-section" style={{ maxWidth: 480, margin: isMobile ? "8px auto 0" : "12px auto 0", padding: isMobile ? "0 16px" : 0 }}>
         {codeStatus !== 'success' ? (
           <div style={{ ...glass, padding: isMobile ? "18px 16px" : "22px 28px" }}>
             <div style={{ fontSize: 10, letterSpacing: 4, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 14, textAlign: "center" }}>
@@ -306,7 +307,8 @@ export default function Welcome() {
             You have the power to change that. Every patient you educate, every conversation you start,
             every recommendation you make — you're protecting someone's health in a way no one else can.
           </p>
-          <button onClick={() => navigate('/register')}
+          <button
+            onClick={() => document.getElementById('invite-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
             style={{ background: C.gradTeal, color: C.white, border: "none", padding: isMobile ? "14px 28px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), width: isMobile ? "100%" : "auto" }}>
             Start Your Training →
           </button>

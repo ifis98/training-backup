@@ -94,6 +94,12 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
   const { signOut } = useClerk();
   const { user: clerkUser } = useUser();
 
+  // Guard /register: require a redeemed invite code in localStorage
+  if (mode === "sign-up" && !localStorage.getItem('bsa6_invite')) {
+    navigate('/');
+    return null;
+  }
+
   // If already signed in, let them continue or sign out
   if (clerkUser) {
     return (
