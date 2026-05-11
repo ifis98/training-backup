@@ -271,7 +271,7 @@ function AppRoutes() {
   }
 
   const isSignedIn = !!clerkUser;
-  const appRoute = isByteSenseAdmin ? "/bytesense-admin" : "/app";
+  const appRoute = "/app";
 
   return (
     <>
@@ -284,7 +284,7 @@ function AppRoutes() {
         <Route path="/register/*" element={!isSignedIn ? <AuthScreen mode="sign-up" /> : <Navigate to={appRoute} />} />
 
         {/* Protected app — new users see intake, existing users see dashboard (handled inside Index) */}
-        <Route path="/app" element={isSignedIn ? (isByteSenseAdmin ? <Navigate to="/bytesense-admin" /> : <Index />) : <Navigate to="/login" />} />
+        <Route path="/app" element={isSignedIn ? <Index /> : <Navigate to="/login" />} />
 
         {/* Section routes — each gets its own URL, sidebar always present */}
         <Route path="/sales-training"    element={isSignedIn ? <Index forcePhase="sales-training" />    : <Navigate to="/login" />} />

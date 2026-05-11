@@ -6,7 +6,8 @@ import { t, Lang } from '@/data/translations';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Package, Building2, Award, Mail, LogOut, ChevronLeft, ChevronRight, Settings, Swords, Phone } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Package, Building2, Award, Mail, LogOut, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardSidebarProps {
   s: AppState;
@@ -34,6 +35,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isByteSenseAdmin } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -249,6 +251,28 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
           );
         })}
       </div>
+
+      {/* Admin panel link */}
+      {isByteSenseAdmin && (
+        <div style={{ padding: collapsed ? "10px 8px" : "10px 12px", borderTop: "1px solid var(--bs-border)" }}>
+          <button
+            onClick={() => navigate('/bytesense-admin')}
+            title="ByteSense Admin Panel"
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 10,
+              background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)",
+              borderRadius: 8, padding: collapsed ? "10px" : "10px 14px",
+              cursor: "pointer", fontFamily: C.fn, transition: "all 0.2s",
+              justifyContent: collapsed ? "center" : "flex-start",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(212,175,55,0.15)"; e.currentTarget.style.borderColor = "rgba(212,175,55,0.4)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(212,175,55,0.08)"; e.currentTarget.style.borderColor = "rgba(212,175,55,0.2)"; }}
+          >
+            <ShieldCheck size={15} color={C.gold} strokeWidth={2} style={{ flexShrink: 0 }} />
+            {!collapsed && <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>Admin Panel</span>}
+          </button>
+        </div>
+      )}
 
       {/* User info at bottom */}
       {!collapsed && (
