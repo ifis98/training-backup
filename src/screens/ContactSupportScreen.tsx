@@ -4,13 +4,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // ── Colours ──────────────────────────────────────────────────────────────────
-const BG      = '#0A0A0A';
-const SURFACE = '#111111';
-const CARD    = '#181818';
-const BORDER  = '#252525';
-const BORDER2 = '#2E2E2E';
-const DIM     = '#A0A0A0';
-const FAINT   = '#555555';
+const BG      = 'var(--bs-bg)';
+const SURFACE = 'var(--bs-bg2)';
+const CARD    = 'var(--bs-bg3)';
+const BORDER  = 'var(--bs-border)';
+const BORDER2 = 'var(--bs-border)';
+const DIM     = 'var(--bs-ash)';
+const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
 const RED_MUT = '#3A1515';
 const RED_BDR = '#5a1010';
@@ -32,7 +32,7 @@ const sectionTag: React.CSSProperties = {
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 38, fontWeight: 800, lineHeight: 1.1,
-  letterSpacing: -1, marginBottom: 8, color: '#F4F4F4', fontFamily: C.fn,
+  letterSpacing: -1, marginBottom: 8, color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const sectionSubtitle: React.CSSProperties = {
@@ -41,7 +41,7 @@ const sectionSubtitle: React.CSSProperties = {
 };
 
 const h3Style: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, margin: '32px 0 16px', color: '#F4F4F4', fontFamily: C.fn,
+  fontSize: 18, fontWeight: 700, margin: '32px 0 16px', color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const divider: React.CSSProperties = {
@@ -75,7 +75,7 @@ const hlLabel = (teal = false): React.CSSProperties => ({
 });
 
 const hlTitle: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, color: '#F4F4F4', marginBottom: 10,
+  fontSize: 18, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 10,
 };
 
 const hlBody: React.CSSProperties = {
@@ -94,7 +94,7 @@ function PoliciesSection() {
       {/* Dr. Hendrik Lai */}
       <div style={{ ...cardStyle('teal'), marginBottom: 20 }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: TEAL_C, marginBottom: 12 }}>MAIN DENTIST CONTACT</div>
-        <div style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F4', marginBottom: 4 }}>Dr. Hendrik Lai</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 4 }}>Dr. Hendrik Lai</div>
         <div style={{ fontSize: 13, color: DIM, marginBottom: 12 }}>Lead Dentist — Practice Point of Contact</div>
         <div style={{ fontSize: 24, fontWeight: 700, color: TEAL_C, marginBottom: 4 }}>+1 (920) 331-7128</div>
         <div style={{ fontSize: 12, color: FAINT }}>Call or text for clinical questions, patient care decisions, and in-practice support.</div>
@@ -105,14 +105,14 @@ function PoliciesSection() {
         {/* Natasha Blake */}
         <div style={cardStyle('red')}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: RED_B, marginBottom: 12 }}>YOUR DEDICATED BYTESENSE CONTACT</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F4', marginBottom: 4 }}>Natasha L. Blake</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 4 }}>Natasha L. Blake</div>
           <div style={{ fontSize: 13, color: DIM, marginBottom: 2 }}>Chief Strategy &amp; Innovation Officer</div>
           <div style={{ fontSize: 13, color: DIM, marginBottom: 16 }}>byteSense</div>
           <div style={{ fontSize: 24, fontWeight: 700, color: RED_B, marginBottom: 4 }}>909-527-9602</div>
           <div style={{ fontSize: 12, color: FAINT, marginBottom: 16 }}>Call or text — Natasha responds personally to all Beta partner inquiries</div>
           <div style={divider} />
           <div style={{ fontSize: 13, color: DIM }}>
-            <strong style={{ color: '#F4F4F4' }}>Use for:</strong> Clinical questions, team training support, scan submission help, case status, pricing discussions, partnership questions, any concern about the program — anything at all.
+            <strong style={{ color: 'var(--bs-text)' }}>Use for:</strong> Clinical questions, team training support, scan submission help, case status, pricing discussions, partnership questions, any concern about the program — anything at all.
           </div>
         </div>
 
@@ -120,12 +120,12 @@ function PoliciesSection() {
         <div>
           <div style={{ ...cardStyle('teal'), marginBottom: 14 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: TEAL_C, marginBottom: 12 }}>PATIENT TECHNICAL SUPPORT</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#F4F4F4', marginBottom: 4 }}>support@bytesense.ai</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>support@bytesense.ai</div>
             <div style={{ fontSize: 13, color: DIM }}>For patient-facing technical questions: app issues, device connectivity, data interpretation, account support.</div>
           </div>
           <div style={{ ...cardStyle('none'), borderLeft: `3px solid ${FAINT}` }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: FAINT, marginBottom: 12 }}>BYTESENSE WEBSITE</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#F4F4F4', marginBottom: 4 }}>bytesense.ai</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>bytesense.ai</div>
             <div style={{ fontSize: 13, color: DIM }}>Direct patients here for product information, FAQs, and company background. Also useful for your team's ongoing education.</div>
           </div>
         </div>
@@ -133,7 +133,7 @@ function PoliciesSection() {
 
       {/* Warranty */}
       <div style={{ ...cardStyle('teal'), marginBottom: 32 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 8 }}>12-Month Device Warranty</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8 }}>12-Month Device Warranty</div>
         <div style={cardBody}>
           Every bioSense™ device is covered by a 12-month warranty from the date of delivery. The warranty covers manufacturing defects in the device and sensor systems. It does not cover loss, patient-caused damage, or normal wear from extended use. For warranty-related concerns, contact Natasha Blake or support@bytesense.ai with the patient name, case number, and description of the issue. Warranty decisions are made in partnership with the practice — your patient's satisfaction is our satisfaction.
         </div>
@@ -509,7 +509,7 @@ export default function ContactSupportScreen() {
       }}>
         {/* Logo area */}
         <div style={{ padding: '28px 24px 20px', borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: '#F4F4F4', marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: 'var(--bs-text)', marginBottom: 8 }}>
             byte<span style={{ color: RED_B }}>Sense</span>
           </div>
           <span style={{
@@ -548,7 +548,7 @@ export default function ContactSupportScreen() {
         <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ background: RED_MUT, border: `1px solid ${RED_BDR}`, padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Contact Support</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 2 }}>+1 (888) 397-7073</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>+1 (888) 397-7073</div>
             <div style={{ fontSize: 13, color: DIM }}>support@bytesense.ai</div>
           </div>
         </div>

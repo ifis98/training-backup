@@ -133,7 +133,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
       left: isMobile ? 0 : "calc(var(--bs-sidebar-w, 220px) + var(--bs-roleplay-w, 0px))",
       zIndex: isMobile ? 300 : 200,
       display: "flex", flexDirection: "column",
-      background: `radial-gradient(ellipse at top, #1a1a24, ${C.dark})`,
+      background: "radial-gradient(ellipse at top, var(--bs-bg3), var(--bs-bg))",
       fontFamily: C.fn,
       transform: isOpen ? "translateX(0)" : "translateX(105%)",
       transition: "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",

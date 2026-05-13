@@ -4,13 +4,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowLeft } from 'lucide-react';
 
 // ── Colours (matches OfficeWorkflowScreen) ───────────────────────────────────
-const BG      = '#0A0A0A';
-const SURFACE = '#111111';
-const CARD    = '#181818';
-const BORDER  = '#252525';
-const BORDER2 = '#2E2E2E';
-const DIM     = '#A0A0A0';
-const FAINT   = '#555555';
+const BG      = 'var(--bs-bg)';
+const SURFACE = 'var(--bs-bg2)';
+const CARD    = 'var(--bs-bg3)';
+const BORDER  = 'var(--bs-border)';
+const BORDER2 = 'var(--bs-border)';
+const DIM     = 'var(--bs-ash)';
+const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
 const RED_MUT = '#3A1515';
 const RED_BDR = '#5a1010';
@@ -32,7 +32,7 @@ const sectionTag: React.CSSProperties = {
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 38, fontWeight: 800, lineHeight: 1.1,
-  letterSpacing: -1, marginBottom: 8, color: '#F4F4F4', fontFamily: C.fn,
+  letterSpacing: -1, marginBottom: 8, color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const sectionSubtitle: React.CSSProperties = {
@@ -58,7 +58,7 @@ const checkLi: React.CSSProperties = {
 };
 
 const h3Style: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, margin: '32px 0 16px', color: '#F4F4F4', fontFamily: C.fn,
+  fontSize: 18, fontWeight: 700, margin: '32px 0 16px', color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 function StepBlock({ num, title, body }: { num: number; title: string; body: string }) {
@@ -66,7 +66,7 @@ function StepBlock({ num, title, body }: { num: number; title: string; body: str
     <div style={{ display: 'flex', gap: 20, marginBottom: 24, alignItems: 'flex-start' }}>
       <div style={{ width: 38, height: 38, minWidth: 38, background: RED_B, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: 'white', flexShrink: 0 }}>{num}</div>
       <div>
-        <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 6, color: '#F4F4F4', fontFamily: C.fn }}>{title}</div>
+        <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 6, color: 'var(--bs-text)', fontFamily: C.fn }}>{title}</div>
         <div style={{ fontSize: 14, color: DIM, lineHeight: 1.7, fontFamily: C.fn }}>{body}</div>
       </div>
     </div>
@@ -127,7 +127,7 @@ function ScannerDetailPage({ scanner, onBack }: { scanner: typeof SCANNERS[0]; o
           color: DIM, fontSize: 13, fontFamily: C.fn, padding: 0,
           marginBottom: 36,
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#F4F4F4'; }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--bs-text)'; }}
         onMouseLeave={e => { e.currentTarget.style.color = DIM; }}
       >
         <ArrowLeft size={15} strokeWidth={2} />
@@ -144,7 +144,7 @@ function ScannerDetailPage({ scanner, onBack }: { scanner: typeof SCANNERS[0]; o
       <div style={{ background: '#0c0c10', border: `1px solid ${BORDER2}`, padding: '18px 22px', marginBottom: 40, display: 'flex', gap: 14 }}>
         <div style={{ color: TEAL_C, fontSize: 18, flexShrink: 0 }}>ℹ</div>
         <div style={{ fontSize: 13, color: DIM, lineHeight: 1.7, fontFamily: C.fn }}>
-          All submissions go through <strong style={{ color: '#F4F4F4' }}>Medit Link</strong> to <strong style={{ color: '#F4F4F4' }}>Florida Oral Labs</strong>. Complete this once before your first case.
+          All submissions go through <strong style={{ color: 'var(--bs-text)' }}>Medit Link</strong> to <strong style={{ color: 'var(--bs-text)' }}>Florida Oral Labs</strong>. Complete this once before your first case.
         </div>
       </div>
 
@@ -156,7 +156,7 @@ function ScannerDetailPage({ scanner, onBack }: { scanner: typeof SCANNERS[0]; o
       <div style={{ background: '#0a1a0a', border: `1px solid #1a5a1a`, padding: '20px 24px', display: 'flex', gap: 16, marginTop: 8 }}>
         <div style={{ color: '#38A169', fontSize: 20, flexShrink: 0 }}>✓</div>
         <div style={{ fontSize: 13, color: DIM, lineHeight: 1.75, fontFamily: C.fn }}>
-          <strong style={{ color: '#F4F4F4' }}>Before your first submission:</strong> Contact Natasha Blake at 909-527-9602 to confirm your Medit Link lab connection is active and Florida Oral Labs is correctly linked to your account. This prevents delays on your first case.
+          <strong style={{ color: 'var(--bs-text)' }}>Before your first submission:</strong> Contact Natasha Blake at 909-527-9602 to confirm your Medit Link lab connection is active and Florida Oral Labs is correctly linked to your account. This prevents delays on your first case.
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@ function ScannerRegistrationSection({ onSelectScanner }: { onSelectScanner: (id:
       <div style={{ background: '#0c0c10', border: `1px solid ${BORDER2}`, padding: '18px 22px', marginBottom: 36, display: 'flex', gap: 14 }}>
         <div style={{ color: TEAL_C, fontSize: 18, flexShrink: 0 }}>ℹ</div>
         <div style={{ fontSize: 13, color: DIM, lineHeight: 1.7, fontFamily: C.fn }}>
-          All case submissions go through <strong style={{ color: '#F4F4F4' }}>Medit Link</strong> to <strong style={{ color: '#F4F4F4' }}>Florida Oral Labs</strong>, regardless of which scanner your practice uses. Complete this registration once — it takes approximately 10 minutes.
+          All case submissions go through <strong style={{ color: 'var(--bs-text)' }}>Medit Link</strong> to <strong style={{ color: 'var(--bs-text)' }}>Florida Oral Labs</strong>, regardless of which scanner your practice uses. Complete this registration once — it takes approximately 10 minutes.
         </div>
       </div>
 
@@ -206,7 +206,7 @@ function ScannerRegistrationSection({ onSelectScanner }: { onSelectScanner: (id:
       <div style={{ ...cardStyle('teal') }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: TEAL_C, marginBottom: 10 }}>Don't see your scanner?</div>
         <div style={{ fontSize: 14, color: DIM, lineHeight: 1.7 }}>
-          If your practice uses a different intraoral scanner (3Shape, Planmeca, etc.), contact Natasha Blake at <strong style={{ color: '#F4F4F4' }}>909-527-9602</strong>. All scanners that export STL files can submit cases.
+          If your practice uses a different intraoral scanner (3Shape, Planmeca, etc.), contact Natasha Blake at <strong style={{ color: 'var(--bs-text)' }}>909-527-9602</strong>. All scanners that export STL files can submit cases.
         </div>
       </div>
     </div>
@@ -292,7 +292,7 @@ function InOfficeLaunchSection() {
       <div style={{ background: '#1a0a0a', border: `1px solid ${RED_BDR}`, padding: '20px 24px', display: 'flex', gap: 16 }}>
         <div style={{ color: RED_B, fontSize: 20, flexShrink: 0 }}>⚑</div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#F4F4F4', marginBottom: 8 }}>First Week Target: 3 Submitted Cases</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8 }}>First Week Target: 3 Submitted Cases</div>
           <div style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}>
             Getting 3 cases submitted in your first week establishes the habit, proves the system works, and gets patients through the pipeline quickly enough to generate real testimonials. Don't aim for perfect — aim for moving. Natasha is available throughout your first week for real-time coaching. Use her.
           </div>
@@ -333,7 +333,7 @@ function ActivationSection() {
             fontSize: 12, color: item.color === 'teal' ? TEAL_C : RED_B, fontWeight: 800, flexShrink: 0, marginTop: 1,
           }}>☐</div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#F4F4F4', marginBottom: 4 }}>{item.label}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>{item.label}</div>
             <div style={{ fontSize: 13, color: DIM, lineHeight: 1.65 }}>{item.desc}</div>
           </div>
         </div>
@@ -376,7 +376,7 @@ function ActivationSection() {
       {/* Final callout */}
       <div style={{ background: TEAL_MUT, border: `1px solid ${TEAL_C}55`, padding: '28px 32px', marginTop: 40 }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: TEAL_C, marginBottom: 10, textTransform: 'uppercase' }}>You Are Live</div>
-        <h3 style={{ fontSize: 22, fontWeight: 800, color: '#F4F4F4', marginBottom: 12, fontFamily: C.fn }}>Your First Case Is In the Lab</h3>
+        <h3 style={{ fontSize: 22, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 12, fontFamily: C.fn }}>Your First Case Is In the Lab</h3>
         <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, margin: 0, fontFamily: C.fn }}>
           From this point forward, the system runs on rhythm. Morning huddle → patient identification → presentation → consent → scan → submit → collect → schedule delivery. Each repetition gets faster. Each case builds confidence in your team and trust in your patients. You are already ahead of every practice that is still waiting for the perfect moment to start.
         </p>
@@ -470,7 +470,7 @@ export default function OfficeOnboardingScreen() {
         }}>
           {/* Header */}
           <div style={{ padding: '28px 24px 20px', borderBottom: `1px solid ${BORDER}` }}>
-            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: '#F4F4F4', marginBottom: 8 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: 'var(--bs-text)', marginBottom: 8 }}>
               byte<span style={{ color: RED_B }}>Sense</span>
             </div>
             <span style={{
@@ -505,7 +505,7 @@ export default function OfficeOnboardingScreen() {
           <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
             <div style={{ background: RED_MUT, border: `1px solid ${RED_BDR}`, padding: 14 }}>
               <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Natasha Blake</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 2 }}>909-527-9602</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>909-527-9602</div>
               <div style={{ fontSize: 11, color: DIM }}>Onboarding support</div>
             </div>
           </div>

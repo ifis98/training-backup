@@ -359,12 +359,12 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     </div>
   );
 
-  const tooltipStyle = { background: C.dark2, border: `1px solid var(--bs-border)`, borderRadius: C.radiusSm, fontSize: 12, color: "var(--bs-text)" };
+  const tooltipStyle = { background: "var(--bs-bg2)", border: `1px solid var(--bs-border)`, borderRadius: C.radiusSm, fontSize: 12, color: "var(--bs-text)" };
 
   return (
     <div style={{ fontFamily: C.fn, color: "var(--bs-text)", minHeight: "100vh" }}>
       {/* ── Header ── */}
-      <div style={{ background: "rgba(8,8,12,0.96)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderBottom: "1px solid var(--bs-border)", position: "sticky", top: 0, zIndex: 30, color: "#F0F0F4" }}>
+      <div style={{ background: "var(--bs-glass)", backdropFilter: C.blur, WebkitBackdropFilter: C.blur, borderBottom: "1px solid var(--bs-border)", position: "sticky", top: 0, zIndex: 30, color: "var(--bs-text)" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "10px 16px" : "14px 28px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
@@ -394,7 +394,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 </button>
                 <button
                   onClick={() => window.open('https://app.bytesense.ai/api/proxy?url=https://tawk.to/chat/691e1e6b3c3c13194fe65a35/1jaeqdl1b', '_blank')}
-                  style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "#FFFFFF", width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}
+                  style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}
                   title="Live Chat Support"
                 >
                   <MessageSquare size={17} strokeWidth={1.5} />
@@ -783,10 +783,10 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                     style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
                   <select value={newCase.status} onChange={e => setNewCase({ ...newCase, status: e.target.value })}
                     style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }}>
-                    <option value="pending" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_pending")}</option>
-                    <option value="follow_up" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
-                    <option value="converted" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_converted")}</option>
-                    <option value="rejected" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_rejected")}</option>
+                    <option value="pending" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_pending")}</option>
+                    <option value="follow_up" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
+                    <option value="converted" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_converted")}</option>
+                    <option value="rejected" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                   </select>
                   <input type="number" value={newCase.case_value} onChange={e => setNewCase({ ...newCase, case_value: +e.target.value })} placeholder={T("case_value")}
                     style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
@@ -832,10 +832,10 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>{c.case_value > 0 ? `$${Number(c.case_value).toLocaleString()}` : ''}</span>
                   <select value={c.status} onChange={e => handleUpdateCaseStatus(c.id, e.target.value)}
                     style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: caseStatusColor(c.status), padding: "4px 8px", fontSize: 10, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, fontWeight: 700 }}>
-                    <option value="pending" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_pending")}</option>
-                    <option value="follow_up" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
-                    <option value="converted" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_converted")}</option>
-                    <option value="rejected" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_rejected")}</option>
+                    <option value="pending" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_pending")}</option>
+                    <option value="follow_up" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
+                    <option value="converted" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_converted")}</option>
+                    <option value="rejected" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                   </select>
                 </div>
               ))

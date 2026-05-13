@@ -4,13 +4,13 @@ import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 // ── Colours (mirrored from HTML variables) ──────────────────────────────────
-const BG      = '#0A0A0A';
-const SURFACE = '#111111';
-const CARD    = '#181818';
-const BORDER  = '#252525';
-const BORDER2 = '#2E2E2E';
-const DIM     = '#A0A0A0';
-const FAINT   = '#555555';
+const BG      = 'var(--bs-bg)';
+const SURFACE = 'var(--bs-bg2)';
+const CARD    = 'var(--bs-bg3)';
+const BORDER  = 'var(--bs-border)';
+const BORDER2 = 'var(--bs-border)';
+const DIM     = 'var(--bs-ash)';
+const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
 const RED_MUT = '#3A1515';
 const RED_BDR = '#5a1010';
@@ -61,7 +61,7 @@ const sectionTag: React.CSSProperties = {
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 38, fontWeight: 800, lineHeight: 1.1,
-  letterSpacing: -1, marginBottom: 8, color: '#F4F4F4', fontFamily: C.fn,
+  letterSpacing: -1, marginBottom: 8, color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const sectionSubtitle: React.CSSProperties = {
@@ -486,7 +486,7 @@ function LiabilitySection() {
     <div data-sid="ob-liability" style={{ padding: isMobile ? '40px 16px' : '72px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn }}>
 
       {/* ── Full-width heading ── */}
-      <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: '#F4F4F4', margin: '0 0 52px', letterSpacing: -1.5 }}>
+      <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: '0 0 52px', letterSpacing: -1.5 }}>
         <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Liability Protection</span>
         {' '}<span style={{ fontFamily: C.fn, fontWeight: 800 }}>via Compliance Tracking.</span>
       </h2>
@@ -624,7 +624,7 @@ function LiabilitySection() {
               </p>
 
               {/* Patients perceive */}
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>
                 Patients perceive your practice as:
               </p>
               <div style={{ marginBottom: 24 }}>
@@ -637,7 +637,7 @@ function LiabilitySection() {
               </div>
 
               {/* Uplift areas */}
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>
                 That perceived sophistication can meaningfully increase:
               </p>
               <div style={{ marginBottom: 0 }}>
@@ -673,7 +673,7 @@ function SophisticationSection() {
     <div data-sid="ob-positioning" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: '#000' }}>
 
       {/* ── Full-width heading ── */}
-      <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: '#F4F4F4', margin: `0 0 ${isMobile ? 32 : 52}px`, letterSpacing: -1.5 }}>
+      <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: `0 0 ${isMobile ? 32 : 52}px`, letterSpacing: -1.5 }}>
         <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Enhance Provider</span><br />
         <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 800 }}>Perceived </span>
         <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Sophistication.</span>
@@ -811,7 +811,7 @@ function SophisticationSection() {
               <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 20 }}>
                 This shift significantly elevates provider perception.
               </p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>Patients perceive your practice as:</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>Patients perceive your practice as:</p>
               <div style={{ marginBottom: 20 }}>
                 {perceptionBullets.map((b, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -820,7 +820,7 @@ function SophisticationSection() {
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>That perceived sophistication can meaningfully increase:</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>That perceived sophistication can meaningfully increase:</p>
               <div style={{ marginBottom: 20 }}>
                 {upliftBullets.map((b, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -863,7 +863,7 @@ function PremiumDifferentiationSection() {
     <div data-sid="ob-premium" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn }}>
 
       {/* ── Full-width heading ── */}
-      <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: '#F4F4F4', margin: `0 0 ${isMobile ? 32 : 52}px`, letterSpacing: -1.5 }}>
+      <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: `0 0 ${isMobile ? 32 : 52}px`, letterSpacing: -1.5 }}>
         <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Higher-Value</span>{' '}
         <span style={{ fontFamily: C.fn, fontWeight: 800 }}>Care Positioning &amp;</span><br />
         <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Differentiation.</span>
@@ -988,9 +988,9 @@ function PremiumDifferentiationSection() {
                 ))}
               </div>
               <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 20 }}>
-                your practice can differentiate through <strong style={{ color: '#F4F4F4', fontWeight: 600 }}>innovation, personalization, and patient experience.</strong>
+                your practice can differentiate through <strong style={{ color: 'var(--bs-text)', fontWeight: 600 }}>innovation, personalization, and patient experience.</strong>
               </p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>
                 That differentiation supports:
               </p>
               <div style={{ marginBottom: 20 }}>
@@ -1051,7 +1051,7 @@ function PatientRetentionSection() {
       <div data-sid="ob-retention" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: '#000' }}>
 
         {/* ── Section heading ── */}
-        <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: '#F4F4F4', margin: '0 0 52px', letterSpacing: -1.5 }}>
+        <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: '0 0 52px', letterSpacing: -1.5 }}>
           <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Enhance</span>
           {' '}Patient Retention<br />
           &amp; Follow-Up.
@@ -1224,7 +1224,7 @@ function PatientRetentionSection() {
                 </p>
 
                 {/* Platform bullets */}
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>
                   Through the byteSense platform, patients receive ongoing:
                 </p>
                 <div style={{ marginBottom: 20 }}>
@@ -1245,7 +1245,7 @@ function PatientRetentionSection() {
                 </p>
 
                 {/* Practice benefits */}
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>
                   This helps your practice:
                 </p>
                 <div style={{ marginBottom: 20 }}>
@@ -1296,7 +1296,7 @@ function PracticeRevenueSection() {
 
         {/* Left: headline + widget card */}
         <div>
-          <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: '#F4F4F4', margin: '0 0 40px', letterSpacing: -1.5 }}>
+          <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: '0 0 40px', letterSpacing: -1.5 }}>
             <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>From </span>standard<br />
             appliance,<br />
             <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>to premium<br />revenue category.</span>
@@ -1512,7 +1512,7 @@ function PracticeRevenueSection() {
               By combining protection with personalized sleep, stress, and recovery insights, your practice
               can offer a higher-value solution that patients are more emotionally connected to and more willing to invest in.
             </p>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>This creates opportunities to:</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>This creates opportunities to:</p>
             <div style={{ marginBottom: 20 }}>
               {[
                 'Increase case acceptance',
@@ -1570,7 +1570,7 @@ function TrustSection() {
     <div data-sid="ob-trust" style={{ padding: isMobile ? '24px 16px' : '72px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn }}>
       {/* Headline row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 52 }}>
-        <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: '#F4F4F4', margin: 0, letterSpacing: -1.5 }}>
+        <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: 0, letterSpacing: -1.5 }}>
           <span style={{ fontStyle: 'italic', fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400 }}>Enhance Trust</span>
           {' '}& Loyalty.
         </h2>
@@ -1606,7 +1606,7 @@ function TrustSection() {
               </p>
 
               {/* Platform list */}
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>
                 Through the byteSense mobile platform, patients can receive:
               </p>
               <div style={{ marginBottom: 20 }}>
@@ -1642,7 +1642,7 @@ function TrustSection() {
               </p>
 
               {/* Benefits */}
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 10 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 10 }}>
                 That level of personalization and ongoing engagement helps:
               </p>
               <div style={{ marginBottom: 20 }}>
@@ -1801,7 +1801,7 @@ function ConsumerSleepSection() {
             </p>
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>byteSense tracks recovery through:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>byteSense tracks recovery through:</p>
           <div style={{ marginBottom: 20 }}>
             {tracksBullets.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -1894,7 +1894,7 @@ function ConsumerReadinessSection() {
             </p>
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>Readiness is shaped by:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>Readiness is shaped by:</p>
           <div style={{ marginBottom: 20 }}>
             {readinessBullets.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -1978,7 +1978,7 @@ function ConsumerMorningSection() {
             </p>
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>Your morning outlook covers:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>Your morning outlook covers:</p>
           <div style={{ marginBottom: 20 }}>
             {morningCovers.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -2069,7 +2069,7 @@ function ConsumerCirculationSection() {
             </p>
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>Why the oral position matters:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>Why the oral position matters:</p>
           <div style={{ marginBottom: 20 }}>
             {oralAdvantage.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -2166,7 +2166,7 @@ function ConsumerPositionSection() {
             </p>
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>Position data is compared against:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>Position data is compared against:</p>
           <div style={{ marginBottom: 20 }}>
             {positionCorrelates.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -2274,7 +2274,7 @@ function ConsumerOralSection() {
             </p>
           </div>
 
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>Oral Intelligence interprets:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>Oral Intelligence interprets:</p>
           <div style={{ marginBottom: 20 }}>
             {oralIntelBullets.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -2400,7 +2400,7 @@ function ConsumerDiscoverSection() {
           </div>
 
           {/* What it connects */}
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', margin: '0 0 10px' }}>byteSense looks for connections between:</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', margin: '0 0 10px' }}>byteSense looks for connections between:</p>
           <div style={{ marginBottom: 20 }}>
             {connectsBullets.map((b, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, fontSize: 13, color: DIM, lineHeight: 1.7 }}>
@@ -2524,7 +2524,7 @@ export default function ProductExperienceScreen() {
       }}>
         {/* Logo area */}
         <div style={{ padding: '28px 24px 20px', borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: '#F4F4F4', marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: 'var(--bs-text)', marginBottom: 8 }}>
             byte<span style={{ color: RED_B }}>Sense</span>
           </div>
           <span style={{
@@ -2563,7 +2563,7 @@ export default function ProductExperienceScreen() {
         <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ background: RED_MUT, border: `1px solid ${RED_B}55`, padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Contact Support</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 2 }}>+1 (888) 397-7073</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>+1 (888) 397-7073</div>
             <div style={{ fontSize: 13, color: DIM }}>support@bytesense.ai</div>
           </div>
         </div>
@@ -2644,7 +2644,7 @@ export default function ProductExperienceScreen() {
             item.id === 'ob-premium'     ? <PremiumDifferentiationSection key="ob-premium" /> :
             (
               <div key={item.id} data-sid={item.id} style={{ maxWidth: 900, padding: isMobile ? '24px 16px' : '40px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn }}>
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: '#F4F4F4', marginBottom: 14 }}>{item.trigger}</h3>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 14 }}>{item.trigger}</h3>
                 <p style={{ fontSize: 15, color: DIM, lineHeight: 1.8 }}>{item.body}</p>
               </div>
             )

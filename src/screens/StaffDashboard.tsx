@@ -139,7 +139,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     { name: 'Remaining', value: Math.max(myM.length - dN, 0), color: "var(--bs-card2)" },
   ];
 
-  const tooltipStyle = { background: C.dark2, border: `1px solid var(--bs-border)`, borderRadius: C.radiusSm, fontSize: 12, color: "var(--bs-text)" };
+  const tooltipStyle = { background: "var(--bs-bg2)", border: `1px solid var(--bs-border)`, borderRadius: C.radiusSm, fontSize: 12, color: "var(--bs-text)" };
 
   const knowledgeScore = useMemo(() => computeKnowledgeScore(s.blScore, dN, myM.length, s.simP), [s.blScore, dN, myM.length, s.simP]);
   const scoreColor = getScoreColor(knowledgeScore, { green: C.green, gold: C.gold, red: C.red });
@@ -210,7 +210,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, var(--bs-bg2), var(--bs-bg))`, minHeight: "100vh", color: "var(--bs-text)", display: "flex" }}>
       <div style={{ flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
       {/* Header */}
-      <div style={{ background: "rgba(20,20,28,0.6)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid var(--bs-border)`, color: "#F0F0F4" }}>
+      <div style={{ background: "var(--bs-glass)", backdropFilter: C.blur, padding: "20px 28px 22px", borderBottom: `1px solid var(--bs-border)`, color: "var(--bs-text)" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -507,10 +507,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                   style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
                 <select value={newCase.status} onChange={e => setNewCase({ ...newCase, status: e.target.value })}
                   style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }}>
-                  <option value="pending" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_pending")}</option>
-                  <option value="follow_up" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
-                  <option value="converted" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_converted")}</option>
-                  <option value="rejected" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_rejected")}</option>
+                  <option value="pending" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_pending")}</option>
+                  <option value="follow_up" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
+                  <option value="converted" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_converted")}</option>
+                  <option value="rejected" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                 </select>
                 <input type="number" value={newCase.case_value} onChange={e => setNewCase({ ...newCase, case_value: +e.target.value })} placeholder={T("case_value")}
                   style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
@@ -552,10 +552,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
                 <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>{c.case_value > 0 ? `$${Number(c.case_value).toLocaleString()}` : ''}</span>
                 <select value={c.status} onChange={e => handleUpdateCaseStatus(c.id, e.target.value)}
                   style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: caseStatusColor(c.status), padding: "4px 8px", fontSize: 10, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, fontWeight: 700 }}>
-                  <option value="pending" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_pending")}</option>
-                  <option value="follow_up" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
-                  <option value="converted" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_converted")}</option>
-                  <option value="rejected" style={{ background: C.dark2, color: "var(--bs-text)" }}>{T("status_rejected")}</option>
+                  <option value="pending" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_pending")}</option>
+                  <option value="follow_up" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_follow_up")}</option>
+                  <option value="converted" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_converted")}</option>
+                  <option value="rejected" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                 </select>
               </div>
             ))

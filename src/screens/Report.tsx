@@ -27,7 +27,7 @@ export default function Report({ s, u, sc, myPH, myM, dN, pr, lang = "en" }: Rep
 
   return (
     <div style={{ fontFamily: C.fn, background: C.snow, minHeight: "100vh" }}>
-      <div style={{ background: C.dark, color: C.white, padding: isMobile ? "32px 16px" : "44px 24px", textAlign: "center" }}>
+      <div style={{ background: "var(--bs-bg2)", color: "var(--bs-text)", padding: isMobile ? "32px 16px" : "44px 24px", textAlign: "center" }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: C.ash, textTransform: "uppercase", marginBottom: 10 }}>{T("training_report")}</div>
         <h2 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, marginBottom: 16 }}>{T("congratulations").replace("{name}", s.name)}</h2>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: isMobile ? 12 : 16, flexWrap: "wrap" }}>

@@ -116,7 +116,7 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       onClick={handleClose}>
-      <div style={{ ...glass, maxWidth: 520, width: '90%', maxHeight: '85vh', overflow: 'auto', padding: 0, background: C.dark2, border: `1px solid ${C.glassBorder}` }}
+      <div style={{ ...glass, maxWidth: 520, width: '90%', maxHeight: '85vh', overflow: 'auto', padding: 0, background: "var(--bs-bg2)", border: `1px solid ${C.glassBorder}` }}
         onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: `1px solid ${C.glassBorder}` }}>

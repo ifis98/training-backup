@@ -107,28 +107,28 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
             </div>
 
             {summary.strengths.length > 0 && (
-              <div style={{ background: C.dark2, padding: isMobile ? 14 : 16, marginBottom: 12 }}>
+              <div style={{ background: "var(--bs-bg2)", padding: isMobile ? 14 : 16, marginBottom: 12 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.green, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>{T("strengths")}</div>
                 {summary.strengths.map((item, i) => (
-                  <div key={i} style={{ fontSize: 13, color: C.white, marginBottom: 4, paddingLeft: 8, borderLeft: `2px solid ${C.green}`, lineHeight: 1.5 }}>{item}</div>
+                  <div key={i} style={{ fontSize: 13, color: "var(--bs-text)", marginBottom: 4, paddingLeft: 8, borderLeft: `2px solid ${C.green}`, lineHeight: 1.5 }}>{item}</div>
                 ))}
               </div>
             )}
 
             {summary.improvements.length > 0 && (
-              <div style={{ background: C.dark2, padding: isMobile ? 14 : 16, marginBottom: 12 }}>
+              <div style={{ background: "var(--bs-bg2)", padding: isMobile ? 14 : 16, marginBottom: 12 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>{T("areas_improve")}</div>
                 {summary.improvements.map((item, i) => (
-                  <div key={i} style={{ fontSize: 13, color: C.white, marginBottom: 4, paddingLeft: 8, borderLeft: `2px solid ${C.gold}`, lineHeight: 1.5 }}>{item}</div>
+                  <div key={i} style={{ fontSize: 13, color: "var(--bs-text)", marginBottom: 4, paddingLeft: 8, borderLeft: `2px solid ${C.gold}`, lineHeight: 1.5 }}>{item}</div>
                 ))}
               </div>
             )}
 
             {summary.tips.length > 0 && (
-              <div style={{ background: C.dark2, padding: isMobile ? 14 : 16, marginBottom: 12 }}>
+              <div style={{ background: "var(--bs-bg2)", padding: isMobile ? 14 : 16, marginBottom: 12 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.teal, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>{T("coaching_tips")}</div>
                 {summary.tips.map((item, i) => (
-                  <div key={i} style={{ fontSize: 13, color: C.white, marginBottom: 6, paddingLeft: 8, borderLeft: `2px solid ${C.teal}`, lineHeight: 1.5 }}>{item}</div>
+                  <div key={i} style={{ fontSize: 13, color: "var(--bs-text)", marginBottom: 6, paddingLeft: 8, borderLeft: `2px solid ${C.teal}`, lineHeight: 1.5 }}>{item}</div>
                 ))}
               </div>
             )}

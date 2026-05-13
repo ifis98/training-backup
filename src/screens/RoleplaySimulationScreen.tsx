@@ -10,13 +10,13 @@ interface RoleplaySimulationScreenProps {
 }
 
 // ── Colours ──────────────────────────────────────────────────────────────────
-const BG      = '#0A0A0A';
-const SURFACE = '#111111';
-const CARD    = '#181818';
-const BORDER  = '#252525';
-const BORDER2 = '#2E2E2E';
-const DIM     = '#A0A0A0';
-const FAINT   = '#555555';
+const BG      = 'var(--bs-bg)';
+const SURFACE = 'var(--bs-bg2)';
+const CARD    = 'var(--bs-bg3)';
+const BORDER  = 'var(--bs-border)';
+const BORDER2 = 'var(--bs-border)';
+const DIM     = 'var(--bs-ash)';
+const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
 const RED_MUT = '#3A1515';
 const RED_BDR = '#5a1010';
@@ -38,7 +38,7 @@ const sectionTag: React.CSSProperties = {
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 38, fontWeight: 800, lineHeight: 1.1,
-  letterSpacing: -1, marginBottom: 8, color: '#F4F4F4', fontFamily: C.fn,
+  letterSpacing: -1, marginBottom: 8, color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const sectionSubtitle: React.CSSProperties = {
@@ -65,7 +65,7 @@ const hlLabel = (teal = false): React.CSSProperties => ({
 });
 
 const hlTitle: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, color: '#F4F4F4', marginBottom: 10,
+  fontSize: 18, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 10,
 };
 
 const hlBody: React.CSSProperties = {
@@ -125,7 +125,7 @@ function AISimulationsSection({ u }: { u: (d: any) => void }) {
 
       <div style={divider} />
 
-      <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 20, fontFamily: C.fn }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 20, fontFamily: C.fn }}>
         Meet Your AI Patients
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, marginBottom: 32 }}>
@@ -139,7 +139,7 @@ function AISimulationsSection({ u }: { u: (d: any) => void }) {
               fontFamily: C.fn,
             }}
           >
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 4 }}>{name}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>{name}</div>
             <div style={{ fontSize: 12, color: TEAL_C }}>{desc}</div>
           </div>
         ))}
@@ -147,7 +147,7 @@ function AISimulationsSection({ u }: { u: (d: any) => void }) {
 
       <div style={divider} />
 
-      <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 16, fontFamily: C.fn }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 16, fontFamily: C.fn }}>
         What You'll Practice
       </div>
       <ul style={checkList}>
@@ -225,7 +225,7 @@ function AICoachSection({ openCoach }: { openCoach: (mode: string) => void }) {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14, marginBottom: 32 }}>
         {coachCards.map(({ title, body }) => (
           <div key={title} style={cardStyle('teal')}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 8 }}>{title}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8 }}>{title}</div>
             <div style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}>{body}</div>
           </div>
         ))}
@@ -233,7 +233,7 @@ function AICoachSection({ openCoach }: { openCoach: (mode: string) => void }) {
 
       <div style={divider} />
 
-      <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 16, fontFamily: C.fn }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 16, fontFamily: C.fn }}>
         Coaching Modes
       </div>
       <ul style={{ listStyle: 'none', padding: 0, marginBottom: 32 }}>
@@ -244,7 +244,7 @@ function AICoachSection({ openCoach }: { openCoach: (mode: string) => void }) {
               background: TEAL_C, flexShrink: 0, marginTop: 4,
             }} />
             <span>
-              <strong style={{ color: '#F4F4F4' }}>{label}</strong>
+              <strong style={{ color: 'var(--bs-text)' }}>{label}</strong>
               <span style={{ color: FAINT }}> — </span>
               {desc}
             </span>
@@ -320,7 +320,7 @@ export default function RoleplaySimulationScreen({ s, u, openCoach, lang }: Role
       }}>
         {/* Logo area */}
         <div style={{ padding: '28px 24px 20px', borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: '#F4F4F4', marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: 'var(--bs-text)', marginBottom: 8 }}>
             byte<span style={{ color: RED_B }}>Sense</span>
           </div>
           <span style={{
@@ -359,7 +359,7 @@ export default function RoleplaySimulationScreen({ s, u, openCoach, lang }: Role
         <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ background: RED_MUT, border: `1px solid ${RED_BDR}`, padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Your Dedicated Support</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 2 }}>Natasha Blake</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>Natasha Blake</div>
             <div style={{ fontSize: 13, color: DIM }}>909-527-9602</div>
           </div>
         </div>

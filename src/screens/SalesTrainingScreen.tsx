@@ -25,13 +25,13 @@ interface SalesTrainingScreenProps {
 }
 
 // ── Colours (mirrored from HTML variables) ──────────────────────────────────
-const BG      = '#0A0A0A';
-const SURFACE = '#111111';
-const CARD    = '#181818';
-const BORDER  = '#252525';
-const BORDER2 = '#2E2E2E';
-const DIM     = '#A0A0A0';
-const FAINT   = '#555555';
+const BG      = 'var(--bs-bg)';
+const SURFACE = 'var(--bs-bg2)';
+const CARD    = 'var(--bs-bg3)';
+const BORDER  = 'var(--bs-border)';
+const BORDER2 = 'var(--bs-border)';
+const DIM     = 'var(--bs-ash)';
+const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
 const RED_MUT = '#3A1515';
 const RED_BDR = '#5a1010';
@@ -53,7 +53,7 @@ const sectionTag: React.CSSProperties = {
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 38, fontWeight: 800, lineHeight: 1.1,
-  letterSpacing: -1, marginBottom: 8, color: '#F4F4F4', fontFamily: C.fn,
+  letterSpacing: -1, marginBottom: 8, color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const sectionSubtitle: React.CSSProperties = {
@@ -78,7 +78,7 @@ const hlLabel = (teal = false): React.CSSProperties => ({
 });
 
 const hlTitle: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, color: '#F4F4F4', marginBottom: 10,
+  fontSize: 18, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 10,
 };
 
 const hlBody: React.CSSProperties = {
@@ -86,7 +86,7 @@ const hlBody: React.CSSProperties = {
 };
 
 const h3Style: React.CSSProperties = {
-  fontSize: 18, fontWeight: 700, margin: '32px 0 16px', color: '#F4F4F4', fontFamily: C.fn,
+  fontSize: 18, fontWeight: 700, margin: '32px 0 16px', color: 'var(--bs-text)', fontFamily: C.fn,
 };
 
 const tableWrap: React.CSSProperties = {
@@ -98,7 +98,7 @@ const tableStyle: React.CSSProperties = {
 };
 
 const thStyle: React.CSSProperties = {
-  background: '#1A1A1A', color: '#F4F4F4', fontWeight: 700,
+  background: 'var(--bs-bg3)', color: 'var(--bs-text)', fontWeight: 700,
   padding: '10px 14px', textAlign: 'left', borderBottom: `1px solid ${BORDER2}`,
   fontSize: 11, letterSpacing: 1, textTransform: 'uppercase',
 };
@@ -118,7 +118,7 @@ const cardStyle = (color: 'red' | 'teal' | 'none' = 'none'): React.CSSProperties
 });
 
 const cardTitle: React.CSSProperties = {
-  fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 8,
+  fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8,
 };
 
 const cardBody: React.CSSProperties = {
@@ -178,9 +178,9 @@ function AboutSection() {
       <div style={{ background: '#1a0a0a', border: `1px solid ${RED_BDR}`, padding: '20px 24px', marginBottom: 28, display: 'flex', gap: 16 }}>
         <div style={{ color: RED_B, fontSize: 20, flexShrink: 0, marginTop: 2 }}>⚑</div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#F4F4F4', marginBottom: 8 }}>Critical Messaging Directive — Read This First</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8 }}>Critical Messaging Directive — Read This First</div>
           <div style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}>
-            bioSense™ is <strong style={{ color: '#F4F4F4' }}>NEVER</strong> to be introduced, described, or positioned as a "night guard" or "mouthguard." These terms commoditize the device and collapse its value to $50–$300. bioSense™ is a <strong style={{ color: '#F4F4F4' }}>wellness health intelligence platform</strong> that happens to protect teeth. Lead with intelligence, monitoring, and body data — always. Protection is a benefit, not the identity.
+            bioSense™ is <strong style={{ color: 'var(--bs-text)' }}>NEVER</strong> to be introduced, described, or positioned as a "night guard" or "mouthguard." These terms commoditize the device and collapse its value to $50–$300. bioSense™ is a <strong style={{ color: 'var(--bs-text)' }}>wellness health intelligence platform</strong> that happens to protect teeth. Lead with intelligence, monitoring, and body data — always. Protection is a benefit, not the identity.
           </div>
         </div>
       </div>
@@ -210,7 +210,7 @@ function AboutSection() {
               ['Motion / Accelerometer', 'Head and jaw movement, sleep position', 'Sleep stage inference, positional OSA, restlessness markers'],
             ].map(([sensor, what, why]) => (
               <tr key={sensor}>
-                <td style={tdStyle}><strong style={{ color: '#F4F4F4' }}>{sensor}</strong></td>
+                <td style={tdStyle}><strong style={{ color: 'var(--bs-text)' }}>{sensor}</strong></td>
                 <td style={tdStyle}>{what}</td>
                 <td style={tdStyle}>{why}</td>
               </tr>
@@ -222,7 +222,7 @@ function AboutSection() {
       <div style={highlightBox(true)}>
         <div style={hlLabel(true)}>The Oral Advantage — Why the Mouth Wins</div>
         <h3 style={hlTitle}>Oral SpO₂ Is Categorically More Accurate Than Wrist or Finger Sensors</h3>
-        <p style={hlBody}>Published clinical research demonstrates that oral SpO₂ sensors detect oxygen desaturation events <strong style={{ color: '#F4F4F4' }}>7 seconds faster</strong> than peripheral sensors. The mouth is immune to vasoconstriction that degrades peripheral readings. Oral data correlates more closely with arterial blood gas measurements — the gold standard — and provides a clearer signal of brain oxygenation. This is not incremental improvement. It is a different category of accuracy.</p>
+        <p style={hlBody}>Published clinical research demonstrates that oral SpO₂ sensors detect oxygen desaturation events <strong style={{ color: 'var(--bs-text)' }}>7 seconds faster</strong> than peripheral sensors. The mouth is immune to vasoconstriction that degrades peripheral readings. Oral data correlates more closely with arterial blood gas measurements — the gold standard — and provides a clearer signal of brain oxygenation. This is not incremental improvement. It is a different category of accuracy.</p>
       </div>
 
       <h3 style={h3Style}>The byteSense Score™</h3>
@@ -259,7 +259,7 @@ function AboutSection() {
           </thead>
           <tbody>
             <tr>
-              <td style={tdStyle}><strong style={{ color: '#F4F4F4' }}>bioSense™</strong></td>
+              <td style={tdStyle}><strong style={{ color: 'var(--bs-text)' }}>bioSense™</strong></td>
               <td style={tdTeal}>Intraoral</td>
               <td style={tdTeal}>Oral (Superior)</td>
               <td style={tdTeal}>Yes — clinical grade</td>
@@ -337,7 +337,7 @@ function BetaSection() {
           </div>
           <div style={{ paddingBottom: last ? 0 : 24 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: C.red, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>{week}</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F4', marginBottom: 6 }}>{title}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 6 }}>{title}</div>
             <div style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}>{body}</div>
           </div>
         </div>
@@ -373,7 +373,7 @@ function PricingSection() {
             padding: '24px 22px',
           }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: featured ? RED_B : DIM, textTransform: 'uppercase', marginBottom: 10 }}>{label}</div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: featured ? RED_B : '#F4F4F4', letterSpacing: -1, marginBottom: 4 }}>{price}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: featured ? RED_B : 'var(--bs-text)', letterSpacing: -1, marginBottom: 4 }}>{price}</div>
             <div style={{ fontSize: 12, color: DIM, marginBottom: 16 }}>{note}</div>
             <div style={{ borderTop: `1px solid ${BORDER}`, marginBottom: 16 }} />
             <ul style={{ listStyle: 'none', padding: 0 }}>
@@ -528,7 +528,7 @@ function MarketingSection() {
         ].map(([title, body]) => (
           <li key={title} style={{ padding: '12px 0', borderBottom: `1px solid ${BORDER}`, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <span style={{ color: C.red, flexShrink: 0, marginTop: 2 }}>—</span>
-            <span style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}><strong style={{ color: '#F4F4F4', display: 'block', marginBottom: 2 }}>{title}:</strong>{body}</span>
+            <span style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}><strong style={{ color: 'var(--bs-text)', display: 'block', marginBottom: 2 }}>{title}:</strong>{body}</span>
           </li>
         ))}
       </ul>
@@ -545,7 +545,7 @@ function MarketingSection() {
         ].map(([title, body]) => (
           <li key={title} style={{ padding: '12px 0', borderBottom: `1px solid ${BORDER}`, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <span style={{ color: C.red, flexShrink: 0, marginTop: 2 }}>—</span>
-            <span style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}><strong style={{ color: '#F4F4F4', display: 'block', marginBottom: 2 }}>{title}:</strong>{body}</span>
+            <span style={{ fontSize: 13, color: DIM, lineHeight: 1.75 }}><strong style={{ color: 'var(--bs-text)', display: 'block', marginBottom: 2 }}>{title}:</strong>{body}</span>
           </li>
         ))}
       </ul>
@@ -667,7 +667,7 @@ function SupportSection() {
       {/* Dr. Hendrik Lai */}
       <div style={{ ...cardStyle('teal'), marginBottom: 20 }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: TEAL_C, marginBottom: 12 }}>MAIN DENTIST CONTACT</div>
-        <div style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F4', marginBottom: 4 }}>Dr. Hendrik Lai</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 4 }}>Dr. Hendrik Lai</div>
         <div style={{ fontSize: 13, color: DIM, marginBottom: 12 }}>Lead Dentist — Practice Point of Contact</div>
         <div style={{ fontSize: 24, fontWeight: 700, color: TEAL_C, marginBottom: 4 }}>+1 (920) 331-7128</div>
         <div style={{ fontSize: 12, color: FAINT }}>Call or text for clinical questions, patient care decisions, and in-practice support.</div>
@@ -676,25 +676,25 @@ function SupportSection() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 32 }}>
         <div style={cardStyle('red')}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: RED_B, marginBottom: 12 }}>YOUR DEDICATED BYTESENSE CONTACT</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F4', marginBottom: 4 }}>Natasha L. Blake</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 4 }}>Natasha L. Blake</div>
           <div style={{ fontSize: 13, color: DIM, marginBottom: 2 }}>Chief Strategy &amp; Innovation Officer</div>
           <div style={{ fontSize: 13, color: DIM, marginBottom: 16 }}>byteSense</div>
           <div style={{ fontSize: 24, fontWeight: 700, color: RED_B, marginBottom: 4 }}>909-527-9602</div>
           <div style={{ fontSize: 12, color: FAINT, marginBottom: 16 }}>Call or text — Natasha responds personally to all Beta partner inquiries</div>
           <div style={divider} />
           <div style={{ fontSize: 13, color: DIM }}>
-            <strong style={{ color: '#F4F4F4' }}>Use for:</strong> Clinical questions, team training support, scan submission help, case status, pricing discussions, partnership questions, any concern about the program — anything at all.
+            <strong style={{ color: 'var(--bs-text)' }}>Use for:</strong> Clinical questions, team training support, scan submission help, case status, pricing discussions, partnership questions, any concern about the program — anything at all.
           </div>
         </div>
         <div>
           <div style={{ ...cardStyle('teal'), marginBottom: 14 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: TEAL_C, marginBottom: 12 }}>PATIENT TECHNICAL SUPPORT</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#F4F4F4', marginBottom: 4 }}>support@bytesense.ai</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>support@bytesense.ai</div>
             <div style={{ fontSize: 13, color: DIM }}>For patient-facing technical questions: app issues, device connectivity, data interpretation, account support.</div>
           </div>
           <div style={{ ...cardStyle('none'), borderLeft: `3px solid ${FAINT}` }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: FAINT, marginBottom: 12 }}>BYTESENSE WEBSITE</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#F4F4F4', marginBottom: 4 }}>bytesense.ai</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>bytesense.ai</div>
             <div style={{ fontSize: 13, color: DIM }}>Direct patients here for product information, FAQs, and company background. Also useful for your team's ongoing education.</div>
           </div>
         </div>
@@ -825,7 +825,7 @@ export default function SalesTrainingScreen(props: SalesTrainingScreenProps) {
       }}>
         {/* Logo area */}
         <div style={{ padding: '28px 24px 20px', borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: '#F4F4F4', marginBottom: 8 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: 'var(--bs-text)', marginBottom: 8 }}>
             byte<span style={{ color: RED_B }}>Sense</span>
           </div>
           <span style={{
@@ -864,7 +864,7 @@ export default function SalesTrainingScreen(props: SalesTrainingScreenProps) {
         <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ background: RED_MUT, border: `1px solid ${RED_BDR}`, padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Contact Support</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 2 }}>+1 (888) 397-7073</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>+1 (888) 397-7073</div>
             <div style={{ fontSize: 13, color: DIM }}>support@bytesense.ai</div>
           </div>
         </div>
