@@ -6,7 +6,7 @@ import { t, Lang } from '@/data/translations';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Package, Building2, Award, Mail, LogOut, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Package, Building2, Mail, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardSidebarProps {
@@ -17,10 +17,8 @@ interface DashboardSidebarProps {
   openCoach: (mode: string) => void;
   onSignOut: () => void;
   onOpenSettings: () => void;
-  onOpenPanel?: (src: string, title: string) => void;
   onOpenBooking?: () => void;
   lang: Lang;
-  activePanel?: string | null;
 }
 
 const glass = {
@@ -30,7 +28,7 @@ const glass = {
   borderRight: `1px solid var(--bs-border)`,
 } as React.CSSProperties;
 
-export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, onSignOut, onOpenSettings, onOpenPanel, onOpenBooking, lang, activePanel }: DashboardSidebarProps) {
+export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, onSignOut, onOpenSettings, onOpenBooking, lang }: DashboardSidebarProps) {
   const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -58,24 +56,23 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
   const path = location.pathname;
   const activeId = path === '/app' || path === '/'
     ? 'dashboard'
-    : path.startsWith('/sales-training')     ? 'sales-training'
-    : path.startsWith('/product-experience') ? 'product-training'
-    : path.startsWith('/office-workflow')    ? 'office-workflow'
-    : path.startsWith('/roleplay')           ? 'roleplay'
-    : path.startsWith('/contact-support')    ? 'contact'
-    : s.phase === 'report'                   ? 'report'
+    : path.startsWith('/sales-training')       ? 'sales-training'
+    : path.startsWith('/product-experience')   ? 'product-training'
+    : path.startsWith('/office-workflow')      ? 'office-workflow'
+    : path.startsWith('/office-onboarding')    ? 'office-onboarding'
+    : path.startsWith('/roleplay')             ? 'roleplay'
+    : path.startsWith('/contact-support')      ? 'contact'
+    : s.phase === 'report'                     ? 'report'
     : 'dashboard';
 
   const navItems = [
-    { id: "dashboard",        icon: LayoutDashboard, label: "Dashboard",              action: () => { u({ phase: "dashboard" }); navigate('/app'); scrollTop(); } },
-    { id: "sales-training",   icon: TrendingUp,      label: "Sales Training",         action: () => { navigate('/sales-training'); scrollTop(); } },
-    { id: "product-training", icon: Package,         label: "Product Experience",     action: () => { navigate('/product-experience'); scrollTop(); } },
-    { id: "office-workflow",  icon: Building2,       label: "Office Workflow",        action: () => { navigate('/office-workflow'); scrollTop(); } },
-    { id: "roleplay",         icon: Swords,          label: "Roleplay Simulation",    action: () => { navigate('/roleplay'); scrollTop(); } },
-    { id: "report",           icon: Award,           label: "Reports & Certificates", action: () => { u({ phase: "report" }); navigate('/app'); scrollTop(); }, disabled: !allComplete && !s.signed },
-    { id: "contact",          icon: Mail,            label: "Contact Support",        action: () => { navigate('/contact-support'); scrollTop(); } },
-    { id: "settings",         icon: Settings,        label: "Settings",               action: onOpenSettings },
-    { id: "signout",          icon: LogOut,          label: T("sign_out"),            action: onSignOut },
+    { id: "dashboard",          icon: LayoutDashboard, label: "Dashboard",           action: () => { u({ phase: "dashboard" }); navigate('/app'); scrollTop(); } },
+    { id: "sales-training",     icon: TrendingUp,      label: "Sales Training",      action: () => { navigate('/sales-training'); scrollTop(); } },
+    { id: "product-training",   icon: Package,         label: "Product Experience",  action: () => { navigate('/product-experience'); scrollTop(); } },
+    { id: "office-workflow",    icon: Building2,       label: "Office Workflow",     action: () => { navigate('/office-workflow'); scrollTop(); } },
+    { id: "roleplay",           icon: Swords,          label: "Roleplay Simulation", action: () => { navigate('/roleplay'); scrollTop(); } },
+    { id: "contact",            icon: Mail,            label: "Contact Support",     action: () => { navigate('/contact-support'); scrollTop(); } },
+    { id: "settings",           icon: Settings,        label: "Settings",            action: onOpenSettings },
   ];
 
   // Mobile: fixed top header + slide-out left drawer
@@ -183,6 +180,23 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
             })}
           </div>
 
+          {/* Office Onboarding — mobile */}
+          <div style={{ padding: '10px 16px', borderTop: '1px solid var(--bs-border)', flexShrink: 0 }}>
+            <button
+              onClick={() => { setMobileOpen(false); navigate('/office-onboarding'); scrollTop(); }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                background: activeId === 'office-onboarding' ? 'rgba(229,62,62,0.18)' : 'rgba(229,62,62,0.08)',
+                border: `1px solid ${activeId === 'office-onboarding' ? 'rgba(229,62,62,0.5)' : 'rgba(229,62,62,0.25)'}`,
+                borderRadius: 8, padding: '10px 14px',
+                cursor: 'pointer', fontFamily: C.fn,
+              }}
+            >
+              <ClipboardList size={15} color={C.red} strokeWidth={2} style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.red }}>Office Onboarding</span>
+            </button>
+          </div>
+
           {/* User info */}
           <div style={{ padding: '14px 20px', borderTop: '1px solid var(--bs-border)', flexShrink: 0 }}>
             <div style={{ fontSize: 12, color: 'var(--bs-ash)', marginBottom: 2 }}>{s.name || 'User'}</div>
@@ -250,6 +264,27 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
             </div>
           );
         })}
+      </div>
+
+      {/* Office Onboarding — separate red section */}
+      <div style={{ padding: collapsed ? "10px 8px" : "10px 12px", borderTop: "1px solid var(--bs-border)" }}>
+        <button
+          onClick={() => { navigate('/office-onboarding'); scrollTop(); }}
+          title="Office Onboarding"
+          style={{
+            width: "100%", display: "flex", alignItems: "center", gap: 10,
+            background: activeId === 'office-onboarding' ? "rgba(229,62,62,0.18)" : "rgba(229,62,62,0.08)",
+            border: `1px solid ${activeId === 'office-onboarding' ? "rgba(229,62,62,0.5)" : "rgba(229,62,62,0.25)"}`,
+            borderRadius: 8, padding: collapsed ? "10px" : "10px 14px",
+            cursor: "pointer", fontFamily: C.fn, transition: "all 0.2s",
+            justifyContent: collapsed ? "center" : "flex-start",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(229,62,62,0.18)"; e.currentTarget.style.borderColor = "rgba(229,62,62,0.45)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = activeId === 'office-onboarding' ? "rgba(229,62,62,0.18)" : "rgba(229,62,62,0.08)"; e.currentTarget.style.borderColor = activeId === 'office-onboarding' ? "rgba(229,62,62,0.5)" : "rgba(229,62,62,0.25)"; }}
+        >
+          <ClipboardList size={15} color={C.red} strokeWidth={2} style={{ flexShrink: 0 }} />
+          {!collapsed && <span style={{ fontSize: 12, fontWeight: 700, color: C.red }}>Office Onboarding</span>}
+        </button>
       </div>
 
       {/* Admin panel link */}

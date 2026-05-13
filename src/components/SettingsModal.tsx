@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useClerk } from '@clerk/clerk-react';
-import { X, LogOut, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, LogOut, Check, Award } from 'lucide-react';
 import { C, ROLES } from '@/data/constants';
 import { LANG_OPTIONS, Lang, t } from '@/data/translations';
 import { AppState } from '@/hooks/useAppState';
@@ -11,13 +12,16 @@ interface SettingsModalProps {
   s: AppState;
   u: (d: Partial<AppState>) => void;
   lang: Lang;
+  allComplete?: boolean;
 }
 
-export default function SettingsModal({ open, onClose, s, u, lang }: SettingsModalProps) {
+export default function SettingsModal({ open, onClose, s, u, lang, allComplete }: SettingsModalProps) {
   const { signOut } = useClerk();
+  const navigate = useNavigate();
   const T = (key: string) => t(lang, key);
   const [pendingRoles, setPendingRoles] = useState<string[]>(s.roles);
-  const isDark = true;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = s.theme === 'dark' || (s.theme === 'system' && prefersDark);
 
   if (!open) return null;
 
@@ -124,6 +128,36 @@ export default function SettingsModal({ open, onClose, s, u, lang }: SettingsMod
           </div>
         </div>
 
+        {/* Appearance */}
+        <div style={section}>
+          <div style={label}>Appearance</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {(['light', 'dark', 'system'] as const).map(mode => {
+              const isActive = s.theme === mode;
+              return (
+                <button
+                  key={mode}
+                  onClick={() => u({ theme: mode })}
+                  style={{
+                    padding: '8px 16px', borderRadius: 10, cursor: 'pointer',
+                    fontSize: 13, fontFamily: C.fn, fontWeight: isActive ? 700 : 400,
+                    background: isActive
+                      ? (isDark ? `${C.teal}22` : `${C.teal}18`)
+                      : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'),
+                    border: `1px solid ${isActive ? C.teal : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.09)')}`,
+                    color: isActive ? C.teal : (isDark ? C.ash : C.slate),
+                    transition: 'all 0.15s',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {isActive && <Check size={12} strokeWidth={2.5} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Roles */}
         <div style={section}>
           <div style={label}>Your Role(s)</div>
@@ -173,6 +207,36 @@ export default function SettingsModal({ open, onClose, s, u, lang }: SettingsMod
             }}
           >
             {pendingRoles.length === 0 ? 'Select at least one role' : 'Save Roles'}
+          </button>
+        </div>
+
+        {/* Reports & Certificates */}
+        <div style={section}>
+          <div style={label}>Reports &amp; Certificates</div>
+          <button
+            onClick={() => {
+              if (!allComplete && !s.signed) return;
+              u({ phase: 'report' });
+              navigate('/app');
+              onClose();
+            }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 14,
+              width: '100%', padding: '14px 16px', borderRadius: 12,
+              cursor: allComplete || s.signed ? 'pointer' : 'not-allowed',
+              background: allComplete || s.signed ? `${C.teal}15` : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${allComplete || s.signed ? `${C.teal}50` : 'rgba(255,255,255,0.07)'}`,
+              opacity: allComplete || s.signed ? 1 : 0.45,
+              textAlign: 'left', fontFamily: C.fn, transition: 'all 0.15s',
+            }}
+          >
+            <Award size={18} strokeWidth={1.5} color={allComplete || s.signed ? C.teal : C.ash} style={{ flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: allComplete || s.signed ? C.teal : C.white }}>Training Certificate</div>
+              <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>
+                {allComplete || s.signed ? 'View your results and download certificate' : 'Complete all modules & 3 simulations to unlock'}
+              </div>
+            </div>
           </button>
         </div>
 

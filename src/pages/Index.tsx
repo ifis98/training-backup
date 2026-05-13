@@ -16,6 +16,7 @@ import Report from '@/screens/Report';
 import SalesTrainingScreen from '@/screens/SalesTrainingScreen';
 import ProductExperienceScreen from '@/screens/ProductExperienceScreen';
 import OfficeWorkflowScreen from '@/screens/OfficeWorkflowScreen';
+import OfficeOnboardingScreen from '@/screens/OfficeOnboardingScreen';
 import ContactSupportScreen from '@/screens/ContactSupportScreen';
 import RoleplaySimulationScreen from '@/screens/RoleplaySimulationScreen';
 import AICoach from '@/components/AICoach';
@@ -39,7 +40,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   if (clerkUserId) (window as any).__clerkUserId = clerkUserId;
 
   const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync } = useAppState(clerkUserId);
-  const { isStaff, isAdmin } = useAuth();
+  const { isStaff, isAdmin, isByteSenseAdmin, loading: authLoading } = useAuth();
   const lang = (s.lang || 'en') as Lang;
 
   // Global coach state
@@ -52,22 +53,40 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
 
   const allComplete = allD && s.simP >= 3;
 
-  // Always dark mode
+  // Apply theme based on s.theme preference
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+    const applyTheme = () => {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const dark = s.theme === 'dark' || (s.theme === 'system' && prefersDark);
+      document.documentElement.classList.toggle('dark', dark);
+    };
+    applyTheme();
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mq.addEventListener('change', applyTheme);
+    return () => mq.removeEventListener('change', applyTheme);
+  }, [s.theme]);
+
+  // bytesense_admins skip intake — mark intakeDone once so the whole app
+  // treats them as an existing user with no special-casing needed anywhere.
+  useEffect(() => {
+    if (!dbLoaded || authLoading) return;
+    if (s.intakeDone) return;
+    if (!isByteSenseAdmin) return;
+    u({ intakeDone: true, phase: 'dashboard' });
+  }, [dbLoaded, authLoading, s.intakeDone, isByteSenseAdmin]);
 
   // Invite code gate: new users without a redeemed code are sent to the landing page.
-  // Existing users (intakeDone: true) are grandfathered — no code required.
+  // Existing users (intakeDone: true) and bytesense_admins are exempt — no code required.
   const POST_INTAKE_PHASES = ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report'];
   useEffect(() => {
-    if (!dbLoaded) return;
+    if (!dbLoaded || authLoading) return;
     if (s.intakeDone) return;
+    if (isByteSenseAdmin) return;
     if (POST_INTAKE_PHASES.includes(s.phase)) return;
     if (!localStorage.getItem('bsa6_invite')) {
       navigate('/');
     }
-  }, [dbLoaded, s.intakeDone, s.phase, navigate]);
+  }, [dbLoaded, authLoading, s.intakeDone, s.phase, isByteSenseAdmin, navigate]);
 
   // Close coach whenever the user navigates to a new phase
   useEffect(() => {
@@ -150,14 +169,16 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     // ── URL-based section routing ────────────────────────────────────────
     if (forcePhase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
     if (forcePhase === 'product-experience') return <ProductExperienceScreen />;
-    if (forcePhase === 'office-workflow')   return <OfficeWorkflowScreen />;
+    if (forcePhase === 'office-workflow')    return <OfficeWorkflowScreen />;
+    if (forcePhase === 'office-onboarding') return <OfficeOnboardingScreen />;
     if (forcePhase === 'contact-support')   return <ContactSupportScreen />;
     if (forcePhase === 'roleplay')          return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
 
     // ── Phase-state routing (used internally, e.g. from mobile menu) ─────
     if (s.phase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
     if (s.phase === 'product-experience') return <ProductExperienceScreen />;
-    if (s.phase === 'office-workflow')   return <OfficeWorkflowScreen />;
+    if (s.phase === 'office-workflow')    return <OfficeWorkflowScreen />;
+    if (s.phase === 'office-onboarding') return <OfficeOnboardingScreen />;
     if (s.phase === 'contact-support')   return <ContactSupportScreen />;
     if (s.phase === 'roleplay') return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
 
@@ -168,7 +189,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   };
 
   // Show the sidebar layout for all screens once intake is complete (or on a section URL)
-  const showLayout = !!forcePhase || !!forceView || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'roleplay', 'contact-support'].includes(s.phase);
+  const showLayout = !!forcePhase || !!forceView || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'office-onboarding', 'roleplay', 'contact-support'].includes(s.phase);
 
   if (showLayout) {
     return (
@@ -198,7 +219,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
         </div>
 
         {/* Global overlays */}
-        <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} s={s} u={u} lang={lang} />
+        <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} s={s} u={u} lang={lang} allComplete={allComplete} />
         <AICoach isOpen={showCoach} onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />
         <BookingModal open={showBookingGlobal} onClose={() => setShowBookingGlobal(false)} lang={lang} />
       </div>

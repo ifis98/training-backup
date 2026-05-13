@@ -41,7 +41,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   const { user: clerkUser } = useUser();
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
-  const [practiceName, setPracticeName] = useState("");
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [simReviews, setSimReviews] = useState<any[]>([]);
   const [cases, setCases] = useState<any[]>([]);
@@ -50,7 +49,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   const [newCase, setNewCase] = useState({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
   const [showBooking, setShowBooking] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const handleSignOut = onSignOut;
   const lang = (s.lang || "en") as Lang;
   const T = (key: string) => t(lang, key);
 
@@ -217,7 +215,6 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <Logo size={28} light onClick={() => { u({ phase: "dashboard" }); scrollTop(); }} />
-              {practiceName && <span style={{ fontSize: 12, color: "var(--bs-ash)", opacity: 0.7 }}>· {practiceName}</span>}
             </div>
             <button onClick={() => setShowSettings(true)}
               style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-ash)", width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}

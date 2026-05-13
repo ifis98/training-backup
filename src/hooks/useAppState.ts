@@ -30,7 +30,7 @@ export interface AppState {
   spk: boolean;
   signed: boolean;
   lang: string;
-  theme: 'dark' | 'light';
+  theme: 'dark' | 'light' | 'system';
   intakeDone: boolean;
   mainBlocker: string;
   monthlyVolume: string;

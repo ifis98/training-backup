@@ -10,7 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { t, Lang, LANG_OPTIONS } from '@/data/translations';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Tooltip } from 'recharts';
 import BookingModal from '@/components/BookingModal';
-import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, TrendingDown, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save, Settings, Phone, MessageSquare } from 'lucide-react';
+import { Target, BarChart3, ClipboardList, StickyNote, Zap, DollarSign, FileText, Trophy, Mail, Shield, BookOpen, Award, Star, ChevronRight, Printer, TrendingUp, Plus, Briefcase, CheckCircle2, Clock, XCircle, ArrowRight, Pencil, Save, Settings, Phone, MessageSquare } from 'lucide-react';
 
 interface DashboardProps {
   s: AppState;
@@ -25,7 +25,6 @@ interface DashboardProps {
   openCoach: (mode: string) => void;
   onOpenSettings: () => void;
   onSignOut: () => void;
-  onOpenPanel?: (src: string, title: string) => void;
 }
 
 const CHART_COLORS = [C.teal, C.red, C.gold, C.blue, C.violet, C.cyan, C.green, C.rose, C.amber];
@@ -43,7 +42,7 @@ const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
 };
 
 
-export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut, onOpenPanel }: DashboardProps) {
+export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut }: DashboardProps) {
   const isMobile = useIsMobile();
   const { user: clerkUser } = useUser();
   const displayName = clerkUser?.firstName || clerkUser?.fullName || s.name || '';

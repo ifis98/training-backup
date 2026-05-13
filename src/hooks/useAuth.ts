@@ -54,7 +54,6 @@ export function useAuth() {
     isAdmin,
     isByteSenseAdmin,
     isStaff,
-    profile: null,
     signOut,
   };
 }

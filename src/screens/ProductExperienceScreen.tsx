@@ -1022,7 +1022,7 @@ function PatientRetentionSection() {
   const isMobile = useIsMobile();
 
   const bullets1 = [
-    'Passive, nightly bite and bruxism activity monitoring between visits',
+    'Passive, nightly appliance usage and oral activity pattern tracking between visits',
     'Gentle behaviorally-timed nudges that reinforce appointment recommendations',
     'Sleep, stress, and recovery trend tracking patients check daily',
     'Personalized insights that keep oral health top-of-mind year-round',
@@ -1196,7 +1196,7 @@ function PatientRetentionSection() {
               <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>three-hundred-and-sixty-five.</span>
             </h3>
             <p style={{ fontFamily: C.fn, fontSize: 15, lineHeight: 1.6, color: 'rgba(244,239,234,0.78)', margin: 0 }}>
-              byteSense transforms the traditional dental relationship. The at-home sensor passively reads bite, breath, and bruxism patterns — translating them into gentle, behaviorally-timed nudges between appointments. Patients stay engaged because the care does. Providers see retention curve up because the relationship never goes quiet.
+              The at-home sensor passively tracks appliance usage, nighttime oral activity, movement, and recovery-related patterns — translating them into gentle, behaviorally-timed nudges between appointments.
             </p>
           </div>
         </div>
@@ -1241,7 +1241,7 @@ function PatientRetentionSection() {
                   This continuous engagement creates a fundamentally different relationship between patient and provider. Rather than experiencing the practice as a twice-yearly obligation, patients begin to associate your office with their ongoing health journey — giving them a reason to stay connected, follow through, and return.
                 </p>
                 <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 20 }}>
-                  For patients who may not yet feel urgency about a recall, byteSense provides something compelling: objective, real data about their own body. When a patient can see their bruxism events, recovery trends, and overnight patterns, the conversation about returning shifts from "it's just routine" to "here's what we've been tracking together."
+                  For patients who may not yet feel urgency about a recall, byteSense provides something compelling: objective, real data about their own body. When a patient can see their nighttime oral activity patterns, recovery trends, and overnight changes, the conversation about returning shifts from "it's just routine" to "here's what we've been tracking together."
                 </p>
 
                 {/* Practice benefits */}
@@ -1554,7 +1554,7 @@ function TrustSection() {
     'Personalized insights tied to nighttime activity and appliance usage',
     'Notifications reinforcing provider recommendations',
     'Ongoing engagement between visits',
-    'Educational feedback connected to stress, recovery, and grinding behavior',
+    'Educational feedback connected to stress, recovery, and nighttime oral activity patterns',
   ];
   const inlineList = ['stress,', 'sleep quality,', 'nervous system activation,', 'recovery,', 'and long-term wellness behaviors.'];
   const bullets2 = [

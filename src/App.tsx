@@ -289,8 +289,9 @@ function AppRoutes() {
         {/* Section routes — each gets its own URL, sidebar always present */}
         <Route path="/sales-training"    element={isSignedIn ? <Index forcePhase="sales-training" />    : <Navigate to="/login" />} />
         <Route path="/product-experience" element={isSignedIn ? <Index forcePhase="product-experience" /> : <Navigate to="/login" />} />
-        <Route path="/office-workflow"   element={isSignedIn ? <Index forcePhase="office-workflow" />   : <Navigate to="/login" />} />
-        <Route path="/roleplay"          element={isSignedIn ? <Index forcePhase="roleplay" />          : <Navigate to="/login" />} />
+        <Route path="/office-workflow"    element={isSignedIn ? <Index forcePhase="office-workflow" />    : <Navigate to="/login" />} />
+        <Route path="/office-onboarding" element={isSignedIn ? <Index forcePhase="office-onboarding" /> : <Navigate to="/login" />} />
+        <Route path="/roleplay"          element={isSignedIn ? <Index forcePhase="roleplay" />           : <Navigate to="/login" />} />
         <Route path="/contact-support"   element={isSignedIn ? <Index forcePhase="contact-support" />   : <Navigate to="/login" />} />
 
         <Route path="/staff" element={isSignedIn ? <Index forceView="staff" /> : <Navigate to="/login" />} />
