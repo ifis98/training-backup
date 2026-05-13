@@ -1,6 +1,6 @@
 // ByteSense Brand Colors + Design Tokens
 export const C = {
-  fn: "'Outfit', system-ui, sans-serif",
+  fn: "'Plus Jakarta Sans', system-ui, sans-serif",
   red: "#CC1010",
   redL: "#FF3030",
   redBg: "#FFF5F5",

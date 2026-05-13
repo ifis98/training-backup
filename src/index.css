@@ -135,6 +135,7 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     background-color: var(--bs-bg);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 }
 
