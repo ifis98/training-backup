@@ -33,10 +33,10 @@ const BORDER2 = 'var(--bs-border)';
 const DIM     = 'var(--bs-ash)';
 const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
-const RED_MUT = '#3A1515';
-const RED_BDR = '#5a1010';
+const RED_MUT = 'var(--bs-red-muted)';
+const RED_BDR = 'var(--bs-red-border)';
 const TEAL_C  = '#00B4AD';
-const TEAL_MUT= '#003D3B';
+const TEAL_MUT= 'var(--bs-teal-muted)';
 
 // ── Shared layout helpers ────────────────────────────────────────────────────
 const getSectionStyle = (isMobile: boolean): React.CSSProperties => ({
@@ -126,7 +126,7 @@ const cardBody: React.CSSProperties = {
 };
 
 const scriptBox: React.CSSProperties = {
-  background: '#111',
+  background: 'var(--bs-bg2)',
   border: `1px solid ${BORDER2}`,
   borderLeft: `3px solid ${TEAL_C}`,
   padding: '20px 22px',
@@ -175,7 +175,7 @@ function AboutSection() {
       <p style={sectionSubtitle}>Not a night guard. Not a mouthguard. An entirely new category of health intelligence.</p>
 
       {/* Notice */}
-      <div style={{ background: '#1a0a0a', border: `1px solid ${RED_BDR}`, padding: '20px 24px', marginBottom: 28, display: 'flex', gap: 16 }}>
+      <div style={{ background: 'var(--bs-red-muted)', border: `1px solid ${RED_BDR}`, padding: '20px 24px', marginBottom: 28, display: 'flex', gap: 16 }}>
         <div style={{ color: RED_B, fontSize: 20, flexShrink: 0, marginTop: 2 }}>⚑</div>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8 }}>Critical Messaging Directive — Read This First</div>

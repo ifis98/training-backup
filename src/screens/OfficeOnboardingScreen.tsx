@@ -12,10 +12,10 @@ const BORDER2 = 'var(--bs-border)';
 const DIM     = 'var(--bs-ash)';
 const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
-const RED_MUT = '#3A1515';
-const RED_BDR = '#5a1010';
+const RED_MUT = 'var(--bs-red-muted)';
+const RED_BDR = 'var(--bs-red-border)';
 const TEAL_C  = '#00B4AD';
-const TEAL_MUT= '#003D3B';
+const TEAL_MUT= 'var(--bs-teal-muted)';
 
 // ── Shared layout helpers ────────────────────────────────────────────────────
 const getSectionStyle = (isMobile: boolean): React.CSSProperties => ({
@@ -153,7 +153,7 @@ function ScannerDetailPage({ scanner, onBack }: { scanner: typeof SCANNERS[0]; o
         <StepBlock key={i} num={i + 1} title={step.title} body={step.body} />
       ))}
 
-      <div style={{ background: '#0a1a0a', border: `1px solid #1a5a1a`, padding: '20px 24px', display: 'flex', gap: 16, marginTop: 8 }}>
+      <div style={{ background: 'var(--bs-green-muted)', border: `1px solid var(--bs-green-border)`, padding: '20px 24px', display: 'flex', gap: 16, marginTop: 8 }}>
         <div style={{ color: '#38A169', fontSize: 20, flexShrink: 0 }}>✓</div>
         <div style={{ fontSize: 13, color: DIM, lineHeight: 1.75, fontFamily: C.fn }}>
           <strong style={{ color: 'var(--bs-text)' }}>Before your first submission:</strong> Contact Natasha Blake at 909-527-9602 to confirm your Medit Link lab connection is active and Florida Oral Labs is correctly linked to your account. This prevents delays on your first case.
@@ -289,7 +289,7 @@ function InOfficeLaunchSection() {
         body="Take 10 minutes at end-of-day to review: How many patients were flagged? How many received the presentation? How many consented? How many cases were submitted? What objections came up? Early tracking reveals friction in the system before it becomes a pattern. Share wins with the team — momentum is contagious."
       />
 
-      <div style={{ background: '#1a0a0a', border: `1px solid ${RED_BDR}`, padding: '20px 24px', display: 'flex', gap: 16 }}>
+      <div style={{ background: 'var(--bs-red-muted)', border: `1px solid ${RED_BDR}`, padding: '20px 24px', display: 'flex', gap: 16 }}>
         <div style={{ color: RED_B, fontSize: 20, flexShrink: 0 }}>⚑</div>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 8 }}>First Week Target: 3 Submitted Cases</div>

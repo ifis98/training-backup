@@ -12,10 +12,10 @@ const BORDER2 = 'var(--bs-border)';
 const DIM     = 'var(--bs-ash)';
 const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
-const RED_MUT = '#3A1515';
-const RED_BDR = '#5a1010';
+const RED_MUT = 'var(--bs-red-muted)';
+const RED_BDR = 'var(--bs-red-border)';
 const TEAL_C  = '#00B4AD';
-const TEAL_MUT= '#003D3B';
+const TEAL_MUT= 'var(--bs-teal-muted)';
 const TRUST_TEAL = '#00B894';   // card-2 recovery green
 const TRUST_AMBER = '#D97706';  // card-1 avatar
 
@@ -237,7 +237,7 @@ function BodyLines({ lines }: { lines: string[] }) {
 // ── Shared card chrome ───────────────────────────────────────────────────────
 const CARD_CHROME: React.CSSProperties = {
   display: 'flex', flexDirection: 'column',
-  background: '#14100E', borderRadius: 32, padding: '16px 16px 28px',
+  background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px',
   border: '1px solid rgba(255,255,255,0.05)',
   boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)',
   height: '100%', boxSizing: 'border-box' as const,
@@ -282,7 +282,7 @@ const glassPin = (extra: React.CSSProperties = {}): React.CSSProperties => ({
 // ── Card A: Behavioral nudge ─────────────────────────────────────────────────
 function TrustCard1() {
   return (
-    <div style={{ background: '#14100E', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
       {/* Visual */}
       <div style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden', background: `radial-gradient(ellipse 70% 50% at 78% 35%, rgba(255,180,120,0.50) 0%, rgba(255,139,92,0.25) 35%, transparent 65%), radial-gradient(ellipse 120% 80% at 20% 110%, rgba(60,30,20,0.6) 0%, transparent 60%), linear-gradient(160deg, #1F1411 0%, #2A1A14 30%, #14100E 60%, #0A0807 100%)` }}>
         {/* Lamp bloom */}
@@ -327,7 +327,7 @@ function TrustCard1() {
 // ── Card B: HRV / recovery curve ─────────────────────────────────────────────
 function TrustCard2() {
   return (
-    <div style={{ background: '#14100E', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
       {/* Visual */}
       <div style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden', background: `radial-gradient(ellipse 60% 40% at 50% 18%, rgba(140,200,200,0.28) 0%, rgba(60,120,140,0.12) 40%, transparent 70%), radial-gradient(ellipse 100% 60% at 50% 110%, rgba(20,40,55,0.85) 0%, transparent 65%), linear-gradient(170deg, #0E1820 0%, #0A1015 50%, #050708 100%)` }}>
         {/* Horizon glow */}
@@ -397,7 +397,7 @@ function TrustCard2() {
 // ── Card C: Provider message ──────────────────────────────────────────────────
 function TrustCard3() {
   return (
-    <div style={{ background: '#14100E', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
       {/* Visual */}
       <div style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden', background: `radial-gradient(ellipse 80% 55% at 30% 25%, rgba(180,200,170,0.28) 0%, rgba(120,140,110,0.12) 40%, transparent 70%), radial-gradient(ellipse 90% 70% at 80% 105%, rgba(40,55,40,0.6) 0%, transparent 65%), linear-gradient(165deg, #1A2018 0%, #141812 50%, #0A0C09 100%)` }}>
         {/* Window-light bloom */}
@@ -589,7 +589,7 @@ function LiabilitySection() {
       {/* ── Dropdown ── */}
       <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease', marginTop: 16 }}>
         <div style={{ overflow: 'hidden', minHeight: 0 }}>
-          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: '#111111' }}>
+          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: 'var(--bs-bg2)' }}>
             <div style={{ padding: isMobile ? '20px 16px 28px' : '20px 32px 32px' }}>
 
               {/* Intro */}
@@ -670,7 +670,7 @@ function SophisticationSection() {
   const upliftBullets     = ['Treatment acceptance', 'Patient trust', 'Premium service positioning', 'Long-term patient loyalty', 'Referral generation', 'Overall practice differentiation'];
 
   return (
-    <div data-sid="ob-positioning" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: '#000' }}>
+    <div data-sid="ob-positioning" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: 'var(--bs-bg)' }}>
 
       {/* ── Full-width heading ── */}
       <h2 style={{ fontSize: isMobile ? 36 : 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: `0 0 ${isMobile ? 32 : 52}px`, letterSpacing: -1.5 }}>
@@ -683,7 +683,7 @@ function SophisticationSection() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '480px 1fr', gap: isMobile ? 32 : 64, alignItems: 'center', marginBottom: 40 }}>
 
         {/* LEFT — dial card */}
-        <div style={{ background: '#14100E', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+        <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
           <div style={{
             position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden',
             background: `
@@ -780,7 +780,7 @@ function SophisticationSection() {
       {/* ── Dropdown ── */}
       <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease' }}>
         <div style={{ overflow: 'hidden', minHeight: 0 }}>
-          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, background: '#111111' }}>
+          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, background: 'var(--bs-bg2)' }}>
             <div style={{ padding: isMobile ? '24px 16px 28px' : '32px 36px 36px' }}>
               <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 14, marginTop: 0 }}>
                 Today's patients increasingly associate technology, personalization, and preventative care with higher-quality healthcare providers.
@@ -873,7 +873,7 @@ function PremiumDifferentiationSection() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '480px 1fr', gap: isMobile ? 32 : 64, alignItems: 'center', marginBottom: 40 }}>
 
         {/* LEFT — rings card */}
-        <div style={{ background: '#14100E', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+        <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
           <div style={{
             position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden',
             background: `
@@ -968,7 +968,7 @@ function PremiumDifferentiationSection() {
       {/* ── Dropdown ── */}
       <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease' }}>
         <div style={{ overflow: 'hidden', minHeight: 0 }}>
-          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, background: '#111111' }}>
+          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, background: 'var(--bs-bg2)' }}>
             <div style={{ padding: isMobile ? '24px 16px 28px' : '32px 36px 36px' }}>
               <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 14, marginTop: 0 }}>
                 Most dental offices still offer traditional night guards as passive appliances. byteSense helps your practice offer something fundamentally different: a technology-enabled patient experience centered around prevention, personalization, sleep, stress, and recovery.
@@ -1048,7 +1048,7 @@ function PatientRetentionSection() {
           100% { box-shadow: 0 0 0 0 rgba(255,107,112,0), 0 0 14px rgba(255,107,112,0.7); }
         }
       `}</style>
-      <div data-sid="ob-retention" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: '#000' }}>
+      <div data-sid="ob-retention" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: 'var(--bs-bg)' }}>
 
         {/* ── Section heading ── */}
         <h2 style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.06, color: 'var(--bs-text)', margin: '0 0 52px', letterSpacing: -1.5 }}>
@@ -1062,7 +1062,7 @@ function PatientRetentionSection() {
           maxWidth: 520, margin: '0 auto 40px',
           padding: '16px 16px 28px',
           borderRadius: 32,
-          background: '#16110E',
+          background: 'var(--bs-bg2)',
           border: '1px solid rgba(244,239,234,0.08)',
           boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 70px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.3)',
           color: '#F4EFEA',
@@ -1216,7 +1216,7 @@ function PatientRetentionSection() {
         {/* ── Dropdown ── */}
         <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease', marginTop: 16 }}>
           <div style={{ overflow: 'hidden', minHeight: 0 }}>
-            <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: '#111111' }}>
+            <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: 'var(--bs-bg2)' }}>
               <div style={{ padding: isMobile ? '20px 16px 28px' : '20px 24px 32px' }}>
                 {/* Intro */}
                 <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 20, marginTop: 0 }}>
@@ -1289,7 +1289,7 @@ function PracticeRevenueSection() {
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
 
   return (
-    <div data-sid="ob-revenue" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: '#000' }}>
+    <div data-sid="ob-revenue" style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn, background: 'var(--bs-bg)' }}>
 
       {/* ── Hero two-column layout ── */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 40 : 80, alignItems: 'center', marginBottom: 40 }}>
@@ -1449,13 +1449,13 @@ function PracticeRevenueSection() {
       {/* ── Dropdown: Calculator + Description ── */}
       <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease' }}>
         <div style={{ overflow: 'hidden', minHeight: 0 }}>
-        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: '#111111' }}>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: 'var(--bs-bg2)' }}>
 
           {/* Revenue Calculator */}
-          <div style={{ padding: isMobile ? '24px 16px' : '36px 36px', background: '#0D0D10' }}>
+          <div style={{ padding: isMobile ? '24px 16px' : '36px 36px', background: 'var(--bs-bg)' }}>
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, color: '#D4AF37', textTransform: 'uppercase', marginBottom: 12 }}>Revenue Calculator</div>
-              <h3 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: '#F4F4F6', margin: '0 0 10px', lineHeight: 1.1 }}>
+              <h3 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: 'var(--bs-text)', margin: '0 0 10px', lineHeight: 1.1 }}>
                 See Your <span style={{ color: '#00C2A8' }}>Revenue Potential</span>
               </h3>
               <p style={{ fontSize: 14, color: DIM, margin: 0 }}>Adjust the sliders to see how byteSense can impact your bottom line</p>
@@ -1486,9 +1486,9 @@ function PracticeRevenueSection() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 20 }}>
-              <div style={{ background: '#161618', border: `1px solid ${BORDER}`, borderRadius: 12, padding: '28px 24px' }}>
+              <div style={{ background: 'var(--bs-bg2)', border: `1px solid ${BORDER}`, borderRadius: 12, padding: '28px 24px' }}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: DIM, textTransform: 'uppercase', marginBottom: 12 }}>Current Monthly Revenue</div>
-                <div style={{ fontSize: 44, fontWeight: 800, color: '#F4F4F6', marginBottom: 6 }}>{fmt(currentRevenue)}</div>
+                <div style={{ fontSize: 44, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 6 }}>{fmt(currentRevenue)}</div>
                 <div style={{ fontSize: 12, color: DIM }}>{closeRate}% close rate</div>
               </div>
               <div style={{ background: 'rgba(0,194,168,0.06)', border: `1px solid rgba(0,194,168,0.25)`, borderRadius: 12, padding: '28px 24px' }}>
@@ -1598,7 +1598,7 @@ function TrustSection() {
       {/* ── Dropdown ── */}
       <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease', marginTop: 16 }}>
         <div style={{ overflow: 'hidden', minHeight: 0 }}>
-          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: '#111111' }}>
+          <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, overflow: 'hidden', background: 'var(--bs-bg2)' }}>
             <div style={{ padding: isMobile ? '20px 16px 28px' : '20px 24px 32px' }}>
               {/* Intro */}
               <p style={{ fontSize: 14, color: DIM, lineHeight: 1.8, marginBottom: 20, marginTop: 0 }}>
@@ -1748,7 +1748,7 @@ function CbSection({
       {hasDropdown && (
         <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 0.4s ease', marginTop: 40 }}>
           <div style={{ overflow: 'hidden', minHeight: 0 }}>
-            <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, background: '#111111', overflow: 'hidden' }}>
+            <div style={{ border: `1px solid ${BORDER}`, borderRadius: 14, background: 'var(--bs-bg2)', overflow: 'hidden' }}>
               {dropdownContent}
             </div>
           </div>
@@ -2380,7 +2380,7 @@ function ConsumerDiscoverSection() {
           <p style={{ fontSize: 13, fontWeight: 600, color: '#F4EFEA', margin: '0 0 14px' }}>The Daily Insight Loop</p>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 10, marginBottom: 28 }}>
             {loopSteps.map((step, i) => (
-              <div key={i} style={{ background: '#0D0D10', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '14px 16px', position: 'relative' }}>
+              <div key={i} style={{ background: 'var(--bs-bg)', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '14px 16px', position: 'relative' }}>
                 <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(244,239,234,0.35)', marginBottom: 8 }}>0{i + 1}</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: step.color, marginBottom: 6 }}>{step.label}</div>
                 <div style={{ fontSize: 11, color: DIM, lineHeight: 1.5 }}>{step.sub}</div>

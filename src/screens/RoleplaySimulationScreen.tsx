@@ -18,10 +18,10 @@ const BORDER2 = 'var(--bs-border)';
 const DIM     = 'var(--bs-ash)';
 const FAINT   = 'var(--bs-ash)';
 const RED_B   = '#E63434';
-const RED_MUT = '#3A1515';
-const RED_BDR = '#5a1010';
+const RED_MUT = 'var(--bs-red-muted)';
+const RED_BDR = 'var(--bs-red-border)';
 const TEAL_C  = '#00B4AD';
-const TEAL_MUT= '#003D3B';
+const TEAL_MUT= 'var(--bs-teal-muted)';
 
 // ── Shared layout helpers ─────────────────────────────────────────────────────
 const sectionStyle: React.CSSProperties = {

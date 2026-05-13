@@ -100,31 +100,45 @@ All colors MUST be HSL.
 
 /* ByteSense design tokens — light/dark via CSS custom properties */
 :root {
-  --bs-bg:      #F8F8FA;
-  --bs-bg2:     #EFEFF4;
-  --bs-bg3:     #E6E6EE;
-  --bs-text:    #0C0C0E;
-  --bs-text2:   #3A3A4A;
-  --bs-ash:     #5C5C6C;
-  --bs-border:  rgba(0, 0, 0, 0.08);
-  --bs-card:    rgba(0, 0, 0, 0.03);
-  --bs-card2:   rgba(0, 0, 0, 0.06);
-  --bs-glass:   rgba(255, 255, 255, 0.7);
-  --bs-shadow:  rgba(0, 0, 0, 0.08);
+  --bs-bg:           #F8F8FA;
+  --bs-bg2:          #EFEFF4;
+  --bs-bg3:          #E6E6EE;
+  --bs-text:         #0C0C0E;
+  --bs-text2:        #3A3A4A;
+  --bs-ash:          #5C5C6C;
+  --bs-border:       rgba(0, 0, 0, 0.08);
+  --bs-card:         rgba(0, 0, 0, 0.03);
+  --bs-card2:        rgba(0, 0, 0, 0.06);
+  --bs-glass:        rgba(255, 255, 255, 0.7);
+  --bs-shadow:       rgba(0, 0, 0, 0.08);
+  /* Semantic accent cards */
+  --bs-red-muted:    rgba(204, 16, 16, 0.07);
+  --bs-red-border:   rgba(204, 16, 16, 0.25);
+  --bs-teal-muted:   rgba(0, 180, 173, 0.08);
+  --bs-teal-border:  rgba(0, 180, 173, 0.3);
+  --bs-green-muted:  rgba(5, 150, 105, 0.07);
+  --bs-green-border: rgba(5, 150, 105, 0.25);
 }
 
 .dark {
-  --bs-bg:      #0C0C0E;
-  --bs-bg2:     #141418;
-  --bs-bg3:     #1C1C22;
-  --bs-text:    #F4F4F6;
-  --bs-text2:   #C8C8D8;
-  --bs-ash:     #9898A8;
-  --bs-border:  rgba(255, 255, 255, 0.07);
-  --bs-card:    rgba(255, 255, 255, 0.03);
-  --bs-card2:   rgba(255, 255, 255, 0.06);
-  --bs-glass:   rgba(14, 14, 20, 0.85);
-  --bs-shadow:  rgba(0, 0, 0, 0.3);
+  --bs-bg:           #0C0C0E;
+  --bs-bg2:          #141418;
+  --bs-bg3:          #1C1C22;
+  --bs-text:         #F4F4F6;
+  --bs-text2:        #C8C8D8;
+  --bs-ash:          #9898A8;
+  --bs-border:       rgba(255, 255, 255, 0.07);
+  --bs-card:         rgba(255, 255, 255, 0.03);
+  --bs-card2:        rgba(255, 255, 255, 0.06);
+  --bs-glass:        rgba(14, 14, 20, 0.85);
+  --bs-shadow:       rgba(0, 0, 0, 0.3);
+  /* Semantic accent cards */
+  --bs-red-muted:    #3A1515;
+  --bs-red-border:   #5a1010;
+  --bs-teal-muted:   #003D3B;
+  --bs-teal-border:  rgba(0, 180, 173, 0.34);
+  --bs-green-muted:  #0a1a0a;
+  --bs-green-border: #1a5a1a;
 }
 
 @layer base {
