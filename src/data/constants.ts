@@ -48,8 +48,10 @@ export const C = {
   gradViolet: "linear-gradient(135deg, #7C3AED, #8B5CF6)",
   gradDark: "linear-gradient(135deg, #141418, #1C1C22)",
   // Shadows
-  glow: (color: string, intensity = 0.3) => `0 0 24px ${color}${Math.round(intensity * 255).toString(16).padStart(2, '0')}`,
-  shadowCard: "0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)",
+  // Shadows globally disabled per design request — keep signatures so existing
+  // callers compile, but always return 'none'.
+  glow: (_color: string, _intensity = 0.3) => 'none',
+  shadowCard: "none",
   shadowElevated: "0 16px 48px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3)",
 };
 

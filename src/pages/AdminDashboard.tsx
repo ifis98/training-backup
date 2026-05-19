@@ -85,7 +85,7 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
   const staffChartData = staff.map(s => ({ name: (s.profile?.full_name || '?').split(' ')[0], progress: getProgress(s) }));
 
   const kpiCard = (label: string, value: string | number, color: string, gradient: string) => (
-    <div style={{ ...glass, padding: "22px 18px", flex: 1, minWidth: 120, position: "relative", overflow: "hidden", transition: "all 0.3s", boxShadow: C.glow(color, 0.08) }}
+    <div style={{ ...glass, padding: "22px 18px", flex: 1, minWidth: 120, position: "relative", overflow: "hidden", transition: "all 0.3s", boxShadow: "none"}}
       onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.boxShadow = C.glow(color, 0.2); e.currentTarget.style.transform = "translateY(-3px)"; }}
       onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => { e.currentTarget.style.boxShadow = C.glow(color, 0.08); e.currentTarget.style.transform = "translateY(0)"; }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: gradient, borderRadius: `${C.radius} ${C.radius} 0 0` }} />
@@ -128,7 +128,7 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
               border: tab === t.id ? "none" : `1px solid ${C.glassBorder}`,
               padding: "9px 18px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer",
               borderRadius: 999, transition: "all 0.25s",
-              boxShadow: tab === t.id ? C.glow(C.red, 0.2) : "none",
+              boxShadow: "none",
             }} onClick={() => setTab(t.id)}>{t.label}</button>
           ))}
         </div>
@@ -203,7 +203,7 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
               <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="staff@example.com" type="email"
                 style={{ flex: 1, padding: "13px 18px", fontSize: 14, fontFamily: C.fn, border: `1.5px solid ${C.glassBorder}`, background: "rgba(255,255,255,0.04)", color: C.white, outline: "none", borderRadius: C.radiusSm }} />
               <button onClick={sendInvite}
-                style={{ background: C.gradTeal, color: C.white, border: "none", padding: "13px 24px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>Send Invite</button>
+                style={{ background: C.gradTeal, color: C.white, border: "none", padding: "13px 24px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>Send Invite</button>
             </div>
             {invitations.map((inv, i) => (
               <div key={i} style={{ ...glass, padding: 18, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -225,7 +225,7 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
 
         {tab === 'certificate' && (
           <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <div style={{ ...glass, padding: "60px 40px", maxWidth: 620, margin: "0 auto", boxShadow: C.glow(C.gold, 0.1), borderColor: `${C.gold}20` }}>
+            <div style={{ ...glass, padding: "60px 40px", maxWidth: 620, margin: "0 auto", boxShadow: "none", borderColor: `${C.gold}20` }}>
               <div style={{ fontSize: 10, letterSpacing: 6, color: C.gold, textTransform: "uppercase", fontWeight: 700, marginBottom: 18 }}>Official Certification</div>
               <Logo size={42} light />
               <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 10, marginTop: 18 }}>Certified ByteSense Location</h2>
@@ -233,7 +233,7 @@ export default function AdminDashboard({ user, profile, onBack }: AdminDashboard
               <p style={{ fontSize: 13, color: C.ash, lineHeight: 1.8, marginBottom: 28 }}>This practice has completed the ByteSense Practice Onboarding Program and is certified to deliver ByteSense health intelligence technology to patients.</p>
               <div style={{ fontSize: 12, color: C.gold }}>byteSense Inc. · {new Date().getFullYear()}</div>
             </div>
-            <button onClick={() => window.print()} style={{ marginTop: 28, background: C.gradGold, color: C.dark, border: "none", padding: "13px 30px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.gold, 0.2) }}>Print Certificate</button>
+            <button onClick={() => window.print()} style={{ marginTop: 28, background: C.gradGold, color: C.dark, border: "none", padding: "13px 30px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>Print Certificate</button>
           </div>
         )}
       </div>

@@ -239,12 +239,12 @@ const CARD_CHROME: React.CSSProperties = {
   display: 'flex', flexDirection: 'column',
   background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px',
   border: '1px solid rgba(255,255,255,0.05)',
-  boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)',
+  boxShadow: "none",
   height: '100%', boxSizing: 'border-box' as const,
 };
 const VISUAL_BASE: React.CSSProperties = {
   position: 'relative', aspectRatio: '1 / 1', borderRadius: 22, overflow: 'hidden',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.03)',
+  boxShadow: "none",
 };
 const GLASS_BASE: React.CSSProperties = {
   position: 'absolute',
@@ -252,7 +252,7 @@ const GLASS_BASE: React.CSSProperties = {
   backdropFilter: 'blur(28px) saturate(140%)',
   WebkitBackdropFilter: 'blur(28px) saturate(140%)',
   border: '1px solid rgba(255,255,255,0.10)',
-  boxShadow: '0 24px 50px -20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10)',
+  boxShadow: "none",
   color: '#F4EFEA',
   zIndex: 5,
 };
@@ -269,7 +269,7 @@ const glassCard = (extra: React.CSSProperties = {}): React.CSSProperties => ({
   backdropFilter: 'blur(28px) saturate(140%)',
   WebkitBackdropFilter: 'blur(28px) saturate(140%)',
   border: '1px solid rgba(255,255,255,0.10)',
-  boxShadow: '0 24px 50px -20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10)',
+  boxShadow: "none",
   color: '#F4EFEA',
   zIndex: 5,
   ...extra,
@@ -282,7 +282,7 @@ const glassPin = (extra: React.CSSProperties = {}): React.CSSProperties => ({
 // ── Card A: Behavioral nudge ─────────────────────────────────────────────────
 function TrustCard1() {
   return (
-    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: "none"}}>
       {/* Visual */}
       <div style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden', background: `radial-gradient(ellipse 70% 50% at 78% 35%, rgba(255,180,120,0.50) 0%, rgba(255,139,92,0.25) 35%, transparent 65%), radial-gradient(ellipse 120% 80% at 20% 110%, rgba(60,30,20,0.6) 0%, transparent 60%), linear-gradient(160deg, #1F1411 0%, #2A1A14 30%, #14100E 60%, #0A0807 100%)` }}>
         {/* Lamp bloom */}
@@ -296,7 +296,7 @@ function TrustCard1() {
         <span style={{ position: 'absolute', top: 19, right: 16, zIndex: 6, fontFamily: 'monospace', fontSize: 9, color: 'rgba(244,239,234,0.4)', letterSpacing: '0.06em' }}>9:47 PM</span>
 
         {/* Nudge card — bottom-anchored */}
-        <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, padding: '12px 14px', borderRadius: 16, background: 'rgba(10,6,4,0.62)', backdropFilter: 'blur(24px) saturate(130%)', WebkitBackdropFilter: 'blur(24px) saturate(130%)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 16px 32px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)', zIndex: 5 }}>
+        <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, padding: '12px 14px', borderRadius: 16, background: 'rgba(10,6,4,0.62)', backdropFilter: 'blur(24px) saturate(130%)', WebkitBackdropFilter: 'blur(24px) saturate(130%)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: "none", zIndex: 5 }}>
           <p style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontSize: 13.5, lineHeight: 1.45, color: '#F4EFEA', margin: '0 0 10px' }}>
             "Disturbance climbing again. Try a slow exhale — I'll re-check at sunrise."
           </p>
@@ -327,7 +327,7 @@ function TrustCard1() {
 // ── Card B: HRV / recovery curve ─────────────────────────────────────────────
 function TrustCard2() {
   return (
-    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: "none"}}>
       {/* Visual */}
       <div style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden', background: `radial-gradient(ellipse 60% 40% at 50% 18%, rgba(140,200,200,0.28) 0%, rgba(60,120,140,0.12) 40%, transparent 70%), radial-gradient(ellipse 100% 60% at 50% 110%, rgba(20,40,55,0.85) 0%, transparent 65%), linear-gradient(170deg, #0E1820 0%, #0A1015 50%, #050708 100%)` }}>
         {/* Horizon glow */}
@@ -335,12 +335,12 @@ function TrustCard2() {
 
         {/* Top pill */}
         <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 9px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', fontSize: 9, textTransform: 'uppercase' as const, letterSpacing: '0.12em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgb(156,201,176)', boxShadow: '0 0 6px rgba(156,201,176,0.8)', flexShrink: 0 }} />
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgb(156,201,176)', boxShadow: "none", flexShrink: 0 }} />
           Recovery improving
         </div>
 
         {/* HRV card — bottom-anchored */}
-        <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, padding: '12px 14px 14px', borderRadius: 16, background: 'rgba(14,20,28,0.55)', backdropFilter: 'blur(24px) saturate(130%)', WebkitBackdropFilter: 'blur(24px) saturate(130%)', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 16px 32px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)', zIndex: 5 }}>
+        <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, padding: '12px 14px 14px', borderRadius: 16, background: 'rgba(14,20,28,0.55)', backdropFilter: 'blur(24px) saturate(130%)', WebkitBackdropFilter: 'blur(24px) saturate(130%)', border: '1px solid rgba(255,255,255,0.09)', boxShadow: "none", zIndex: 5 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 }}>
             <span style={{ fontSize: 9, textTransform: 'uppercase' as const, letterSpacing: '0.11em', color: 'rgba(244,239,234,0.45)' }}>HRV · 7-night avg</span>
             <span style={{ fontFamily: 'monospace', fontSize: 9, color: 'rgb(156,201,176)' }}>↑ 23%</span>
@@ -397,7 +397,7 @@ function TrustCard2() {
 // ── Card C: Provider message ──────────────────────────────────────────────────
 function TrustCard3() {
   return (
-    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: '16px 16px 28px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: "none"}}>
       {/* Visual */}
       <div style={{ position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden', background: `radial-gradient(ellipse 80% 55% at 30% 25%, rgba(180,200,170,0.28) 0%, rgba(120,140,110,0.12) 40%, transparent 70%), radial-gradient(ellipse 90% 70% at 80% 105%, rgba(40,55,40,0.6) 0%, transparent 65%), linear-gradient(165deg, #1A2018 0%, #141812 50%, #0A0C09 100%)` }}>
         {/* Window-light bloom */}
@@ -412,7 +412,7 @@ function TrustCard3() {
         </div>
 
         {/* Message card — bottom-anchored */}
-        <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, padding: '12px 14px 12px', borderRadius: 16, background: 'rgba(8,12,8,0.62)', backdropFilter: 'blur(24px) saturate(130%)', WebkitBackdropFilter: 'blur(24px) saturate(130%)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 16px 32px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)', zIndex: 5 }}>
+        <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, padding: '12px 14px 12px', borderRadius: 16, background: 'rgba(8,12,8,0.62)', backdropFilter: 'blur(24px) saturate(130%)', WebkitBackdropFilter: 'blur(24px) saturate(130%)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: "none", zIndex: 5 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 9 }}>
             <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #6B8C70, #A8C49A)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#14100E', flexShrink: 0 }}>SH</div>
             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 1 }}>
@@ -510,13 +510,13 @@ function LiabilitySection() {
 
             {/* Top-left pill */}
             <div style={glassPin({ top: 28, left: 28, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', whiteSpace: 'nowrap' })}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(156,201,176)', boxShadow: '0 0 8px rgba(156,201,176,0.9)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(156,201,176)', boxShadow: "none", flexShrink: 0 }} />
               Protection protocol · active
             </div>
 
             {/* Top-right pill — alert / amber */}
             <div style={glassPin({ top: 28, right: 28, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', whiteSpace: 'nowrap' })}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(255,139,92)', boxShadow: '0 0 8px rgba(255,139,92,0.9)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(255,139,92)', boxShadow: "none", flexShrink: 0 }} />
               Grinding ↑ night 8
             </div>
 
@@ -544,9 +544,7 @@ function LiabilitySection() {
                     background: i === alertBar
                       ? 'linear-gradient(180deg, rgba(255,139,92,0.95), rgba(255,139,92,0.55))'
                       : 'linear-gradient(180deg, rgba(156,201,176,0.95), rgba(156,201,176,0.5))',
-                    boxShadow: i === alertBar
-                      ? '0 0 8px rgba(255,139,92,0.6)'
-                      : '0 0 8px rgba(156,201,176,0.5)',
+                    boxShadow: "none",
                   }} />
                 ))}
               </div>
@@ -683,7 +681,7 @@ function SophisticationSection() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '480px 1fr', gap: isMobile ? 32 : 64, alignItems: 'center', marginBottom: 40 }}>
 
         {/* LEFT — dial card */}
-        <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+        <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: "none"}}>
           <div style={{
             position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden',
             background: `
@@ -692,20 +690,20 @@ function SophisticationSection() {
               radial-gradient(ellipse 90% 70% at 50% 110%, rgba(15,12,18,0.85) 0%, transparent 60%),
               linear-gradient(160deg, #1A1620 0%, #14111A 35%, #0B090E 70%, #050407 100%)
             `,
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.03)',
+            boxShadow: "none",
           }}>
             {/* Center glow blur */}
             <div style={{ position: 'absolute', inset: '20% 25%', background: 'radial-gradient(circle, rgba(180,200,255,0.10) 0%, transparent 60%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
 
             {/* Top-left pill: Preventative monitoring */}
             <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.30)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: MINT, boxShadow: '0 0 8px rgba(156,201,176,0.9)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: MINT, boxShadow: "none", flexShrink: 0 }} />
               Preventative monitoring · active
             </div>
 
             {/* Top-right pill: Adaptive intelligence */}
             <div style={{ position: 'absolute', top: 28, right: 28, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.30)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: INDIGO, boxShadow: '0 0 8px rgba(138,163,217,0.9)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: INDIGO, boxShadow: "none", flexShrink: 0 }} />
               Adaptive intelligence
             </div>
 
@@ -873,7 +871,7 @@ function PremiumDifferentiationSection() {
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '480px 1fr', gap: isMobile ? 32 : 64, alignItems: 'center', marginBottom: 40 }}>
 
         {/* LEFT — rings card */}
-        <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 40px 80px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4)' }}>
+        <div style={{ background: 'var(--bs-bg2)', borderRadius: 32, padding: 16, border: '1px solid rgba(255,255,255,0.05)', boxShadow: "none"}}>
           <div style={{
             position: 'relative', aspectRatio: '1/1', borderRadius: 22, overflow: 'hidden',
             background: `
@@ -888,13 +886,13 @@ function PremiumDifferentiationSection() {
 
             {/* Top-left pill */}
             <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.13em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: MINT, boxShadow: '0 0 8px rgba(156,201,176,0.9)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: MINT, boxShadow: "none", flexShrink: 0 }} />
               Personalized recovery · live
             </div>
 
             {/* Top-right pill */}
             <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.13em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: EMBER, boxShadow: '0 0 8px rgba(255,139,92,0.9)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: EMBER, boxShadow: "none", flexShrink: 0 }} />
               Member tier · premium
             </div>
 
@@ -921,7 +919,7 @@ function PremiumDifferentiationSection() {
             </div>
 
             {/* Bottom legend card */}
-            <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 6, padding: '12px 16px', borderRadius: 16, background: 'rgba(20,14,10,0.42)', backdropFilter: 'blur(28px) saturate(140%)', WebkitBackdropFilter: 'blur(28px) saturate(140%)', border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 24px 50px -20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 6, padding: '12px 16px', borderRadius: 16, background: 'rgba(20,14,10,0.42)', backdropFilter: 'blur(28px) saturate(140%)', WebkitBackdropFilter: 'blur(28px) saturate(140%)', border: '1px solid rgba(255,255,255,0.10)', boxShadow: "none", display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {[
                 { label: 'Sleep',    val: '88', color: MINT,  glow: 'rgba(156,201,176,0.7)' },
                 { label: 'Stress',   val: '36', color: EMBER, glow: 'rgba(255,139,92,0.7)'  },
@@ -929,7 +927,7 @@ function PremiumDifferentiationSection() {
               ].map(({ label, val, color, glow }) => (
                 <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 9.5, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: 'rgba(244,239,234,0.55)' }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${glow}`, flexShrink: 0 }} />
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, boxShadow: "none", flexShrink: 0 }} />
                     {label}
                   </span>
                   <span style={{ fontSize: 17, fontWeight: 400, letterSpacing: '-0.01em', color: '#F4EFEA' }}>{val}</span>
@@ -1064,7 +1062,7 @@ function PatientRetentionSection() {
           borderRadius: 32,
           background: 'var(--bs-bg2)',
           border: '1px solid rgba(244,239,234,0.08)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 70px -30px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.3)',
+          boxShadow: "none",
           color: '#F4EFEA',
         }}>
           {/* Visual area */}
@@ -1078,7 +1076,7 @@ function PatientRetentionSection() {
               radial-gradient(ellipse 90% 80% at 80% 95%, rgba(156,201,176,0.45) 0%, rgba(156,201,176,0.10) 35%, transparent 65%),
               radial-gradient(circle at 50% 50%, #2A1F18 0%, #1A130F 60%, #0E0A08 100%)
             `,
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.03)',
+            boxShadow: "none",
           }}>
             {/* Ambient grain overlay */}
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 75% 70%, rgba(255,255,255,0.03) 0%, transparent 35%)', mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 1 }} />
@@ -1114,7 +1112,7 @@ function PatientRetentionSection() {
               transform: 'translate(-50%, -50%)',
               width: 6, height: 6, borderRadius: '50%',
               background: 'rgba(244,239,234,0.35)',
-              boxShadow: '0 0 4px rgba(255,200,170,0.3)',
+              boxShadow: "none",
               zIndex: 4,
             }} />
 
@@ -1137,14 +1135,14 @@ function PatientRetentionSection() {
               backdropFilter: 'blur(28px) saturate(140%)',
               WebkitBackdropFilter: 'blur(28px) saturate(140%)',
               border: '1px solid rgba(255,255,255,0.10)',
-              boxShadow: '0 30px 60px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.10)',
+              boxShadow: "none",
               zIndex: 5,
               color: '#F4EFEA',
             }}>
               {/* Pill header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#9CC9B0', boxShadow: '0 0 8px rgba(156,201,176,0.9)', flexShrink: 0 }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#9CC9B0', boxShadow: "none", flexShrink: 0 }} />
                   Insight loop · live
                 </div>
                 <span style={{ color: 'rgba(244,239,234,0.55)', fontFamily: 'monospace', fontSize: 14, lineHeight: '1', marginLeft: 8 }}>›</span>
@@ -1168,7 +1166,7 @@ function PatientRetentionSection() {
                     flex: 1, borderRadius: 2,
                     height: `${h}%`,
                     background: i === 9 ? 'rgba(255,200,170,0.85)' : 'rgba(244,239,234,0.18)',
-                    boxShadow: i === 9 ? '0 0 8px rgba(255,180,140,0.7)' : 'none',
+                    boxShadow: "none",
                   }} />
                 ))}
               </div>
@@ -1311,7 +1309,7 @@ function PracticeRevenueSection() {
               radial-gradient(circle at 50% 50%, #0F1715 0%, #0A0E0D 55%, #050706 100%)
             `,
             border: '1px solid rgba(244,239,234,0.06)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.03), 0 30px 70px -30px rgba(0,0,0,0.7)',
+            boxShadow: "none",
           }}>
             {/* Ambient grain */}
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% 30%, rgba(255,255,255,0.04) 0%, transparent 40%), radial-gradient(circle at 78% 72%, rgba(255,255,255,0.03) 0%, transparent 35%)', mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 1 }} />
@@ -1347,7 +1345,7 @@ function PracticeRevenueSection() {
                   width: d.peak ? 7 : 5, height: d.peak ? 7 : 5,
                   borderRadius: '50%',
                   background: d.peak ? 'rgb(180,235,205)' : 'rgba(244,239,234,0.55)',
-                  boxShadow: d.peak ? '0 0 10px rgba(120,210,170,0.9), 0 0 24px rgba(120,210,170,0.4)' : 'none',
+                  boxShadow: "none",
                   transform: 'translate(-50%, -50%)',
                   zIndex: 4,
                 }} />
@@ -1367,13 +1365,13 @@ function PracticeRevenueSection() {
               backdropFilter: 'blur(28px) saturate(140%)',
               WebkitBackdropFilter: 'blur(28px) saturate(140%)',
               border: '1px solid rgba(255,255,255,0.10)',
-              boxShadow: '0 30px 60px -20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.10)',
+              boxShadow: "none",
               zIndex: 5, color: '#F4EFEA',
             }}>
               {/* Pill header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(140,225,185)', boxShadow: '0 0 8px rgba(140,225,185,0.9)', flexShrink: 0 }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(140,225,185)', boxShadow: "none", flexShrink: 0 }} />
                   Projected uplift · monthly
                 </div>
                 <span style={{ color: 'rgba(244,239,234,0.55)', fontFamily: 'monospace', fontSize: 14, lineHeight: '1' }}>›</span>
@@ -1670,9 +1668,9 @@ function TrustSection() {
 const CB_MINT  = 'rgb(140,225,185)';
 const CB_AMBER = 'rgb(255,180,100)';
 const CB_TEAL  = 'rgb(120,200,220)';
-const cbMintDot: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: CB_MINT,  boxShadow: '0 0 8px rgba(140,225,185,0.85)', flexShrink: 0 };
-const cbAmberDot: React.CSSProperties= { width: 6, height: 6, borderRadius: '50%', background: CB_AMBER, boxShadow: '0 0 8px rgba(255,180,100,0.85)', flexShrink: 0 };
-const cbTealDot: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: CB_TEAL,  boxShadow: '0 0 8px rgba(120,200,220,0.85)', flexShrink: 0 };
+const cbMintDot: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: CB_MINT,  boxShadow: "none", flexShrink: 0 };
+const cbAmberDot: React.CSSProperties= { width: 6, height: 6, borderRadius: '50%', background: CB_AMBER, boxShadow: "none", flexShrink: 0 };
+const cbTealDot: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: CB_TEAL,  boxShadow: "none", flexShrink: 0 };
 
 const cbPill = (extra: React.CSSProperties = {}): React.CSSProperties => ({
   position: 'absolute', zIndex: 6,
@@ -1690,7 +1688,7 @@ const cbGlass = (extra: React.CSSProperties = {}): React.CSSProperties => ({
   backdropFilter: 'blur(28px) saturate(140%)',
   WebkitBackdropFilter: 'blur(28px) saturate(140%)',
   border: '1px solid rgba(255,255,255,0.10)',
-  boxShadow: '0 24px 50px -20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.10)',
+  boxShadow: "none",
   color: '#F4EFEA',
   ...extra,
 });
@@ -1698,7 +1696,7 @@ const cbGlass = (extra: React.CSSProperties = {}): React.CSSProperties => ({
 const cbVisual = (bg: string): React.CSSProperties => ({
   position: 'relative', aspectRatio: '1/1', borderRadius: 28, overflow: 'hidden',
   isolation: 'isolate',
-  boxShadow: '0 30px 60px -25px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 0 1px rgba(255,255,255,0.04)',
+  boxShadow: "none",
   background: bg,
 });
 
@@ -1837,7 +1835,7 @@ function ConsumerSleepSection() {
           {/* Bar chart */}
           <div style={{ position: 'absolute', left: 24, right: 24, bottom: '22%', display: 'flex', gap: 3, alignItems: 'flex-end', height: '38%', zIndex: 3 }}>
             {heights.map((h, i) => (
-              <div key={i} style={{ flex: 1, borderRadius: 2, height: `${h}%`, background: tall.has(i) ? 'rgba(220,230,250,0.78)' : 'rgba(180,200,235,0.45)', boxShadow: tall.has(i) ? '0 0 6px rgba(180,200,235,0.4)' : 'none' }} />
+              <div key={i} style={{ flex: 1, borderRadius: 2, height: `${h}%`, background: tall.has(i) ? 'rgba(220,230,250,0.78)' : 'rgba(180,200,235,0.45)', boxShadow: "none"}} />
             ))}
           </div>
           {/* Bottom glass */}
@@ -2016,7 +2014,7 @@ function ConsumerMorningSection() {
                 { text: 'Consider avoiding late caffeine tonight', color: CB_MINT },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, color: 'rgba(244,239,234,0.78)', lineHeight: 1.4 }}>
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: item.color, boxShadow: `0 0 6px ${item.color}99`, flexShrink: 0, marginTop: 6 }} />
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: item.color, boxShadow: "none", flexShrink: 0, marginTop: 6 }} />
                   {item.text}
                 </div>
               ))}
@@ -2211,10 +2209,10 @@ function ConsumerPositionSection() {
           {/* Bottom glass legend */}
           <div style={cbGlass({ left: 24, right: 24, bottom: 24, padding: '14px 16px', borderRadius: 16, display: 'flex', gap: 18, alignItems: 'center' })}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#F4EFEA' }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: CB_TEAL, boxShadow: '0 0 6px rgba(120,200,220,0.7)', flexShrink: 0 }} />Side
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: CB_TEAL, boxShadow: "none", flexShrink: 0 }} />Side
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#F4EFEA' }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: CB_AMBER, boxShadow: '0 0 6px rgba(255,180,100,0.7)', flexShrink: 0 }} />Back
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: CB_AMBER, boxShadow: "none", flexShrink: 0 }} />Back
             </div>
             <div style={{ flex: 1 }} />
             <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(244,239,234,0.55)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Restlessness increased during this window</span>
@@ -2310,7 +2308,7 @@ function ConsumerOralSection() {
           </div>
           {/* Glowing core */}
           <div style={{ position: 'absolute', left: '50%', top: 'calc(50% - 6%)', transform: 'translate(-50%,-50%)', width: '26%', aspectRatio: '1/1', borderRadius: '50%', background: 'radial-gradient(circle, rgba(180,235,210,0.35) 0%, rgba(120,210,170,0.15) 40%, transparent 70%)', zIndex: 3 }}>
-            <div style={{ position: 'absolute', inset: '30%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,239,234,0.85) 0%, rgba(180,225,200,0.4) 40%, transparent 70%)', boxShadow: '0 0 24px rgba(180,225,200,0.6)' }} />
+            <div style={{ position: 'absolute', inset: '30%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,239,234,0.85) 0%, rgba(180,225,200,0.4) 40%, transparent 70%)', boxShadow: "none"}} />
           </div>
           {/* Floating chips */}
           {chips.map((c, i) => (
@@ -2436,7 +2434,7 @@ function ConsumerDiscoverSection() {
           {/* Cause/Effect chips */}
           {causeChips.map((c, i) => (
             <div key={i} style={{ position: 'absolute', padding: '7px 11px', borderRadius: 999, background: 'rgba(20,14,10,0.45)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', fontSize: 11, color: '#F4EFEA', zIndex: 4, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: C.fn, ...c.style }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.cls === 'cause' ? CB_AMBER : CB_MINT, boxShadow: c.cls === 'cause' ? '0 0 6px rgba(255,180,100,0.7)' : '0 0 6px rgba(140,225,200,0.7)', flexShrink: 0 }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.cls === 'cause' ? CB_AMBER : CB_MINT, boxShadow: "none", flexShrink: 0 }} />
               {c.text}
             </div>
           ))}

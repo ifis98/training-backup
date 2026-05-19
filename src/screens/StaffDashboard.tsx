@@ -208,7 +208,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     <div style={{
       ...glass, padding: "22px 18px", flex: 1, minWidth: 120,
       position: "relative", overflow: "hidden", transition: "all 0.3s",
-      boxShadow: C.glow(color, 0.08),
+      boxShadow: "none",
     }}
     onMouseEnter={e => { e.currentTarget.style.boxShadow = C.glow(color, 0.2); e.currentTarget.style.transform = "translateY(-3px)"; }}
     onMouseLeave={e => { e.currentTarget.style.boxShadow = C.glow(color, 0.08); e.currentTarget.style.transform = "translateY(0)"; }}>
@@ -236,7 +236,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
             </button>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, boxShadow: C.glow(C.teal, 0.2) }}>
+            <div style={{ width: 40, height: 40, borderRadius: C.radiusSm, background: C.gradTeal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, boxShadow: "none"}}>
               {(s.name || 'U')[0].toUpperCase()}
             </div>
             <div>
@@ -260,7 +260,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
           </div>
           <div style={{ marginTop: 14 }}>
             <div style={{ height: 4, background: "var(--bs-card2)", borderRadius: 999 }}>
-              <div style={{ height: "100%", width: `${pr}%`, background: C.gradTeal, transition: "width 0.5s", borderRadius: 999, boxShadow: C.glow(C.teal, 0.3) }} />
+              <div style={{ height: "100%", width: `${pr}%`, background: C.gradTeal, transition: "width 0.5s", borderRadius: 999, boxShadow: "none"}} />
             </div>
             <div style={{ fontSize: 10, color: "var(--bs-ash)", marginTop: 5 }}>{dN}/{myM.length} {T("sections")} · {pr}% complete</div>
           </div>
@@ -430,12 +430,12 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
         {/* Completion Banners */}
         {allComplete && !s.signed && (
-          <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: C.glow(C.gold, 0.15), borderColor: `${C.gold}30` }}>
+          <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: "none", borderColor: `${C.gold}30` }}>
             <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <Trophy size={22} strokeWidth={1.5} /> {T("all_complete")}
             </div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
-              style={{ background: C.gradRed, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3) }}>
+              style={{ background: C.gradRed, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>
               {T("complete_onboarding")}
             </button>
           </div>
@@ -443,7 +443,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
 
         {allModsDone && !allComplete && (
           <button onClick={() => { u({ phase: "simulation" }); scrollTop(); }}
-            style={{ background: C.gradTeal, color: "var(--bs-text)", padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: C.glow(C.teal, 0.25), width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
+            style={{ background: C.gradTeal, color: "var(--bs-text)", padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: "none", width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.4); }}
             onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.25); }}>
             {T("training_complete")} <ArrowRight size={16} strokeWidth={2} />
@@ -616,7 +616,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
         <div style={{ ...glass, padding: 22, textAlign: "center", marginBottom: 24 }}>
           <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>{T("need_help")}</div>
           <button onClick={() => setShowBooking(true)}
-            style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "11px 24px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>
+            style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "11px 24px", fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>
             {T("schedule_call")}
           </button>
         </div>

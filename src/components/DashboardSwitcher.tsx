@@ -26,7 +26,7 @@ export default function DashboardSwitcher() {
       {open && (
         <div style={{
           background: C.dark2, border: `1px solid ${C.borderD}`, borderRadius: C.radiusSm,
-          marginBottom: 8, overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,0.5)', minWidth: 220,
+          marginBottom: 8, overflow: 'hidden', boxShadow: "none", minWidth: 220,
         }}>
           {items.map(i => {
             const Icon = i.icon;
@@ -50,7 +50,7 @@ export default function DashboardSwitcher() {
           display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
           background: C.gradRed, color: '#fff', border: 'none', borderRadius: 999,
           cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: C.fn,
-          letterSpacing: 0.5, textTransform: 'uppercase', boxShadow: '0 8px 24px rgba(204,16,16,0.4)',
+          letterSpacing: 0.5, textTransform: 'uppercase', boxShadow: "none",
         }}>
         <active.icon size={14} /> {active.label} <ChevronUp size={14} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
       </button>

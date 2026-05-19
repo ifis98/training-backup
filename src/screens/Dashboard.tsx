@@ -33,7 +33,7 @@ const glass = {
   background: "var(--bs-card)",
   border: "1px solid var(--bs-border)",
   borderRadius: 14,
-  boxShadow: "0 10px 28px -10px rgba(0,0,0,0.25)",
+  boxShadow: "none",
 } as React.CSSProperties;
 
 const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
@@ -499,7 +499,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
             {/* Goals Editor */}
             {editingGoals && (
-              <div style={{ ...glass, padding: "20px 24px", marginBottom: 16, boxShadow: C.glow(C.teal, 0.12), border: `1px solid ${C.teal}30` }}>
+              <div style={{ ...glass, padding: "20px 24px", marginBottom: 16, boxShadow: "none", border: `1px solid ${C.teal}30` }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 14, alignItems: "end" }}>
                   <div>
                     <label style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 6, display: "block" }}>{T("case_goal")}</label>
@@ -556,7 +556,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             )}
             {(practiceGoals || cases.length > 0) && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 14 }}>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: C.glow(C.teal, 0.06) }}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: C.gradTeal }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <Briefcase size={14} strokeWidth={1.5} color={C.teal} />
@@ -572,7 +572,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   </>
                 )}
               </div>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: C.glow(C.gold, 0.06) }}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: C.gradGold }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <DollarSign size={14} strokeWidth={1.5} color={C.gold} />
@@ -588,7 +588,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   </>
                 )}
               </div>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: C.glow(C.gold, 0.04) }}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${C.gold}, ${C.green})` }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <Clock size={14} strokeWidth={1.5} color={C.gold} />
@@ -597,7 +597,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 <div style={{ fontSize: 36, fontWeight: 800, color: C.gold, lineHeight: 1 }}>{cases.filter(c => c.status === 'follow_up').length}</div>
                 <div style={{ fontSize: 11, color: "var(--bs-ash)", marginTop: 6 }}>{T("needs_attention")}</div>
               </div>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: C.glow(C.red, 0.04) }}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: C.gradRed }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <XCircle size={14} strokeWidth={1.5} color={C.red} />
@@ -624,7 +624,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         {/* Knowledge Score + Recommendations Row */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: isMobile ? 10 : 16, marginBottom: isMobile ? 16 : 28 }}>
           {/* Knowledge Score Gauge */}
-          <div style={{ background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 14, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
+          <div style={{ background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 14, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "none"}}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16, position: "relative" }}>
               <div style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: "0.18em", fontWeight: 600 }}>Knowledge Score</div>
               <div
@@ -638,7 +638,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   position: "absolute", top: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
                   background: "var(--bs-bg2)", border: "1px solid var(--bs-border)",
                   borderRadius: 8, padding: "10px 12px", minWidth: 220, zIndex: 50,
-                  boxShadow: "0 12px 28px -8px rgba(0,0,0,0.35)",
+                  boxShadow: "none",
                   fontSize: 11, color: "var(--bs-text)", textTransform: "none", letterSpacing: "normal", fontWeight: 500, lineHeight: 1.5,
                 }}>
                   <div style={{ fontWeight: 700, marginBottom: 6 }}>How this is calculated</div>
@@ -675,7 +675,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
           </div>
 
           {/* Training Recommendations */}
-          <div style={{ background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 14, padding: 24, overflow: "hidden", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
+          <div style={{ background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 14, padding: 24, overflow: "hidden", boxShadow: "none"}}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "var(--bs-ash)", marginBottom: 18, display: "flex", alignItems: "center", gap: 6 }}>
               <Target size={12} strokeWidth={1.5} color={C.teal} /> {T("training_recommendations")}
               {simReviews.length > 0 && (
@@ -956,12 +956,12 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {/* Completion Banners */}
         {allComplete && !s.signed && (
-          <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: C.glow(C.gold, 0.15), borderColor: `${C.gold}30` }}>
+          <div style={{ ...glass, padding: 28, textAlign: "center", marginBottom: 24, boxShadow: "none", borderColor: `${C.gold}30` }}>
             <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <Trophy size={22} strokeWidth={1.5} /> {T("all_complete")}
             </div>
             <button onClick={() => { u({ phase: "report" }); scrollTop(); }}
-              style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.3) }}>
+              style={{ background: C.gradTeal, color: "#fff", border: "none", padding: "14px 32px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>
               {T("complete_onboarding")}
             </button>
           </div>
@@ -969,7 +969,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
         {allModsDone && !allComplete && (
           <button onClick={() => { u({ phase: "simulation" }); scrollTop(); }}
-            style={{ background: C.gradTeal, color: "var(--bs-text)", padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: C.glow(C.teal, 0.25), width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
+            style={{ background: C.gradTeal, color: "var(--bs-text)", padding: 18, textAlign: "center", marginBottom: 24, fontSize: 14, fontWeight: 700, borderRadius: C.radius, boxShadow: "none", width: "100%", border: "none", cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.3s" }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.4); }}
             onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = C.glow(C.teal, 0.25); }}>
             {T("training_complete")} <ArrowRight size={16} strokeWidth={2} />
@@ -1061,7 +1061,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                 <div style={{ fontSize: 30, fontWeight: 800, color: "var(--bs-ash)" }}>${currentRev.toLocaleString()}</div>
                 <div style={{ fontSize: 11, color: "var(--bs-ash)", marginTop: 4 }}>{revClose}% {T("close_rate")}</div>
               </div>
-              <div style={{ background: `rgba(20,184,166,0.06)`, padding: 22, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: C.glow(C.teal, 0.08) }}>
+              <div style={{ background: `rgba(20,184,166,0.06)`, padding: 22, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: "none"}}>
                 <div style={{ fontSize: 10, color: C.teal, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>{T("with_bytesense")}</div>
                 <div style={{ fontSize: 30, fontWeight: 800, color: C.teal }}>${projectedRev.toLocaleString()}</div>
                 <div style={{ fontSize: 11, color: C.teal, marginTop: 4 }}>{projectedClose.toFixed(0)}% {T("projected_close")}</div>

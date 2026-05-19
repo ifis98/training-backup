@@ -141,7 +141,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
       transform: isOpen ? "translateX(0)" : "translateX(105%)",
       transition: "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
       willChange: "transform",
-      boxShadow: isOpen ? "-4px 0 32px rgba(0,0,0,0.15), -1px 0 0 var(--bs-border)" : "none",
+      boxShadow: "none",
     }}>
       {/* Header */}
       <div style={{
@@ -232,7 +232,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
                   padding: "7px 16px", fontSize: 11, fontWeight: 700,
                   fontFamily: C.fn, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
                   borderRadius: 999, transition: "all 0.25s",
-                  boxShadow: mode === m.id ? C.glow(C.gold, 0.2) : "none",
+                  boxShadow: "none",
                 }}>
                 <span style={{ marginRight: 5 }}>{m.icon}</span>{m.label}
               </button>
@@ -269,7 +269,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
                   borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
                   fontSize: 13, lineHeight: 1.7, whiteSpace: "pre-wrap",
                   border: msg.role === "assistant" ? "1px solid var(--bs-border)" : "none",
-                  boxShadow: msg.role === "user" ? C.glow(C.teal, 0.15) : C.shadowCard,
+                  boxShadow: "none",
                 }}>
                   {msg.role === "assistant" && (
                     <>
@@ -335,7 +335,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
                 background: C.gradGold, color: C.dark, border: "none",
                 padding: "12px 20px", fontSize: 13, fontWeight: 700, fontFamily: C.fn,
                 cursor: "pointer", flexShrink: 0, borderRadius: C.radiusSm,
-                boxShadow: C.glow(C.gold, 0.2), transition: "all 0.2s",
+                boxShadow: "none", transition: "all 0.2s",
               }}
               onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>

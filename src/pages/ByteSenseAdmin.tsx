@@ -659,7 +659,7 @@ export default function ByteSenseAdmin() {
   ];
 
   const kpiCard = (label: string, value: string | number, color: string, gradient: string) => (
-    <div style={{ ...glass, padding: '20px 18px', position: 'relative', overflow: 'hidden', boxShadow: C.glow(color, 0.08) }}>
+    <div style={{ ...glass, padding: '20px 18px', position: 'relative', overflow: 'hidden', boxShadow: "none"}}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: gradient }} />
       <div style={{ fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10, fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
@@ -679,7 +679,7 @@ export default function ByteSenseAdmin() {
       {/* SIDEBAR */}
       <aside style={{ width: 240, borderRight: `1px solid ${'var(--bs-border)'}`, padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--bs-bg2)', position: 'sticky', top: 0, height: '100vh' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 8px 24px', borderBottom: `1px solid ${'var(--bs-border)'}`, marginBottom: 16 }}>
-          <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: C.gradRed, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: C.glow(C.red, 0.3) }}>◆</div>
+          <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: C.gradRed, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: "none"}}>◆</div>
           <div>
             <div style={{ fontSize: 9, letterSpacing: 3, color: C.red, textTransform: 'uppercase', fontWeight: 700 }}>ByteSense</div>
             <div style={{ fontSize: 14, fontWeight: 800 }}>HQ Admin</div>
@@ -875,7 +875,7 @@ export default function ByteSenseAdmin() {
                     <label style={{ fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, display: 'block', marginBottom: 6, fontWeight: 600 }}>Count</label>
                     <input type="number" min={1} max={20} value={batchCount} onChange={e => setBatchCount(Number(e.target.value))} style={{ ...inputStyle, width: 90 }} />
                   </div>
-                  <button onClick={generateCodes} style={{ background: C.gradRed, color: '#fff', border: 'none', padding: '12px 24px', fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.2) }}>
+                  <button onClick={generateCodes} style={{ background: C.gradRed, color: '#fff', border: 'none', padding: '12px 24px', fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, boxShadow: "none"}}>
                     Generate
                   </button>
                   <button onClick={exportCodesCSV} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', color: C.teal, border: `1px solid ${C.teal}40`, padding: '10px 16px', fontSize: 12, fontWeight: 600, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
@@ -1235,7 +1235,7 @@ export default function ByteSenseAdmin() {
                               Save notes
                             </button>
                             {d.status !== 'converted' && (
-                              <button onClick={() => convertDemo(d)} style={{ background: C.gradTeal, border: 'none', color: '#fff', padding: '6px 14px', fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.2) }}>
+                              <button onClick={() => convertDemo(d)} style={{ background: C.gradTeal, border: 'none', color: '#fff', padding: '6px 14px', fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, boxShadow: "none"}}>
                                 Convert + Generate Code
                               </button>
                             )}

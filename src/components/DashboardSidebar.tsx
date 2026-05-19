@@ -134,7 +134,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
           display: 'flex', flexDirection: 'column',
           transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
-          boxShadow: mobileOpen ? '20px 0 60px rgba(0,0,0,0.5)' : 'none',
+          boxShadow: "none",
         }}>
           {/* Drawer header */}
           <div style={{ padding: '18px 20px 14px', display: 'flex', alignItems: 'center',

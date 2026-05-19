@@ -93,13 +93,13 @@ export default function Welcome() {
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", flexDirection: isMobile ? "column" : "row", padding: isMobile ? "0 8px" : 0 }}>
           <button onClick={() => { localStorage.removeItem('bsa6_invite'); navigate('/register'); }}
-            style={{ background: C.gradRed, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", letterSpacing: 0.5, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3), transition: "all 0.3s" }}
+            style={{ background: C.gradRed, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", letterSpacing: 0.5, borderRadius: C.radiusSm, boxShadow: "none", transition: "all 0.3s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
             Join the ByteSense Family →
           </button>
           <button onClick={() => setShowDemo(true)}
-            style={{ background: C.gradTeal, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), transition: "all 0.3s" }}
+            style={{ background: C.gradTeal, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none", transition: "all 0.3s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
             Request a Demo
@@ -170,7 +170,7 @@ export default function Welcome() {
               <div style={{ fontSize: isMobile ? 26 : 32, fontWeight: 800, color: C.ash }}>${currentRev.toLocaleString()}</div>
               <div style={{ fontSize: 12, color: C.slate, marginTop: 4 }}>{revClose}% close rate</div>
             </div>
-            <div style={{ background: `rgba(20,184,166,0.06)`, padding: isMobile ? 16 : 24, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: C.glow(C.teal, 0.08) }}>
+            <div style={{ background: `rgba(20,184,166,0.06)`, padding: isMobile ? 16 : 24, textAlign: "center", borderRadius: C.radiusSm, border: `1px solid ${C.teal}25`, boxShadow: "none"}}>
               <div style={{ fontSize: 10, color: C.teal, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>With ByteSense</div>
               <div style={{ fontSize: isMobile ? 26 : 32, fontWeight: 800, color: C.teal }}>${projectedRev.toLocaleString()}</div>
               <div style={{ fontSize: 12, color: C.teal, marginTop: 4 }}>{projectedClose.toFixed(0)}% projected close rate</div>
@@ -217,7 +217,7 @@ export default function Welcome() {
             every recommendation you make — you're protecting someone's health in a way no one else can.
           </p>
           <button onClick={() => { localStorage.removeItem('bsa6_invite'); navigate('/register'); }}
-            style={{ background: C.gradTeal, color: C.white, border: "none", padding: isMobile ? "14px 28px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), width: isMobile ? "100%" : "auto" }}>
+            style={{ background: C.gradTeal, color: C.white, border: "none", padding: isMobile ? "14px 28px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none", width: isMobile ? "100%" : "auto" }}>
             Start Your Training →
           </button>
         </div>
@@ -246,7 +246,7 @@ export default function Welcome() {
                   borderRadius: 999,
                   background: i <= demoStep ? C.gradTeal : "rgba(255,255,255,0.08)",
                   transition: "all 0.4s",
-                  boxShadow: i === demoStep ? C.glow(C.teal, 0.3) : "none",
+                  boxShadow: "none",
                 }} />
               ))}
             </div>
@@ -275,7 +275,7 @@ export default function Welcome() {
                   <option value="dso" style={{ background: C.dark, color: C.white }}>DSO / Multi-Location</option>
                 </select>
                 <button onClick={() => { if (!demoData.name.trim() || !demoData.email.trim()) { toast.error('Name and email required'); return; } setDemoStep(1); }}
-                  style={{ background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", width: "100%", marginTop: 8, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.2) }}>
+                  style={{ background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", width: "100%", marginTop: 8, borderRadius: C.radiusSm, boxShadow: "none"}}>
                   Continue →
                 </button>
               </div>
@@ -303,7 +303,7 @@ export default function Welcome() {
                 ))}
                 <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                   <button onClick={() => setDemoStep(0)} style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "16px 24px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>← Back</button>
-                  <button onClick={() => setDemoStep(2)} style={{ flex: 1, background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.2) }}>Continue →</button>
+                  <button onClick={() => setDemoStep(2)} style={{ flex: 1, background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>Continue →</button>
                 </div>
               </div>
             )}
@@ -358,7 +358,7 @@ export default function Welcome() {
 
                 <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                   <button onClick={() => setDemoStep(1)} style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "16px 24px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>← Back</button>
-                  <button onClick={() => setDemoStep(3)} style={{ flex: 1, background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.2) }}>Continue →</button>
+                  <button onClick={() => setDemoStep(3)} style={{ flex: 1, background: C.gradRed, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: "none"}}>Continue →</button>
                 </div>
               </div>
             )}
@@ -390,7 +390,7 @@ export default function Welcome() {
                 <div style={{ display: "flex", gap: 10 }}>
                   <button onClick={() => setDemoStep(2)} style={{ background: "rgba(255,255,255,0.05)", color: C.ash, border: `1px solid ${C.glassBorder}`, padding: "16px 24px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm }}>← Back</button>
                   <button onClick={submitDemo} disabled={submitting}
-                    style={{ flex: 1, background: C.gradTeal, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", opacity: submitting ? 0.6 : 1, borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25) }}>
+                    style={{ flex: 1, background: C.gradTeal, color: "#fff", border: "none", padding: "16px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", opacity: submitting ? 0.6 : 1, borderRadius: C.radiusSm, boxShadow: "none"}}>
                     {submitting ? 'Submitting...' : 'Submit Demo Request →'}
                   </button>
                 </div>

@@ -66,7 +66,7 @@ export default function SettingsModal({ open, onClose, s, u, lang, allComplete }
     overflowY: 'auto',
     fontFamily: C.fn,
     color: isDark ? C.white : C.dark,
-    boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+    boxShadow: "none",
   };
 
   const section: React.CSSProperties = {

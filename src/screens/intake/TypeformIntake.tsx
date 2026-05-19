@@ -106,7 +106,7 @@ function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
 
       {/* Dropdown */}
       {open && (
-        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, width: 270, maxHeight: 300, display: 'flex', flexDirection: 'column', background: 'var(--bs-bg2)', border: '1px solid var(--bs-border)', borderRadius: 10, boxShadow: '0 16px 48px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, width: 270, maxHeight: 300, display: 'flex', flexDirection: 'column', background: 'var(--bs-bg2)', border: '1px solid var(--bs-border)', borderRadius: 10, boxShadow: "none", overflow: 'hidden' }}>
           <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--bs-border)' }}>
             <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search country..."

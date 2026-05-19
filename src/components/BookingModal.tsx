@@ -239,7 +239,7 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
                   width: '100%', background: (name && email) ? C.gradTeal : 'var(--bs-bg3)',
                   color: (name && email) ? '#fff' : 'var(--bs-ash)', border: 'none', padding: '14px', fontSize: 14, fontWeight: 700,
                   fontFamily: C.fn, cursor: (name && email) ? 'pointer' : 'not-allowed',
-                  borderRadius: C.radiusSm, boxShadow: (name && email) ? C.glow(C.teal, 0.2) : 'none',
+                  borderRadius: C.radiusSm, boxShadow: "none",
                   transition: 'all 0.3s',
                 }}>
                 {loading ? T("booking_loading") : T("confirm_booking")}

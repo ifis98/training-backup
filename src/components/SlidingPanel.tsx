@@ -51,7 +51,7 @@ export default function SlidingPanel({ src, title, onClose }: SlidingPanelProps)
         flexDirection: 'column',
         background: 'var(--bs-bg)',
         willChange: 'transform',
-        boxShadow: isOpen ? '-8px 0 40px rgba(0,0,0,0.5)' : 'none',
+        boxShadow: "none",
       }}
       aria-hidden={!isOpen}
     >
