@@ -274,8 +274,9 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
       background: C.dark, fontFamily: C.fn,
+      overflowX: "hidden", // prevent Clerk widget's "last seen" badge from poking off-screen
     }}>
-      <div style={{ maxWidth: 420, width: "100%", padding: "40px 24px 48px" }}>
+      <div style={{ maxWidth: 420, width: "100%", padding: "40px 24px 48px", overflow: "hidden" }}>
         {/* Header — same as original Auth.tsx */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <img src="/bytesense-logo.png" alt="ByteSense" onClick={() => navigate('/')}
