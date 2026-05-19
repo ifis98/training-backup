@@ -447,6 +447,15 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Keyboard-navigation cursor for radio / multiselect option lists. Up/Down
+  // moves this index (visual only); Enter confirms the highlighted option.
+  // Ref shadows state so the keyboard handler reads the latest value without
+  // having to depend on highlightedIdx in its useEffect (which would re-bind
+  // the listener on every arrow keystroke).
+  const [highlightedIdx, setHighlightedIdx] = useState(-1);
+  const highlightedIdxRef = useRef(-1);
+  useEffect(() => { highlightedIdxRef.current = highlightedIdx; }, [highlightedIdx]);
+
   // Visible questions filtered by showIf
   const visibleQs = QUESTIONS.filter(q => !q.showIf || q.showIf(data));
   const current = visibleQs[qIdx];
@@ -491,13 +500,50 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
       // Don't intercept when typing in an input
       if ((e.target as HTMLElement).tagName === 'INPUT') return;
 
-      if (e.key === 'Enter') { e.preventDefault(); handleOK(); return; }
+      // ArrowUp/Down: move the highlighted option (highlight only, no select)
+      if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && current?.options?.length) {
+        e.preventDefault();
+        const len = current.options.length;
+        setHighlightedIdx(i => {
+          if (i < 0) return 0;
+          return e.key === 'ArrowDown' ? (i + 1) % len : (i - 1 + len) % len;
+        });
+        return;
+      }
+
+      // Enter: confirm the highlighted option (or advance if nothing highlighted)
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (current?.options?.length && highlightedIdxRef.current >= 0 && highlightedIdxRef.current < current.options.length) {
+          const opt = current.options[highlightedIdxRef.current];
+          if (current.type === 'radio') {
+            selectRadio(current, opt.value);
+            return;
+          }
+          if (current.type === 'multiselect' && current.dataKey) {
+            const arr = (data[current.dataKey] as string[]) || [];
+            update({ [current.dataKey]: arr.includes(opt.value) ? arr.filter(v => v !== opt.value) : [...arr, opt.value] } as Partial<IntakeData>);
+            return;
+          }
+        }
+        handleOK();
+        return;
+      }
+
       if (e.key === 'Backspace') { e.preventDefault(); goBack(); return; }
 
       if (!current?.options) return;
-      const letterIdx = e.key.toLowerCase().charCodeAt(0) - 97; // a=0, b=1 …
-      const numIdx = parseInt(e.key, 10) - 1;                   // 1=0, 2=1 …
-      const idx = letterIdx >= 0 && letterIdx < 26 ? letterIdx : numIdx;
+
+      // Only treat single-character keys as hotkeys. Excludes ArrowUp/Down,
+      // Tab, Shift, Backspace, Enter, etc. — all of which had been mapped to
+      // option indices by the previous `e.key.toLowerCase().charCodeAt(0)`
+      // hack (ArrowDown→'a'→idx 0, Tab→'t'→idx 19, …).
+      if (e.key.length !== 1) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const ch = e.key.toLowerCase();
+      const letterIdx = ch >= 'a' && ch <= 'z' ? ch.charCodeAt(0) - 97 : -1;
+      const numIdx    = ch >= '1' && ch <= '9' ? Number(ch) - 1          : -1;
+      const idx = letterIdx >= 0 ? letterIdx : numIdx;
       if (idx >= 0 && idx < current.options.length) {
         const opt = current.options[idx];
         if (current.type === 'radio') {
@@ -510,7 +556,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [current, data, goBack, selectRadio, update]);
+  }, [current, data, goBack, selectRadio, update, handleOK]);
 
   // Focus first input on fields questions
   useEffect(() => {
@@ -518,6 +564,9 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
       setTimeout(() => inputRefs.current[0]?.focus(), 350);
     }
   }, [qIdx, current?.type]);
+
+  // Reset keyboard highlight when the question changes.
+  useEffect(() => { setHighlightedIdx(-1); }, [qIdx]);
 
   // ── canAdvance logic ───────────────────────────────────────────────────────
   const canAdvance = useCallback(() => {
@@ -605,6 +654,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
             saving={saving}
             isMobile={isMobile}
             inputRefs={inputRefs}
+            highlightedIdx={highlightedIdx}
           />
         </div>
       </div>
@@ -659,14 +709,15 @@ interface QProps {
   saving: boolean;
   isMobile: boolean;
   inputRefs: React.MutableRefObject<(HTMLInputElement | null)[]>;
+  highlightedIdx: number;
 }
 
-function QuestionRenderer({ q, data, update, onRadioSelect, onOK, onComplete, canAdvance, saving, isMobile, inputRefs }: QProps) {
+function QuestionRenderer({ q, data, update, onRadioSelect, onOK, onComplete, canAdvance, saving, isMobile, inputRefs, highlightedIdx }: QProps) {
   switch (q.type) {
     case 'welcome':   return <WelcomeScreen onStart={onOK} isMobile={isMobile} />;
     case 'complete':  return <CompleteScreen onComplete={onComplete} saving={saving} isMobile={isMobile} />;
-    case 'radio':     return <RadioScreen q={q} data={data} onSelect={v => onRadioSelect(q, v)} isMobile={isMobile} />;
-    case 'multiselect': return <MultiScreen q={q} data={data} update={update} isMobile={isMobile} />;
+    case 'radio':     return <RadioScreen q={q} data={data} onSelect={v => onRadioSelect(q, v)} isMobile={isMobile} highlightedIdx={highlightedIdx} />;
+    case 'multiselect': return <MultiScreen q={q} data={data} update={update} isMobile={isMobile} highlightedIdx={highlightedIdx} />;
     case 'fields':    return <FieldsScreen q={q} data={data} update={update} onOK={onOK} inputRefs={inputRefs} isMobile={isMobile} />;
     default: return null;
   }
@@ -724,15 +775,16 @@ function QHeader({ num, question, description, isMobile }: { num?: string; quest
   );
 }
 
-function RadioScreen({ q, data, onSelect, isMobile }: { q: QuestionDef; data: IntakeData; onSelect: (v: string) => void; isMobile: boolean }) {
+function RadioScreen({ q, data, onSelect, isMobile, highlightedIdx }: { q: QuestionDef; data: IntakeData; onSelect: (v: string) => void; isMobile: boolean; highlightedIdx: number }) {
   const selected = q.dataKey ? (data[q.dataKey] as string) : '';
 
   return (
     <div>
       <QHeader num={q.num} question={q.question} description={q.description} isMobile={isMobile} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {(q.options || []).map(opt => {
+        {(q.options || []).map((opt, i) => {
           const isSel = selected === opt.value;
+          const isHl = highlightedIdx === i;
           return (
             <button
               key={opt.value}
@@ -741,9 +793,11 @@ function RadioScreen({ q, data, onSelect, isMobile }: { q: QuestionDef; data: In
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: isMobile ? '13px 16px' : '14px 18px',
                 background: isSel ? 'rgba(32,200,185,0.12)' : 'var(--bs-card)',
-                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
+                border: `1.5px solid ${isSel ? C.teal : isHl ? 'var(--bs-ash)' : 'var(--bs-border)'}`,
                 borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                 transition: 'all 0.15s ease', width: '100%',
+                outline: isHl && !isSel ? '2px solid var(--bs-ash)' : 'none',
+                outlineOffset: isHl && !isSel ? 2 : 0,
               }}
             >
               <span style={{
@@ -768,7 +822,7 @@ function RadioScreen({ q, data, onSelect, isMobile }: { q: QuestionDef; data: In
   );
 }
 
-function MultiScreen({ q, data, update, isMobile }: { q: QuestionDef; data: IntakeData; update: (d: Partial<IntakeData>) => void; isMobile: boolean }) {
+function MultiScreen({ q, data, update, isMobile, highlightedIdx }: { q: QuestionDef; data: IntakeData; update: (d: Partial<IntakeData>) => void; isMobile: boolean; highlightedIdx: number }) {
   const values = q.dataKey ? ((data[q.dataKey] as string[]) || []) : [];
 
   const toggle = (value: string) => {
@@ -780,8 +834,9 @@ function MultiScreen({ q, data, update, isMobile }: { q: QuestionDef; data: Inta
     <div>
       <QHeader num={q.num} question={q.question} description={q.description} isMobile={isMobile} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {(q.options || []).map(opt => {
+        {(q.options || []).map((opt, i) => {
           const isSel = values.includes(opt.value);
+          const isHl = highlightedIdx === i;
           return (
             <button
               key={opt.value}
@@ -790,9 +845,11 @@ function MultiScreen({ q, data, update, isMobile }: { q: QuestionDef; data: Inta
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: isMobile ? '13px 16px' : '14px 18px',
                 background: isSel ? 'rgba(32,200,185,0.12)' : 'var(--bs-card)',
-                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
+                border: `1.5px solid ${isSel ? C.teal : isHl ? 'var(--bs-ash)' : 'var(--bs-border)'}`,
                 borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                 transition: 'all 0.15s ease', width: '100%',
+                outline: isHl ? '2px solid var(--bs-ash)' : 'none',
+                outlineOffset: isHl ? 2 : 0,
               }}
             >
               <span style={{
