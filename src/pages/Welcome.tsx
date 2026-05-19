@@ -32,6 +32,19 @@ export default function Welcome() {
     }
   }, [isSignedIn]);
 
+  // Surface the "kicked out due to no invite" message after useAuth signs
+  // them out for failing the eligibility check.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'invite_required') {
+      toast.error('This account is not authorized to access ByteSense. Please use your invite code or contact your administrator.', { duration: 12000 });
+      // Clean the query param so the toast doesn't fire again on subsequent re-renders / refreshes.
+      const url = new URL(window.location.href);
+      url.searchParams.delete('error');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
   const [showDemo, setShowDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [demoData, setDemoData] = useState({

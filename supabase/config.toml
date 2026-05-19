@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.delete-clerk-user]
 verify_jwt = false
 
+[functions.verify-user-eligible]
+verify_jwt = false
+
 [functions.ai-coach]
 verify_jwt = false
 

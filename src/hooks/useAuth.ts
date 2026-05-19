@@ -49,6 +49,30 @@ export function useAuth() {
           return;
         }
 
+        // Closes the Google-OAuth-on-/login bypass — Clerk auto-creates an
+        // account for any successful Google auth even though our /register
+        // page has a code gate. We verify post-sign-in that the user has
+        // proof of eligibility (admin role / redeemed code / pending invite
+        // / internal email domain). If not, sign them out.
+        try {
+          const { data: eligibility } = await supabase.functions.invoke('verify-user-eligible', {
+            body: { clerkUserId, email },
+          });
+          if (eligibility?.success && eligibility?.allowed === false) {
+            console.warn('User not eligible:', eligibility.reason);
+            // Sign them out. Their Clerk account stays (best-effort delete
+            // would require a privileged call); next sign-in attempt will
+            // be blocked the same way until an admin invites them or they
+            // redeem a code.
+            await clerkSignOut({ redirectUrl: '/?error=invite_required' });
+            return;
+          }
+        } catch (e) {
+          // Non-fatal: if the eligibility check itself errors, fall through.
+          // Better to let real users in than block them on infra hiccups.
+          console.warn('verify-user-eligible threw:', e);
+        }
+
         // Call claim-admin-invite unconditionally. The function looks up the
         // pending invite server-side (with service role, bypassing the
         // soon-to-be-locked-down RLS) and returns { success: false } when no
