@@ -556,7 +556,11 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [current, data, goBack, selectRadio, update, handleOK]);
+    // Note: handleOK is intentionally accessed via a ref (below) so this
+    // listener doesn't need to be rebound on every render — and so we
+    // don't run into a temporal-dead-zone error from listing handleOK in
+    // the deps array before it's declared.
+  }, [current, data, goBack, selectRadio, update]);
 
   // Focus first input on fields questions
   useEffect(() => {
