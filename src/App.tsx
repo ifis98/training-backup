@@ -90,6 +90,20 @@ const clerkAppearance = {
   },
 };
 
+// Stable, module-level appearance object for the SignIn widget. Hides the
+// default Clerk "Don't have an account? Sign up" link in the widget footer
+// (we render our own "Got a Code? →" link below it). MUST be a stable
+// reference — passing a fresh object on every render caused Clerk to
+// re-initialize the widget mid-flow, which re-fired the email verification
+// request and sent two OTP emails per sign-in attempt.
+const signInAppearance = {
+  ...clerkAppearance,
+  elements: {
+    ...clerkAppearance.elements,
+    footerAction: { display: "none" } as React.CSSProperties,
+  },
+};
+
 /** Styled Clerk sign-in / sign-up screen matching ByteSense brand */
 function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
   const navigate = useNavigate();
@@ -281,15 +295,7 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
               path="/login"
               signUpUrl="/"
               afterSignInUrl="/app"
-              appearance={{
-                ...clerkAppearance,
-                elements: {
-                  ...clerkAppearance.elements,
-                  // Hide Clerk's default "Don't have an account? Sign up" —
-                  // we don't want random sign-ups, only code redemption.
-                  footerAction: { display: "none" },
-                },
-              }}
+              appearance={signInAppearance}
             />
             <div style={{ textAlign: "center", marginTop: 20 }}>
               <button
