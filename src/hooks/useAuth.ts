@@ -49,6 +49,28 @@ export function useAuth() {
           return;
         }
 
+        // If the user just redeemed a code on the landing page, their
+        // `bsa6_invite` is still in localStorage. Link it BEFORE the
+        // eligibility check, so registration_codes.used_by_clerk_user_id
+        // reflects this user and the check passes.
+        //
+        // (Without this, the link op only fires at intake completion via
+        // Index.tsx — but verify-user-eligible runs before intake even
+        // starts, so legitimate code-redeemers get kicked out.)
+        try {
+          const inviteRaw = localStorage.getItem('bsa6_invite');
+          if (inviteRaw) {
+            const invite = JSON.parse(inviteRaw);
+            if (invite?.code) {
+              await supabase.functions.invoke('manage-registration-codes', {
+                body: { op: 'link', code: invite.code, clerkUserId, email },
+              });
+            }
+          }
+        } catch (e) {
+          console.warn('Pre-eligibility code link failed (non-fatal):', e);
+        }
+
         // Closes the Google-OAuth-on-/login bypass — Clerk auto-creates an
         // account for any successful Google auth even though our /register
         // page has a code gate. We verify post-sign-in that the user has
