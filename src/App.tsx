@@ -104,7 +104,17 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
   // Skip the gate if:
   //  (a) a registration code was already redeemed (practice invite), OR
   //  (b) a Clerk admin invitation ticket is present in the URL (__clerk_ticket)
-  const hasClerkTicket = new URLSearchParams(window.location.search).has('__clerk_ticket');
+  //
+  // hasClerkTicket is frozen at mount via useState — reading
+  // `window.location.search` on every render meant Clerk's SignUp flow
+  // (which mutates URL params during CAPTCHA + verification) could flip
+  // this value mid-flow, retrigger the effect below, and cause the
+  // <SignUp> widget to remount. Each remount asks Clerk to re-send the
+  // verification email — which is why the OTP screen "loaded twice" and
+  // testers got two emails.
+  const [hasClerkTicket] = useState(
+    () => new URLSearchParams(window.location.search).has('__clerk_ticket'),
+  );
   const [inviteAccepted, setInviteAccepted] = useState(
     () => !!localStorage.getItem('bsa6_invite') || hasClerkTicket
   );
