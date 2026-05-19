@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { C } from '@/data/constants';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +23,15 @@ export default function Welcome() {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const isSignedIn = !!clerkUser;
+
+  // Auto-redirect signed-in users to the app
+  useEffect(() => {
+    if (isSignedIn) {
+      const t = setTimeout(() => { window.location.href = '/app'; }, 300);
+      return () => clearTimeout(t);
+    }
+  }, [isSignedIn]);
+
   const [showDemo, setShowDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [demoData, setDemoData] = useState({
@@ -83,7 +92,7 @@ export default function Welcome() {
           Together, we're giving patients the power to understand what their body does while they sleep.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", flexDirection: isMobile ? "column" : "row", padding: isMobile ? "0 8px" : 0 }}>
-          <button onClick={() => navigate('/register')}
+          <button onClick={() => { localStorage.removeItem('bsa6_invite'); navigate('/register'); }}
             style={{ background: C.gradRed, color: "#fff", border: "none", padding: isMobile ? "14px 24px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", letterSpacing: 0.5, borderRadius: C.radiusSm, boxShadow: C.glow(C.red, 0.3), transition: "all 0.3s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
@@ -97,7 +106,7 @@ export default function Welcome() {
           </button>
           {isSignedIn ? (
             <>
-              <button onClick={() => navigate('/app')}
+              <button onClick={() => { window.location.href = '/app'; }}
                 style={{ background: "rgba(255,255,255,0.05)", color: C.white, border: `1px solid ${C.glassBorder}`, padding: isMobile ? "14px 24px" : "16px 32px", fontSize: 16, fontWeight: 600, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, transition: "all 0.2s" }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = C.glassHover}
                 onMouseLeave={e => e.currentTarget.style.borderColor = C.glassBorder}>
@@ -207,7 +216,7 @@ export default function Welcome() {
             You have the power to change that. Every patient you educate, every conversation you start,
             every recommendation you make — you're protecting someone's health in a way no one else can.
           </p>
-          <button onClick={() => navigate('/register')}
+          <button onClick={() => { localStorage.removeItem('bsa6_invite'); navigate('/register'); }}
             style={{ background: C.gradTeal, color: C.white, border: "none", padding: isMobile ? "14px 28px" : "16px 40px", fontSize: 16, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusSm, boxShadow: C.glow(C.teal, 0.25), width: isMobile ? "100%" : "auto" }}>
             Start Your Training →
           </button>

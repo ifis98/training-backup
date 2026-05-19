@@ -20,7 +20,7 @@ export default function Step04SecondaryAdvocate({ step, totalSteps, data, update
       continueLabel="Continue (skip if N/A)"
     >
       <div style={{ background: 'rgba(212,175,55,0.06)', border: `1px solid ${C.gold}30`, padding: '12px 14px', marginBottom: 20, borderRadius: 2 }}>
-        <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: 'var(--bs-ash)', lineHeight: 1.6 }}>
           Assists with case submissions, patient follow-ups, and team education when the primary is unavailable.
         </div>
       </div>

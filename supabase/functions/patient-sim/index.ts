@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, getUserKey, sanitizeMessages } from "../_shared/ai-guards.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -101,13 +102,27 @@ serve(async (req) => {
       );
     }
 
-    const { messages, patientIndex } = await req.json();
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    const body = await req.json();
+    const { messages: rawMessages, patientIndex } = body;
+    if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
       return new Response(
         JSON.stringify({ error: "messages array is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Rate limit per user (or per IP if no clerkUserId in body)
+    const userKey = getUserKey(req, body);
+    const rl = await checkRateLimit(userKey);
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Sanitize user-supplied messages against prompt-injection tokens
+    const messages = sanitizeMessages(rawMessages);
 
     const idx = typeof patientIndex === 'number' ? Math.abs(patientIndex) % PATIENTS.length : 0;
     const patient = PATIENTS[idx];

@@ -5,11 +5,11 @@ export default function OfficeWorkflowView() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0A0A0A' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bs-bg)' }}>
       {/* Back bar */}
       <div style={{
-        background: '#111111',
-        borderBottom: '1px solid #252525',
+        background: 'var(--bs-bg2)',
+        borderBottom: '1px solid var(--bs-border)',
         padding: '10px 20px',
         display: 'flex',
         alignItems: 'center',
@@ -21,7 +21,7 @@ export default function OfficeWorkflowView() {
           style={{
             background: 'none',
             border: 'none',
-            color: '#A0A0A0',
+            color: 'var(--bs-ash)',
             cursor: 'pointer',
             fontSize: 13,
             fontFamily: "'Outfit', 'Inter', sans-serif",
@@ -31,8 +31,8 @@ export default function OfficeWorkflowView() {
             padding: 0,
             transition: 'color 0.2s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#F4F4F4'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#A0A0A0'; }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--bs-text)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--bs-ash)'; }}
         >
           <ChevronLeft size={15} strokeWidth={2} />
           Back to Dashboard

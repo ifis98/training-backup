@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, getUserKey, sanitizeMessages } from "../_shared/ai-guards.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -101,17 +102,31 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, mode = "general", lang = "en" } = await req.json();
+    const body = await req.json();
+    const { messages: rawMessages, mode = "general", lang = "en" } = body;
 
     const LANG_NAMES: Record<string, string> = { en: "English", es: "Spanish", pt: "Portuguese", fr: "French", zh: "Chinese" };
     const langInstruction = lang !== "en" ? `\n\nIMPORTANT: Respond entirely in ${LANG_NAMES[lang] || "English"}. All advice, scripts, templates, and content must be in ${LANG_NAMES[lang] || "English"}.` : "";
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Rate limit per user (or per IP if no clerkUserId in body)
+    const userKey = getUserKey(req, body);
+    const rl = await checkRateLimit(userKey);
+    if (!rl.allowed) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Sanitize user-supplied messages against prompt-injection tokens
+    const messages = sanitizeMessages(rawMessages);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

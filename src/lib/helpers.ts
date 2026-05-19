@@ -123,7 +123,7 @@ export function computeKnowledgeScore(
   totalModules: number,
   simPatients: number,
 ): number {
-  const baselineNorm = Math.min(((blScore ?? 0) / 50) * 100, 100); // baseline 0-50 mapped to 0-100
+  const baselineNorm = Math.min((blScore ?? 0), 100); // baseline 0-100 used directly
   const moduleRate = totalModules > 0 ? (doneCount / totalModules) * 100 : 0;
   const simRate = Math.min((simPatients / 3) * 100, 100);
   return Math.round(baselineNorm * 0.3 + moduleRate * 0.4 + simRate * 0.3);

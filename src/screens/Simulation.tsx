@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { C, ROLES } from '@/data/constants';
 import { ChevronLeft, Mic, MicOff, Send } from 'lucide-react';
 import { scrollTop, startSTT } from '@/lib/helpers';
@@ -13,7 +13,10 @@ interface SimulationProps {
   lang?: Lang;
 }
 
-const SUCCESS_REGEX = /(interested|next step|sign me up|let's do it|schedule|sounds good|i'm in|let's move forward|make it work)/i;
+// Requires affirmative close language. Word boundaries on "interested" prevent
+// false positives on "not interested" / "disinterested". Removed the loosest
+// matches ("sounds good", "make it work") that fire on natural dialog.
+const SUCCESS_REGEX = /\b(yes,?\s*i'?m\s+(interested|in)|sign me up|let'?s do it|let'?s move forward|book\s+(me|the|my|us)|schedule\s+(me|the|my|us|it)|put me down|count me in|where do i sign|when can we (start|begin)|i'?ll take it)\b/i;
 const COACH_REGEX = /\[COACH:\s*([\s\S]*?)\]$/;
 
 function parseCoaching(text: string): { patientText: string; coachTip: string | null } {
@@ -49,6 +52,12 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
   const sRoles = ROLES.filter(r => s.roles.includes(r.id));
   const patient = PATIENTS[patientIdx];
 
+  // Per-patient win tracking — derived from current messages so it resets automatically on new patient
+  const patientWon = useMemo(() =>
+    s.simMsgs.some(m => m.r === 'ai' && SUCCESS_REGEX.test(parseCoaching(m.t).patientText)),
+    [s.simMsgs]
+  );
+
   useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [s.simMsgs]);
 
   const sendMessage = useCallback(async (overrideText?: string) => {
@@ -61,18 +70,22 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
       const resp = await fetch(`${FUNCTIONS_URL}/functions/v1/patient-sim`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FUNCTIONS_KEY}` },
-        body: JSON.stringify({ messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })), patientIndex: patientIdx }),
+        body: JSON.stringify({
+          messages: msgs.map(m => ({ role: m.r === "user" ? "user" : "assistant", content: m.t })),
+          patientIndex: patientIdx,
+          clerkUserId: (window as any).__clerkUserId,
+        }),
       });
       if (!resp.ok) { const errData = await resp.json().catch(() => ({})); throw new Error(errData.error || `Error ${resp.status}`); }
       const data = await resp.json();
       const aiText = data.reply || "I'm not sure what to say to that.";
       let newSimP = s.simP, newXp = s.xp;
-      if (SUCCESS_REGEX.test(aiText) && s.simP < 3) { newSimP = s.simP + 1; newXp = s.xp + 150; }
+      if (SUCCESS_REGEX.test(aiText) && s.simP < 3 && !patientWon) { newSimP = s.simP + 1; newXp = s.xp + 150; }
       u({ simMsgs: [...msgs, { r: "ai", t: aiText }], simP: newSimP, xp: newXp });
     } catch (e: any) {
       u({ simMsgs: [...msgs, { r: "ai", t: `[Error: ${e.message}]` }] });
     } finally { setLoading(false); }
-  }, [s.simMsgs, s.simIn, s.simP, s.xp, loading, u, patientIdx]);
+  }, [s.simMsgs, s.simIn, s.simP, s.xp, loading, u, patientIdx, patientWon]);
 
   const handleNewPatient = () => { setPatientIdx(getRandomPatientIdx(patientIdx)); u({ simMsgs: [] }); };
   const handleMic = () => {
@@ -105,9 +118,9 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
       </div>
 
       {/* ── Patient card (fixed below header) ── */}
-      <div style={{ margin: isMobile ? "10px 12px 0" : "14px 24px 0", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: isMobile ? "10px 14px" : "14px 20px", flexShrink: 0 }}>
-        <div style={{ fontSize: isMobile ? 13 : 14, fontWeight: 700, color: C.white, marginBottom: 2 }}>{T("patient_label")} {patient.name}, {patient.age}</div>
-        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{patient.card}</div>
+      <div style={{ margin: isMobile ? "10px 12px 0" : "14px 24px 0", background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 12, padding: isMobile ? "10px 14px" : "14px 20px", flexShrink: 0 }}>
+        <div style={{ fontSize: isMobile ? 13 : 14, fontWeight: 700, color: "var(--bs-text)", marginBottom: 2 }}>{T("patient_label")} {patient.name}, {patient.age}</div>
+        <div style={{ fontSize: 11, color: "var(--bs-ash)", lineHeight: 1.5 }}>{patient.card}</div>
       </div>
 
       {/* ── Completion banner (shown above chat when done) ── */}
@@ -121,11 +134,15 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         </div>
       )}
 
-      {/* ── New patient prompt ── */}
-      {s.simMsgs.length >= 8 && s.simP < 3 && (
-        <div style={{ padding: isMobile ? "6px 12px" : "6px 24px", textAlign: "center", flexShrink: 0 }}>
+      {/* ── Patient converted success banner ── */}
+      {patientWon && s.simP < 3 && (
+        <div style={{ margin: isMobile ? "8px 12px 0" : "10px 24px 0", background: `${C.gold}18`, border: `1px solid ${C.gold}55`, borderRadius: 10, padding: isMobile ? "12px 16px" : "14px 20px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: C.gold }}>🎉 Patient converted! +150 XP</div>
+            <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>Great work — ready for the next patient?</div>
+          </div>
           <button onClick={handleNewPatient}
-            style={{ background: C.gold, color: C.dark, border: "none", padding: "8px 18px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: 6 }}>
+            style={{ background: C.gold, color: C.dark, border: "none", padding: "9px 18px", fontSize: 12, fontWeight: 800, fontFamily: C.fn, cursor: "pointer", borderRadius: 8, whiteSpace: "nowrap", flexShrink: 0 }}>
             {T("new_patient")}
           </button>
         </div>
@@ -192,18 +209,19 @@ export default function Simulation({ s, u, lang = "en" }: SimulationProps) {
         background: "var(--bs-bg)", flexShrink: 0,
       }}>
         <button onClick={handleMic}
-          style={{ width: 40, height: 40, background: s.lst ? `${C.red}25` : "rgba(255,255,255,0.06)", border: `1px solid ${s.lst ? C.red : "rgba(255,255,255,0.1)"}`, borderRadius: "50%", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          style={{ width: 40, height: 40, background: s.lst ? `${C.red}25` : "var(--bs-card)", border: `1px solid ${s.lst ? C.red : "var(--bs-border)"}`, borderRadius: "50%", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
           {s.lst ? <MicOff size={16} strokeWidth={1.5} color={C.red} /> : <Mic size={16} strokeWidth={1.5} color={C.ash} />}
         </button>
         <input
           value={s.simIn}
-          onChange={e => u({ simIn: e.target.value })}
-          onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder={T("talk_to").replace("{name}", patient.name)}
-          style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, color: C.white, padding: isMobile ? "10px 12px" : "10px 14px", fontSize: isMobile ? 14 : 14, fontFamily: C.fn, outline: "none", minWidth: 0 }}
+          onChange={e => !patientWon && u({ simIn: e.target.value })}
+          onKeyDown={e => e.key === "Enter" && !patientWon && sendMessage()}
+          placeholder={patientWon ? "Patient converted — start a new patient above" : T("talk_to").replace("{name}", patient.name)}
+          disabled={patientWon}
+          style={{ flex: 1, background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 10, color: patientWon ? "var(--bs-ash)" : "var(--bs-text)", padding: isMobile ? "10px 12px" : "10px 14px", fontSize: isMobile ? 14 : 14, fontFamily: C.fn, outline: "none", minWidth: 0, opacity: patientWon ? 0.5 : 1 }}
         />
-        <button onClick={() => sendMessage()} disabled={!s.simIn.trim() || loading}
-          style={{ width: 40, height: 40, background: s.simIn.trim() && !loading ? C.teal : "rgba(255,255,255,0.06)", border: "none", borderRadius: "50%", cursor: s.simIn.trim() && !loading ? "pointer" : "default", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
+        <button onClick={() => sendMessage()} disabled={!s.simIn.trim() || loading || patientWon}
+          style={{ width: 40, height: 40, background: s.simIn.trim() && !loading ? C.teal : "var(--bs-card)", border: "none", borderRadius: "50%", cursor: s.simIn.trim() && !loading ? "pointer" : "default", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
           <Send size={16} strokeWidth={2} color={s.simIn.trim() && !loading ? C.dark : C.ash} />
         </button>
       </div>

@@ -232,7 +232,7 @@ export default function SettingsModal({ open, onClose, s, u, lang, allComplete }
           >
             <Award size={18} strokeWidth={1.5} color={allComplete || s.signed ? C.teal : C.ash} style={{ flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: allComplete || s.signed ? C.teal : C.white }}>Training Certificate</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: allComplete || s.signed ? C.teal : 'var(--bs-text)' }}>Training Certificate</div>
               <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>
                 {allComplete || s.signed ? 'View your results and download certificate' : 'Complete all modules & 3 simulations to unlock'}
               </div>

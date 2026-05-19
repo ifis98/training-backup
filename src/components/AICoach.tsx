@@ -84,7 +84,12 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
       const resp = await fetch(`${supabaseUrl}/functions/v1/ai-coach`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseKey}` },
-        body: JSON.stringify({ messages: newMsgs.map(m => ({ role: m.role, content: m.content })), mode, lang }),
+        body: JSON.stringify({
+          messages: newMsgs.map(m => ({ role: m.role, content: m.content })),
+          mode,
+          lang,
+          clerkUserId: (window as any).__clerkUserId,
+        }),
       });
       if (!resp.ok) { const errData = await resp.json().catch(() => ({})); throw new Error(errData.error || `Error ${resp.status}`); }
       const data = await resp.json();
@@ -119,10 +124,8 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
   const hintKey = `coach_${mode}_hint`;
 
   const glassCard = {
-    background: C.glass,
-    backdropFilter: C.blur,
-    WebkitBackdropFilter: C.blur,
-    border: `1px solid ${C.glassBorder}`,
+    background: 'var(--bs-bg2)',
+    border: '1px solid var(--bs-border)',
     borderRadius: C.radius,
   } as React.CSSProperties;
 
@@ -138,14 +141,14 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
       transform: isOpen ? "translateX(0)" : "translateX(105%)",
       transition: "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
       willChange: "transform",
-      boxShadow: isOpen ? "-8px 0 40px rgba(0,0,0,0.5)" : "none",
+      boxShadow: isOpen ? "-4px 0 32px rgba(0,0,0,0.15), -1px 0 0 var(--bs-border)" : "none",
     }}>
       {/* Header */}
       <div style={{
         padding: "16px 24px",
-        borderBottom: `1px solid ${C.glassBorder}`,
+        borderBottom: "1px solid var(--bs-border)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "rgba(20, 20, 28, 0.7)",
+        background: 'var(--bs-glass)',
         backdropFilter: C.blur,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -157,31 +160,31 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
             <Brain size={18} strokeWidth={1.5} color={C.gold} />
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.white, letterSpacing: 0.5 }}>{T("ai_coach")}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--bs-text)', letterSpacing: 0.5 }}>{T("ai_coach")}</div>
             <div style={{ fontSize: 11, color: C.ash }}>{MODES.find(m => m.id === mode)?.desc}</div>
           </div>
         </div>
         <button onClick={onClose} style={{
-          background: "rgba(255,255,255,0.06)", border: `1px solid ${C.glassBorder}`,
-          color: C.ash, width: 36, height: 36, borderRadius: C.radiusSm,
+          background: "var(--bs-card)", border: "1px solid var(--bs-border)",
+          color: "var(--bs-ash)", width: 36, height: 36, borderRadius: C.radiusSm,
           fontSize: 16, cursor: "pointer", fontFamily: C.fn,
           display: "flex", alignItems: "center", justifyContent: "center",
           transition: "all 0.2s",
         }}
-        onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = C.white; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = C.ash; }}
+        onMouseEnter={e => { e.currentTarget.style.background = "var(--bs-card2)"; e.currentTarget.style.color = "var(--bs-text)"; }}
+        onMouseLeave={e => { e.currentTarget.style.background = "var(--bs-card)"; e.currentTarget.style.color = "var(--bs-ash)"; }}
         ><X size={16} strokeWidth={2} /></button>
       </div>
 
       {/* Tab Bar */}
-      <div style={{ display: "flex", gap: 4, padding: "10px 24px", borderBottom: `1px solid ${C.glassBorder}` }}>
+      <div style={{ display: "flex", gap: 4, padding: "10px 24px", borderBottom: "1px solid var(--bs-border)" }}>
         {[{ id: "chat" as const, label: T("chat"), Icon: MessageSquare }, { id: "saved" as const, label: `${T("saved_responses")} (${favorites.length})`, Icon: Star }].map(tb => (
           <button key={tb.id} onClick={() => setTab(tb.id)}
             style={{
               flex: 1, padding: "9px 12px", fontSize: 11, fontWeight: 700, fontFamily: C.fn,
               cursor: "pointer", border: tab === tb.id ? `1px solid rgba(201,168,76,0.25)` : "1px solid transparent", borderRadius: C.radiusXs,
               background: tab === tb.id ? "rgba(201,168,76,0.1)" : "transparent",
-              color: tab === tb.id ? C.gold : "rgba(255,255,255,0.35)",
+              color: tab === tb.id ? C.gold : "var(--bs-ash)",
               transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}>
             <tb.Icon size={12} strokeWidth={1.5} /> {tb.label}
@@ -192,9 +195,9 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
       {tab === "saved" ? (
         <div style={{ flex: 1, padding: "16px 24px", overflowY: "auto" }}>
           {favorites.length === 0 && (
-            <div style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: 13, marginTop: 60 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-                <Star size={22} strokeWidth={1.5} color="rgba(255,255,255,0.2)" />
+            <div style={{ textAlign: "center", color: "var(--bs-ash)", fontSize: 13, marginTop: 60 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: "var(--bs-card)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+                <Star size={22} strokeWidth={1.5} color="var(--bs-ash)" />
               </div>
               {T("no_saved")}
             </div>
@@ -206,11 +209,11 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
                   {fav.mode} · {new Date(fav.savedAt).toLocaleDateString()}
                 </span>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => copyText(fav.content)} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, cursor: "pointer", fontFamily: C.fn, padding: "5px 8px", borderRadius: C.radiusXs, display: "flex", alignItems: "center" }}><Copy size={13} strokeWidth={1.5} /></button>
+                  <button onClick={() => copyText(fav.content)} style={{ background: "var(--bs-card)", border: "none", color: "var(--bs-ash)", cursor: "pointer", fontFamily: C.fn, padding: "5px 8px", borderRadius: C.radiusXs, display: "flex", alignItems: "center" }}><Copy size={13} strokeWidth={1.5} /></button>
                   <button onClick={() => deleteFavorite(i)} style={{ background: "rgba(204,16,16,0.1)", border: "none", color: C.red, cursor: "pointer", fontFamily: C.fn, padding: "5px 8px", borderRadius: C.radiusXs, display: "flex", alignItems: "center" }}><Trash2 size={13} strokeWidth={1.5} /></button>
                 </div>
               </div>
-              <div style={{ fontSize: 13, color: C.white, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+              <div style={{ fontSize: 13, color: "var(--bs-text)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                 {fav.content.length > 300 ? fav.content.slice(0, 300) + "..." : fav.content}
               </div>
             </div>
@@ -219,13 +222,13 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
       ) : (
         <>
           {/* Mode Pills */}
-          <div style={{ display: "flex", gap: 6, padding: "10px 24px", overflowX: "auto", borderBottom: `1px solid ${C.glassBorder}` }}>
+          <div style={{ display: "flex", gap: 6, padding: "10px 24px", overflowX: "auto", borderBottom: "1px solid var(--bs-border)" }}>
             {MODES.map(m => (
               <button key={m.id} onClick={() => handleModeChange(m.id)}
                 style={{
-                  background: mode === m.id ? C.gradGold : "rgba(255,255,255,0.04)",
-                  color: mode === m.id ? C.dark : C.ash,
-                  border: mode === m.id ? "none" : `1px solid ${C.glassBorder}`,
+                  background: mode === m.id ? C.gradGold : "var(--bs-card)",
+                  color: mode === m.id ? C.dark : "var(--bs-ash)",
+                  border: mode === m.id ? "none" : "1px solid var(--bs-border)",
                   padding: "7px 16px", fontSize: 11, fontWeight: 700,
                   fontFamily: C.fn, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
                   borderRadius: 999, transition: "all 0.25s",
@@ -248,7 +251,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
                 }}>
                   <Brain size={28} strokeWidth={1.5} color={C.gold} />
                 </div>
-                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 16, color: C.white }}>{T("coach_welcome")}</div>
+                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 16, color: "var(--bs-text)" }}>{T("coach_welcome")}</div>
                 <div style={{ fontSize: 13, maxWidth: 340, margin: "0 auto", lineHeight: 1.7, color: C.ash }}>{T(hintKey)}</div>
               </div>
             )}
@@ -259,38 +262,38 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
               }}>
                 <div style={{
                   maxWidth: "80%",
-                  background: msg.role === "user" ? C.gradTeal : C.glass,
+                  background: msg.role === "user" ? C.gradTeal : "var(--bs-bg2)",
                   backdropFilter: msg.role === "assistant" ? C.blur : undefined,
-                  color: C.white,
+                  color: "var(--bs-text)",
                   padding: "12px 16px",
                   borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
                   fontSize: 13, lineHeight: 1.7, whiteSpace: "pre-wrap",
-                  border: msg.role === "assistant" ? `1px solid ${C.glassBorder}` : "none",
+                  border: msg.role === "assistant" ? "1px solid var(--bs-border)" : "none",
                   boxShadow: msg.role === "user" ? C.glow(C.teal, 0.15) : C.shadowCard,
                 }}>
                   {msg.role === "assistant" && (
                     <>
                       <div style={{ fontSize: 9, color: C.gold, marginBottom: 6, fontWeight: 700, letterSpacing: 2 }}>{T("ai_coach").toUpperCase()}</div>
                       {msg.content}
-                      <div style={{ display: "flex", gap: 6, marginTop: 10, borderTop: `1px solid ${C.glassBorder}`, paddingTop: 8 }}>
+                      <div style={{ display: "flex", gap: 6, marginTop: 10, borderTop: "1px solid var(--bs-border)", paddingTop: 8 }}>
                         <button onClick={() => copyText(msg.content)}
                           style={{
-                            background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, fontSize: 11,
+                            background: "var(--bs-card)", border: "none", color: "var(--bs-ash)", fontSize: 11,
                             cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4,
                             padding: "5px 10px", borderRadius: C.radiusXs, transition: "all 0.2s",
                           }}
-                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
-                          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}>
+                          onMouseEnter={e => e.currentTarget.style.background = "var(--bs-card2)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "var(--bs-card)"}>
                           <Copy size={11} strokeWidth={1.5} /> {T("copy")}
                         </button>
                         <button onClick={() => saveResponse(msg.content)}
                           style={{
-                            background: "rgba(255,255,255,0.06)", border: "none", color: C.ash, fontSize: 11,
+                            background: "var(--bs-card)", border: "none", color: "var(--bs-ash)", fontSize: 11,
                             cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4,
                             padding: "5px 10px", borderRadius: C.radiusXs, transition: "all 0.2s",
                           }}
-                          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
-                          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}>
+                          onMouseEnter={e => e.currentTarget.style.background = "var(--bs-card2)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "var(--bs-card)"}>
                           <Star size={11} strokeWidth={1.5} /> {T("save")}
                         </button>
                       </div>
@@ -310,9 +313,9 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
 
           {/* Input */}
           <div style={{
-            padding: "14px 24px", borderTop: `1px solid ${C.glassBorder}`,
+            padding: "14px 24px", borderTop: "1px solid var(--bs-border)",
             display: "flex", gap: 10, alignItems: "center",
-            background: "rgba(20, 20, 28, 0.7)", backdropFilter: C.blur,
+            background: "var(--bs-glass)", backdropFilter: C.blur,
           }}>
             <input
               value={input}
@@ -320,12 +323,12 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
               onKeyDown={e => e.key === "Enter" && sendMessage()}
               placeholder={T("coach_placeholder")}
               style={{
-                flex: 1, background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}`,
-                color: C.white, padding: "12px 18px", fontSize: 14, fontFamily: C.fn,
+                flex: 1, background: "var(--bs-card)", border: "1px solid var(--bs-border)",
+                color: "var(--bs-text)", padding: "12px 18px", fontSize: 14, fontFamily: C.fn,
                 outline: "none", borderRadius: C.radiusSm, transition: "border-color 0.2s",
               }}
               onFocus={e => e.currentTarget.style.borderColor = "rgba(201, 168, 76, 0.4)"}
-              onBlur={e => e.currentTarget.style.borderColor = C.glassBorder}
+              onBlur={e => e.currentTarget.style.borderColor = 'var(--bs-border)'}
             />
             <button onClick={() => sendMessage()}
               style={{

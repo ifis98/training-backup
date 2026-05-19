@@ -1,1 +1,67 @@
 project_id = "krgjwtaavcxwyqbcesxu"
+
+# Per-function settings.
+#
+# verify_jwt = false:
+#   These functions are invoked from the browser via the Supabase JS client,
+#   which authenticates with the new `sb_publishable_*` key format. That key
+#   is NOT a JWT, so the edge runtime's default JWT verifier rejects it with
+#   401 UNAUTHORIZED_INVALID_JWT_FORMAT before the function even runs.
+#
+#   Auth is still enforced inside each function: every one of these reads
+#   `requesterClerkId` from the body and checks `user_roles` for the
+#   bytesense_admin role before doing anything.
+
+[functions.invite-admin]
+verify_jwt = false
+
+[functions.remove-admin]
+verify_jwt = false
+
+[functions.cancel-admin-invite]
+verify_jwt = false
+
+[functions.claim-admin-invite]
+verify_jwt = false
+
+[functions.get-admin-users]
+verify_jwt = false
+
+[functions.manage-registration-codes]
+verify_jwt = false
+
+[functions.list-clerk-users]
+verify_jwt = false
+
+[functions.manage-demo-requests]
+verify_jwt = false
+
+[functions.notify-case-followup]
+verify_jwt = false
+
+[functions.manage-practices]
+verify_jwt = false
+
+[functions.manage-admin-alerts]
+verify_jwt = false
+
+[functions.manage-support-bookings]
+verify_jwt = false
+
+[functions.manage-cases]
+verify_jwt = false
+
+[functions.manage-practice-goals]
+verify_jwt = false
+
+[functions.manage-staff-invitations]
+verify_jwt = false
+
+[functions.delete-clerk-user]
+verify_jwt = false
+
+[functions.ai-coach]
+verify_jwt = false
+
+[functions.patient-sim]
+verify_jwt = false

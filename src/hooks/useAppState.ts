@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import * as Sentry from '@sentry/react';
 import { ROLES, PH, BL } from '@/data/constants';
 import { M } from '@/data/modules';
 import { ShuffledQuestion, shuffleQuestion } from '@/lib/helpers';
@@ -58,7 +59,7 @@ const defaultState: AppState = {
   spk: false,
   signed: false,
   lang: 'en',
-  theme: 'dark',
+  theme: 'light',
   intakeDone: false,
   mainBlocker: '',
   monthlyVolume: '',
@@ -91,8 +92,12 @@ export function useAppState(clerkUserId: string | null = null) {
     setS(p => ({ ...p, ...d }));
   }, []);
 
-  // Persist to localStorage
+  // Persist to localStorage. Gated on dbLoaded so that contaminated state
+  // seeded from the cross-user STORAGE_KEY can't be persisted into the new
+  // user's scoped key before the DB-load truth check runs. Index.tsx shows
+  // a spinner while !dbLoaded so the gate is invisible to the user.
   useEffect(() => {
+    if (!dbLoaded) return;
     if (s.phase !== 'splash') {
       try {
         if (clerkUserId) {
@@ -101,7 +106,7 @@ export function useAppState(clerkUserId: string | null = null) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, lst: false }));
       } catch {}
     }
-  }, [s, clerkUserId]);
+  }, [s, clerkUserId, dbLoaded]);
 
   // Debounced sync to database
   useEffect(() => {
@@ -109,7 +114,7 @@ export function useAppState(clerkUserId: string | null = null) {
     if (syncTimer.current) clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(async () => {
       try {
-        const payload = {
+        const payload: Record<string, unknown> = {
           training_roles: s.roles,
           baseline_score: s.blScore,
           done_modules: s.done,
@@ -119,20 +124,31 @@ export function useAppState(clerkUserId: string | null = null) {
           completed_at: s.signed ? new Date().toISOString() : null,
           name: s.name,
           practice: s.practice,
+          // Monotonic: only ever assert `true`. Pre-intake stubs omit the
+          // column so the DB default (false) sticks until intake completes.
+          ...(s.intakeDone ? { intake_done: true } : {}),
         };
-        await supabase
+        const { error } = await supabase
           .from('training_progress')
           .upsert({ clerk_user_id: clerkUserId, ...payload }, { onConflict: 'clerk_user_id' });
-      } catch {}
+        if (error) {
+          Sentry.captureMessage('training_progress debounced sync failed', {
+            level: 'warning',
+            extra: { code: error.code, message: error.message, hint: error.hint, clerkUserId },
+          });
+        }
+      } catch (e) {
+        Sentry.captureException(e, { tags: { area: 'useAppState.debouncedSync' } });
+      }
     }, SYNC_DEBOUNCE);
     return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
-  }, [clerkUserId, s.roles, s.blScore, s.done, s.xp, s.simP, s.signed, s.name, s.practice]);
+  }, [clerkUserId, s.roles, s.blScore, s.done, s.xp, s.simP, s.signed, s.name, s.practice, s.intakeDone]);
 
   // Immediate (non-debounced) DB write — call this right after intake completes
   const immediateSync = useCallback(async (state: Partial<AppState>) => {
     if (!clerkUserId) return;
     try {
-      await supabase.from('training_progress').upsert({
+      const { error } = await supabase.from('training_progress').upsert({
         clerk_user_id: clerkUserId,
         training_roles: state.roles ?? [],
         baseline_score: state.blScore ?? null,
@@ -143,8 +159,19 @@ export function useAppState(clerkUserId: string | null = null) {
         completed_at: state.signed ? new Date().toISOString() : null,
         name: state.name ?? '',
         practice: state.practice ?? '',
+        // immediateSync is only called from the intake completion handler,
+        // so default to true if the caller didn't explicitly set it.
+        intake_done: state.intakeDone ?? true,
       }, { onConflict: 'clerk_user_id' });
-    } catch {}
+      if (error) {
+        Sentry.captureMessage('training_progress immediateSync failed', {
+          level: 'error',
+          extra: { code: error.code, message: error.message, hint: error.hint, clerkUserId },
+        });
+      }
+    } catch (e) {
+      Sentry.captureException(e, { tags: { area: 'useAppState.immediateSync' } });
+    }
   }, [clerkUserId]);
 
   // Load from DB on mount (when we have a Clerk user)
@@ -175,6 +202,10 @@ export function useAppState(clerkUserId: string | null = null) {
           .maybeSingle();
 
         if (data) {
+          // Source of truth for whether intake completed. A stub row created
+          // by the debounced sync (before intake finishes) has intake_done=false
+          // and should still route the user to IntakeFlow.
+          const dbIntakeDone = (data as { intake_done?: boolean }).intake_done === true;
           setS(prev => ({
             ...prev,
             roles: data.training_roles?.length ? data.training_roles : prev.roles,
@@ -185,8 +216,13 @@ export function useAppState(clerkUserId: string | null = null) {
             signed: data.signed || prev.signed,
             name: (data as any).name || prev.name,
             practice: (data as any).practice || prev.practice,
-            intakeDone: true,
-            phase: (prev.phase === 'splash' || prev.phase === 'setup') ? 'dashboard' : prev.phase,
+            intakeDone: dbIntakeDone,
+            // Force splash when intake not done so the intake gate in
+            // Index.tsx fires even if a stale phase was inherited from
+            // cross-user-contaminated localStorage state.
+            phase: dbIntakeDone
+              ? ((prev.phase === 'splash' || prev.phase === 'setup') ? 'dashboard' : prev.phase)
+              : 'splash',
           }));
         } else if (!locallyKnownDone) {
           // No DB row AND no scoped localStorage for this user — reset to show intake.

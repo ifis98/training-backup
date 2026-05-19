@@ -8,7 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pi
 import {
   LayoutDashboard, KeyRound, Building2, Inbox, Settings, LogOut,
   Search, Copy, Download, ChevronRight, Activity, Trophy, Mail, Shield, X,
-  AlertTriangle, LifeBuoy, RefreshCw,
+  AlertTriangle, LifeBuoy, RefreshCw, Users,
 } from 'lucide-react';
 
 interface RegCode {
@@ -23,16 +23,35 @@ interface DemoReq {
 }
 
 const glass: React.CSSProperties = {
-  background: C.glass, backdropFilter: C.blur, WebkitBackdropFilter: C.blur,
-  border: `1px solid ${C.glassBorder}`, borderRadius: C.radius,
+  background: 'var(--bs-glass)', backdropFilter: C.blur, WebkitBackdropFilter: C.blur,
+  border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radius,
 };
-const tooltipStyle = { background: C.glass, border: `1px solid ${C.glassBorder}`, borderRadius: C.radiusSm, fontSize: 12 };
+const tooltipStyle = { background: 'var(--bs-glass)', border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, fontSize: 12 };
 
 const copyToClipboard = (text: string, label = 'Copied') => {
   navigator.clipboard.writeText(text).then(() => toast.success(`${label}: ${text}`)).catch(() => toast.error('Copy failed'));
 };
 
-type TabId = 'overview' | 'codes' | 'practices' | 'demos' | 'settings';
+type TabId = 'overview' | 'codes' | 'practices' | 'users' | 'demos' | 'settings';
+
+interface ClerkUserRow {
+  clerk_user_id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  created_at: string | null;
+  last_active_at: string | null;
+  roles: string[];
+  full_name: string | null;
+  practice_id: string | null;
+  practice_name: string | null;
+  intake_done: boolean;
+  done_modules: string[];
+  module_count: number;
+  xp: number;
+  training_updated_at: string | null;
+  training_completed_at: string | null;
+}
 type ExtendedTab = TabId | 'alerts' | 'support';
 
 interface AdminAlert {
@@ -86,6 +105,23 @@ export default function ByteSenseAdmin() {
 
   // Settings
   const [inviteEmail, setInviteEmail] = useState('');
+  const [removingAdminId, setRemovingAdminId] = useState<string | null>(null);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [pendingInvites, setPendingInvites] = useState<Array<{ id: string; email: string; role: string; invited_at: string }>>([]);
+  const [cancelingInviteEmail, setCancelingInviteEmail] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [confirmDeleteUserId, setConfirmDeleteUserId] = useState<string | null>(null);
+  const [promotingClerkId, setPromotingClerkId] = useState<string | null>(null);
+
+  // Users tab — paginated, searchable list of all Clerk users
+  const [clerkUsers, setClerkUsers] = useState<ClerkUserRow[]>([]);
+  const [clerkUsersTotal, setClerkUsersTotal] = useState(0);
+  const [clerkUsersLoading, setClerkUsersLoading] = useState(false);
+  const [clerkUsersError, setClerkUsersError] = useState<string | null>(null);
+  const [usersSearch, setUsersSearch] = useState('');
+  const [usersDebouncedSearch, setUsersDebouncedSearch] = useState('');
+  const [usersPage, setUsersPage] = useState(0);
+  const USERS_PAGE_SIZE = 50;
 
   useEffect(() => {
     if (authLoading) return;
@@ -98,22 +134,71 @@ export default function ByteSenseAdmin() {
   }, [user, authLoading, isByteSenseAdmin, navigate]);
 
   const loadData = useCallback(async () => {
-    const [codesRes, practicesRes, demosRes, adminRolesRes, alertsRes, bookingsRes] = await Promise.all([
-      supabase.from('registration_codes').select('*').order('created_at', { ascending: false }),
-      supabase.from('practices').select('*, profiles(user_id, full_name, created_at), training_progress(user_id, done_modules, xp, completed_at, updated_at)').order('created_at', { ascending: false }),
-      supabase.from('demo_requests').select('*').order('created_at', { ascending: false }),
+    // registration_codes RLS is locked to service-role only, so we read it
+    // through the admin-gated edge function instead of a direct query
+    // (the direct query silently returns [] under the anon key).
+    // Tables with broken-since-Clerk RLS are read through admin-gated edge functions
+    // (direct anon queries silently return [] because the old policies key off auth.uid()).
+    const codesPromise = user?.id
+      ? supabase.functions.invoke('manage-registration-codes', { body: { op: 'list', requesterClerkId: user.id } })
+      : Promise.resolve({ data: null, error: null } as { data: { success: boolean; codes?: RegCode[]; error?: string } | null; error: { message: string } | null });
+    const demosPromise = user?.id
+      ? supabase.functions.invoke('manage-demo-requests', { body: { op: 'list', requesterClerkId: user.id } })
+      : Promise.resolve({ data: null, error: null } as { data: { success: boolean; demos?: DemoReq[]; error?: string } | null; error: { message: string } | null });
+    const practicesPromise = user?.id
+      ? supabase.functions.invoke('manage-practices', { body: { op: 'list', requesterClerkId: user.id } })
+      : Promise.resolve({ data: null, error: null } as { data: any; error: any });
+    const alertsPromise = user?.id
+      ? supabase.functions.invoke('manage-admin-alerts', { body: { op: 'list', requesterClerkId: user.id } })
+      : Promise.resolve({ data: null, error: null } as { data: any; error: any });
+    const bookingsPromise = user?.id
+      ? supabase.functions.invoke('manage-support-bookings', { body: { op: 'list', requesterClerkId: user.id } })
+      : Promise.resolve({ data: null, error: null } as { data: any; error: any });
+    const pendingInvitesPromise = user?.id
+      ? supabase.functions.invoke('cancel-admin-invite', { body: { op: 'list', requesterClerkId: user.id } })
+      : Promise.resolve({ data: null, error: null } as { data: any; error: any });
+
+    const [codesRes, practicesRes, demosRes, adminRolesRes, alertsRes, bookingsRes, pendingRes] = await Promise.all([
+      codesPromise,
+      practicesPromise,
+      demosPromise,
       supabase.from('user_roles').select('clerk_user_id').eq('role', 'bytesense_admin'),
-      supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }),
-      supabase.from('support_bookings').select('*').order('created_at', { ascending: false }),
+      alertsPromise,
+      bookingsPromise,
+      pendingInvitesPromise,
     ]);
-    if (codesRes.data) setCodes(codesRes.data as RegCode[]);
-    if (practicesRes.data) setPractices(practicesRes.data);
-    if (alertsRes.data) setAlerts(alertsRes.data as AdminAlert[]);
-    if (bookingsRes.data) setBookings(bookingsRes.data as SupportBooking[]);
-    if (demosRes.data) {
-      setDemos(demosRes.data as DemoReq[]);
+    if (pendingRes?.data?.success && Array.isArray(pendingRes.data.invites)) {
+      setPendingInvites(pendingRes.data.invites as any);
+    } else if (pendingRes?.data?.error) {
+      console.warn('pending invites list error:', pendingRes.data.error);
+    }
+    if (codesRes?.data?.success && Array.isArray(codesRes.data.codes)) {
+      setCodes(codesRes.data.codes as RegCode[]);
+    } else if (codesRes?.data?.error) {
+      console.warn('manage-registration-codes list error:', codesRes.data.error);
+    } else if (codesRes?.error) {
+      console.warn('manage-registration-codes invoke error:', codesRes.error.message);
+    }
+    if (practicesRes?.data?.success && Array.isArray(practicesRes.data.practices)) {
+      setPractices(practicesRes.data.practices);
+    } else if (practicesRes?.data?.error) {
+      console.warn('manage-practices list error:', practicesRes.data.error);
+    }
+    if (alertsRes?.data?.success && Array.isArray(alertsRes.data.alerts)) {
+      setAlerts(alertsRes.data.alerts as AdminAlert[]);
+    } else if (alertsRes?.data?.error) {
+      console.warn('manage-admin-alerts list error:', alertsRes.data.error);
+    }
+    if (bookingsRes?.data?.success && Array.isArray(bookingsRes.data.bookings)) {
+      setBookings(bookingsRes.data.bookings as SupportBooking[]);
+    } else if (bookingsRes?.data?.error) {
+      console.warn('manage-support-bookings list error:', bookingsRes.data.error);
+    }
+    if (demosRes?.data?.success && Array.isArray(demosRes.data.demos)) {
+      const demosArr = demosRes.data.demos as DemoReq[];
+      setDemos(demosArr);
       const notes: Record<string, string> = {};
-      (demosRes.data as DemoReq[]).forEach(d => { notes[d.id] = d.admin_notes || ''; });
+      demosArr.forEach(d => { notes[d.id] = d.admin_notes || ''; });
       setDemoNotes(notes);
     }
     if (adminRolesRes.data) {
@@ -121,28 +206,83 @@ export default function ByteSenseAdmin() {
       if (clerkIds.length) {
         const { data: profs } = await supabase.from('profiles').select('clerk_user_id, full_name, created_at').in('clerk_user_id', clerkIds);
         const profileMap = Object.fromEntries((profs || []).map(p => [p.clerk_user_id, p]));
-        // Always show an entry even if the profile row doesn't exist yet
-        setAdmins(clerkIds.map(id => profileMap[id] || { clerk_user_id: id, full_name: null, created_at: null }));
+
+        // Enrich with Clerk names/emails — Clerk is the source of truth for identity
+        try {
+          const { data: clerkData } = await supabase.functions.invoke('get-admin-users', {
+            body: { clerkIds },
+          });
+          if (clerkData?.success && Array.isArray(clerkData.users)) {
+            const clerkMap = Object.fromEntries(clerkData.users.map((u: any) => [u.clerk_user_id, u]));
+            setAdmins(clerkIds.map(id => ({
+              clerk_user_id: id,
+              full_name: clerkMap[id]?.firstName
+                ? `${clerkMap[id].firstName} ${clerkMap[id].lastName || ''}`.trim()
+                : (profileMap[id]?.full_name ?? null),
+              email: clerkMap[id]?.email ?? null,
+              created_at: profileMap[id]?.created_at ?? null,
+            })));
+            return;
+          }
+        } catch { /* fall through to profiles-only data */ }
+
+        // Fallback: profiles only (no Clerk data available)
+        setAdmins(clerkIds.map(id => profileMap[id] || { clerk_user_id: id, full_name: null, email: null, created_at: null }));
       } else {
         setAdmins([]);
       }
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => { if (isBSAdmin) loadData(); }, [isBSAdmin, loadData]);
 
-  // Realtime subscription on admin_alerts
+  // Debounce the search input for the Users tab so we don't hit Clerk on every keystroke
   useEffect(() => {
-    if (!isBSAdmin) return;
-    const channel = supabase.channel('admin_alerts_live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'admin_alerts' }, () => {
-        supabase.from('admin_alerts').select('*').order('created_at', { ascending: false }).then(({ data }) => {
-          if (data) setAlerts(data as AdminAlert[]);
+    const t = setTimeout(() => { setUsersDebouncedSearch(usersSearch); setUsersPage(0); }, 350);
+    return () => clearTimeout(t);
+  }, [usersSearch]);
+
+  // Load Clerk users when the Users tab is active, paging or search changes
+  useEffect(() => {
+    if (!isBSAdmin || tab !== 'users' || !user?.id) return;
+    let cancelled = false;
+    setClerkUsersLoading(true);
+    setClerkUsersError(null);
+    supabase.functions.invoke('list-clerk-users', {
+      body: {
+        requesterClerkId: user.id,
+        query: usersDebouncedSearch || undefined,
+        limit: USERS_PAGE_SIZE,
+        offset: usersPage * USERS_PAGE_SIZE,
+      },
+    }).then(({ data, error }) => {
+      if (cancelled) return;
+      if (error) { setClerkUsersError(error.message || 'Failed to load users'); return; }
+      if (!data?.success) { setClerkUsersError(data?.error || 'Failed to load users'); return; }
+      setClerkUsers(data.users || []);
+      setClerkUsersTotal(Number(data.totalCount || 0));
+    }).catch(err => { if (!cancelled) setClerkUsersError(String(err)); })
+      .finally(() => { if (!cancelled) setClerkUsersLoading(false); });
+    return () => { cancelled = true; };
+  }, [isBSAdmin, tab, user?.id, usersDebouncedSearch, usersPage]);
+
+  // Realtime subscription on admin_alerts. The postgres_changes event still
+  // fires regardless of RLS; we use it as a "something changed" signal and
+  // refresh the list via the admin-gated function (since direct SELECT
+  // returns [] under the broken-since-Clerk auth.uid() RLS).
+  useEffect(() => {
+    if (!isBSAdmin || !user?.id) return;
+    const refresh = () => {
+      supabase.functions.invoke('manage-admin-alerts', { body: { op: 'list', requesterClerkId: user.id } })
+        .then(({ data }) => {
+          if (data?.success && Array.isArray(data.alerts)) setAlerts(data.alerts as AdminAlert[]);
         });
-      })
+    };
+    const channel = supabase.channel('admin_alerts_live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'admin_alerts' }, refresh)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [isBSAdmin]);
+  }, [isBSAdmin, user?.id]);
 
   const runHealthMonitor = async () => {
     setRunningMonitor(true);
@@ -159,8 +299,12 @@ export default function ByteSenseAdmin() {
   };
 
   const updateAlert = async (id: string, patch: Partial<AdminAlert>) => {
-    const { error } = await supabase.from('admin_alerts').update(patch).eq('id', id);
-    if (error) { toast.error(error.message); return; }
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    const { error, data } = await supabase.functions.invoke('manage-admin-alerts', {
+      body: { op: 'update', id, patch, requesterClerkId: user.id },
+    });
+    if (error) { toast.error(error.message || 'Failed to reach alerts function'); return; }
+    if (!data?.success) { toast.error(data?.error || 'Update failed'); return; }
     setAlerts(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a));
     if (selectedAlert?.id === id) setSelectedAlert(prev => prev ? { ...prev, ...patch } as AdminAlert : prev);
   };
@@ -170,46 +314,93 @@ export default function ByteSenseAdmin() {
   const reopenAlert = (id: string) => updateAlert(id, { status: 'open', resolved_at: null } as any);
 
   const updateBooking = async (id: string, patch: Partial<SupportBooking>) => {
-    const { error } = await supabase.from('support_bookings').update(patch).eq('id', id);
-    if (error) { toast.error(error.message); return; }
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    const { error, data } = await supabase.functions.invoke('manage-support-bookings', {
+      body: { op: 'update', id, patch, requesterClerkId: user.id },
+    });
+    if (error) { toast.error(error.message || 'Failed to reach bookings function'); return; }
+    if (!data?.success) { toast.error(data?.error || 'Update failed'); return; }
     setBookings(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
   };
 
   const generateCodes = async () => {
     if (!newPracticeName.trim()) { toast.error('Practice name required'); return; }
+    if (!user?.id) { toast.error('Not authenticated'); return; }
     try {
-      const inserts = Array.from({ length: batchCount }, () => ({ practice_name: newPracticeName.trim(), rep_name: newRepName.trim() }));
-      const { error } = await supabase.from('registration_codes').insert(inserts);
-      if (error) throw error;
-      toast.success(`${batchCount} code(s) generated!`);
+      const { error, data } = await supabase.functions.invoke('manage-registration-codes', {
+        body: {
+          op: 'generate',
+          practiceName: newPracticeName.trim(),
+          repName: newRepName.trim(),
+          count: batchCount,
+          requesterClerkId: user.id,
+        },
+      });
+      if (error) throw new Error(error.message || 'Failed to reach code function');
+      if (!data?.success) throw new Error(data?.error || 'Failed to generate codes');
+      toast.success(`${data.count} code(s) generated!`);
       setNewPracticeName(''); setNewRepName(''); setBatchCount(1); loadData();
     } catch (err: any) { toast.error(err.message); }
   };
 
   const revokeCode = async (id: string) => {
-    await supabase.from('registration_codes').update({ status: 'revoked' }).eq('id', id);
-    loadData(); toast.success('Code revoked');
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    try {
+      const { error, data } = await supabase.functions.invoke('manage-registration-codes', {
+        body: { op: 'revoke', id, requesterClerkId: user.id },
+      });
+      if (error) throw new Error(error.message || 'Failed to reach code function');
+      if (!data?.success) throw new Error(data?.error || 'Failed to revoke code');
+      toast.success('Code revoked');
+      loadData();
+    } catch (err: any) { toast.error(err.message || 'Failed to revoke code'); }
   };
 
   const updateDemoStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from('demo_requests').update({ status }).eq('id', id);
-    if (error) { toast.error(error.message); return; }
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    const { error, data } = await supabase.functions.invoke('manage-demo-requests', {
+      body: { op: 'update', id, patch: { status }, requesterClerkId: user.id },
+    });
+    if (error) { toast.error(error.message || 'Failed to reach demo function'); return; }
+    if (!data?.success) { toast.error(data?.error || 'Update failed'); return; }
     setDemos(prev => prev.map(d => d.id === id ? { ...d, status } : d));
     toast.success(`Status → ${status}`);
   };
 
   const saveDemoNotes = async (id: string) => {
-    const { error } = await supabase.from('demo_requests').update({ admin_notes: demoNotes[id] || '' }).eq('id', id);
-    if (error) toast.error(error.message); else toast.success('Notes saved');
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    const { error, data } = await supabase.functions.invoke('manage-demo-requests', {
+      body: { op: 'update', id, patch: { admin_notes: demoNotes[id] || '' }, requesterClerkId: user.id },
+    });
+    if (error) { toast.error(error.message || 'Failed to reach demo function'); return; }
+    if (!data?.success) { toast.error(data?.error || 'Save failed'); return; }
+    toast.success('Notes saved');
   };
 
   const convertDemo = async (d: DemoReq) => {
+    if (!user?.id) { toast.error('Not authenticated'); return; }
     try {
-      const { error: insErr } = await supabase.from('registration_codes').insert({
-        practice_name: d.practice_name || d.name, rep_name: '',
+      const { error: codeErr, data: codeData } = await supabase.functions.invoke('manage-registration-codes', {
+        body: {
+          op: 'generate',
+          // If d.practice_name is empty, use d.name as the practice (and leave rep blank).
+          // Otherwise: practice_name = practice, rep_name = the demo requester's name
+          // so the code row shows "<Practice> · <Requester>".
+          practiceName: d.practice_name || d.name,
+          repName: d.practice_name ? d.name : '',
+          count: 1,
+          requesterClerkId: user.id,
+        },
       });
-      if (insErr) throw insErr;
-      await supabase.from('demo_requests').update({ status: 'converted' }).eq('id', d.id);
+      if (codeErr) throw new Error(codeErr.message || 'Failed to reach code function');
+      if (!codeData?.success) throw new Error(codeData?.error || 'Failed to generate code');
+
+      const { error: updErr, data: updData } = await supabase.functions.invoke('manage-demo-requests', {
+        body: { op: 'update', id: d.id, patch: { status: 'converted' }, requesterClerkId: user.id },
+      });
+      if (updErr) throw new Error(updErr.message || 'Failed to reach demo function');
+      if (!updData?.success) throw new Error(updData?.error || 'Failed to mark converted');
+
       toast.success('Code generated + demo marked converted');
       loadData();
     } catch (err: any) { toast.error(err.message); }
@@ -231,14 +422,137 @@ export default function ByteSenseAdmin() {
 
   const inviteAdmin = async () => {
     if (!inviteEmail.trim()) { toast.error('Enter an email'); return; }
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    const targetEmail = inviteEmail.trim().toLowerCase();
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(inviteEmail.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { error, data } = await supabase.functions.invoke('invite-admin', {
+        body: { email: targetEmail, inviterClerkId: user.id },
       });
-      if (error) throw error;
-      toast.success('Invite sent — they will receive a setup link');
+      if (error) throw new Error(error.message || 'Failed to reach invite function');
+      if (!data?.success) throw new Error(data?.error || 'Invite failed');
+
+      if (data.mode === 'direct_grant') {
+        toast.success(`${targetEmail} already has an account — admin role granted directly. They'll see it on next sign-in or page refresh.`);
+      } else if (data.clerkEmailSent) {
+        toast.success(`Invite email sent to ${targetEmail}. They'll receive a sign-up link and get admin access automatically on first login.`);
+      } else if (data.clerkAlreadyInvited) {
+        toast.success(`${targetEmail} already has a pending Clerk invitation — no new email sent. Pending invite recorded; resend from Clerk dashboard or share ${window.location.origin}/register manually.`);
+      } else {
+        const detail = data.clerkErrorDetail ? String(data.clerkErrorDetail).slice(0, 300) : 'no detail returned';
+        toast.error(`Pending invite recorded for ${targetEmail}, BUT Clerk did NOT send the email.\n\nClerk said: ${detail}\n\nShare ${window.location.origin}/register manually for now.`, { duration: 20000 });
+        console.warn('invite-admin clerk error:', data);
+      }
       setInviteEmail('');
-    } catch (err: any) { toast.error(err.message); }
+      loadData();
+    } catch (err: any) { toast.error(err.message || 'Failed to send invite'); }
+  };
+
+  const cancelPendingInvite = async (email: string) => {
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    setCancelingInviteEmail(email);
+    try {
+      const { error, data } = await supabase.functions.invoke('cancel-admin-invite', {
+        body: { email, requesterClerkId: user.id },
+      });
+      if (error) throw new Error(error.message || 'Failed to reach cancel function');
+      if (!data?.success) throw new Error(data?.error || 'Cancel failed');
+      if (data.clerkRevoked) {
+        toast.success(`Cancelled invite for ${email} — Clerk email link is now revoked.`);
+      } else if (data.clerkRevokeError) {
+        toast.success(`Cancelled invite for ${email} in our database. Note: Clerk side could not be revoked — ${String(data.clerkRevokeError).slice(0, 160)}`, { duration: 12000 });
+      } else {
+        toast.success(`Pending invite for ${email} cancelled`);
+      }
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to cancel invite');
+    } finally {
+      setCancelingInviteEmail(null);
+    }
+  };
+
+  const makeAdmin = async (targetClerkId: string, email: string | null) => {
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    if (!email) { toast.error('User has no email on file'); return; }
+    setPromotingClerkId(targetClerkId);
+    try {
+      const { data, error } = await supabase.functions.invoke('invite-admin', {
+        body: { email, inviterClerkId: user.id },
+      });
+      if (error) throw new Error(error.message || 'Failed to reach invite function');
+      if (!data?.success) throw new Error(data?.error || 'Promote failed');
+      // Only celebrate when the function actually granted the role. If it
+      // fell through to the pending-invite path (e.g. Clerk lookup didn't
+      // find the user), the role was NOT granted — surface that honestly.
+      if (data.mode !== 'direct_grant') {
+        toast.error(`Could not promote ${email}: ${data.lookupErrorDetail || data.clerkErrorDetail || 'Clerk user not found'}. They need to sign in at least once first.`, { duration: 12000 });
+        return;
+      }
+      toast.success(`${email} is now a bytesense_admin`);
+      // Refresh both the Users tab list and the Current Admins list
+      const { data: refreshData } = await supabase.functions.invoke('list-clerk-users', {
+        body: { requesterClerkId: user.id, query: usersDebouncedSearch || undefined, limit: USERS_PAGE_SIZE, offset: usersPage * USERS_PAGE_SIZE },
+      });
+      if (refreshData?.success) {
+        setClerkUsers(refreshData.users || []);
+        setClerkUsersTotal(Number(refreshData.totalCount || 0));
+      }
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to promote');
+    } finally {
+      setPromotingClerkId(null);
+    }
+  };
+
+  const removeClerkUser = async (targetClerkId: string) => {
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    setDeletingUserId(targetClerkId);
+    try {
+      const { error, data } = await supabase.functions.invoke('delete-clerk-user', {
+        body: { targetClerkId, requesterClerkId: user.id },
+      });
+      if (error) throw new Error(error.message || 'Failed to reach delete function');
+      if (!data?.success) throw new Error(data?.error || 'Delete failed');
+      if (data.clerkDeleted) {
+        toast.success('User deleted from Clerk + all associated data removed');
+      } else {
+        toast.success(`Supabase rows cleaned, but Clerk deletion failed — ${String(data.clerkErrorDetail || 'unknown').slice(0, 160)}`, { duration: 12000 });
+      }
+      setConfirmDeleteUserId(null);
+      // Refresh the users list
+      const { data: refreshData } = await supabase.functions.invoke('list-clerk-users', {
+        body: { requesterClerkId: user.id, query: usersDebouncedSearch || undefined, limit: USERS_PAGE_SIZE, offset: usersPage * USERS_PAGE_SIZE },
+      });
+      if (refreshData?.success) {
+        setClerkUsers(refreshData.users || []);
+        setClerkUsersTotal(Number(refreshData.totalCount || 0));
+      }
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete user');
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
+  const removeAdmin = async (targetClerkId: string) => {
+    if (!user?.id) { toast.error('Not authenticated'); return; }
+    setRemovingAdminId(targetClerkId);
+    try {
+      const { error, data } = await supabase.functions.invoke('remove-admin', {
+        body: { targetClerkId, requesterClerkId: user.id },
+      });
+      if (error) throw new Error(error.message || 'Failed to reach remove function');
+      if (!data?.success) throw new Error(data?.error || 'Remove failed');
+      toast.success('Admin access removed');
+      setConfirmRemoveId(null);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to remove admin');
+    } finally {
+      setRemovingAdminId(null);
+    }
   };
 
   const sendChangePassword = async () => {
@@ -285,7 +599,7 @@ export default function ByteSenseAdmin() {
     codes.filter(c => c.used_at).slice(0, 10).forEach(c => events.push({ ts: c.used_at!, type: 'used', label: `Code ${c.code} used`, color: C.teal }));
     demos.slice(0, 10).forEach(d => events.push({ ts: d.created_at, type: 'demo', label: `Demo request from ${d.name}${d.practice_name ? ' (' + d.practice_name + ')' : ''}`, color: C.amber }));
     practices.slice(0, 10).forEach((p: any) => events.push({ ts: p.created_at, type: 'practice', label: `Practice "${p.name}" registered`, color: C.green }));
-    admins.slice(0, 10).forEach((a: any) => { if (a.created_at) events.push({ ts: a.created_at, type: 'staff', label: `ByteSense staff joined: ${a.full_name || 'Admin'}`, color: C.red }); });
+    admins.slice(0, 10).forEach((a: any) => { if (a.created_at) events.push({ ts: a.created_at, type: 'staff', label: `ByteSense staff joined: ${a.full_name || a.email || 'Admin'}`, color: C.red }); });
     return events.sort((a, b) => +new Date(b.ts) - +new Date(a.ts)).slice(0, 10);
   }, [codes, demos, practices, admins]);
 
@@ -320,12 +634,12 @@ export default function ByteSenseAdmin() {
   ].filter(d => d.value > 0);
 
   if (authLoading || checking) {
-    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, color: C.ash, fontFamily: C.fn }}>Loading…</div>;
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bs-bg)', color: 'var(--bs-ash)', fontFamily: C.fn }}>Loading…</div>;
   }
 
   const inputStyle: React.CSSProperties = {
     padding: '12px 16px', fontSize: 14, fontFamily: C.fn,
-    border: `1px solid ${C.glassBorder}`, background: 'rgba(255,255,255,0.04)', color: C.white,
+    border: `1px solid ${'var(--bs-border)'}`, background: 'var(--bs-card)', color: 'var(--bs-text)',
     outline: 'none', boxSizing: 'border-box', width: '100%', borderRadius: C.radiusSm,
   };
 
@@ -339,6 +653,7 @@ export default function ByteSenseAdmin() {
     { id: 'support', label: 'Support Inbox', icon: LifeBuoy, badge: unassignedBookings },
     { id: 'codes', label: 'Codes', icon: KeyRound },
     { id: 'practices', label: 'Practices', icon: Building2 },
+    { id: 'users', label: 'Users', icon: Users },
     { id: 'demos', label: 'Demos', icon: Inbox },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -355,15 +670,15 @@ export default function ByteSenseAdmin() {
     <button onClick={onClick} style={{
       padding: '6px 14px', fontSize: 11, fontWeight: 700, fontFamily: C.fn,
       background: active ? `${color}25` : 'transparent', color: active ? color : C.ash,
-      border: `1px solid ${active ? color : C.glassBorder}`, borderRadius: 999, cursor: 'pointer',
+      border: `1px solid ${active ? color : 'var(--bs-border)'}`, borderRadius: 999, cursor: 'pointer',
     }}>{label} <span style={{ opacity: 0.7 }}>{count}</span></button>
   );
 
   return (
-    <div style={{ fontFamily: C.fn, background: `radial-gradient(ellipse at top, #141420, ${C.dark})`, minHeight: '100vh', color: C.white, display: 'flex' }}>
+    <div style={{ fontFamily: C.fn, background: 'var(--bs-bg)', minHeight: '100vh', color: 'var(--bs-text)', display: 'flex' }}>
       {/* SIDEBAR */}
-      <aside style={{ width: 240, borderRight: `1px solid ${C.glassBorder}`, padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 4, background: 'rgba(12,12,16,0.6)', position: 'sticky', top: 0, height: '100vh' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 8px 24px', borderBottom: `1px solid ${C.glassBorder}`, marginBottom: 16 }}>
+      <aside style={{ width: 240, borderRight: `1px solid ${'var(--bs-border)'}`, padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--bs-bg2)', position: 'sticky', top: 0, height: '100vh' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 8px 24px', borderBottom: `1px solid ${'var(--bs-border)'}`, marginBottom: 16 }}>
           <div style={{ width: 36, height: 36, borderRadius: C.radiusSm, background: C.gradRed, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: C.glow(C.red, 0.3) }}>◆</div>
           <div>
             <div style={{ fontSize: 9, letterSpacing: 3, color: C.red, textTransform: 'uppercase', fontWeight: 700 }}>ByteSense</div>
@@ -377,7 +692,7 @@ export default function ByteSenseAdmin() {
             <button key={n.id} onClick={() => setTab(n.id)} style={{
               display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: C.radiusSm,
               background: active ? `${C.red}20` : 'transparent', border: 'none',
-              color: active ? C.white : C.ash, fontSize: 13, fontWeight: active ? 700 : 500, fontFamily: C.fn,
+              color: active ? 'var(--bs-text)' : C.ash, fontSize: 13, fontWeight: active ? 700 : 500, fontFamily: C.fn,
               cursor: 'pointer', textAlign: 'left', width: '100%',
               borderLeft: active ? `2px solid ${C.red}` : '2px solid transparent',
             }}>
@@ -389,7 +704,7 @@ export default function ByteSenseAdmin() {
             </button>
           );
         })}
-        <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: `1px solid ${C.glassBorder}` }}>
+        <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: `1px solid ${'var(--bs-border)'}` }}>
           <div style={{ fontSize: 10, color: C.slate, padding: '0 8px 8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
           <button type="button" onClick={() => navigate(appDashboardPath)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 14px', background: 'transparent', border: 'none', color: C.ash, fontSize: 12, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
             ← App dashboard
@@ -403,7 +718,7 @@ export default function ByteSenseAdmin() {
       {/* MAIN */}
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Top bar */}
-        <div style={{ padding: '14px 28px', borderBottom: `1px solid ${C.glassBorder}`, display: 'flex', alignItems: 'center', gap: 16, background: 'rgba(20,20,28,0.5)', backdropFilter: C.blur, position: 'sticky', top: 0, zIndex: 10 }}>
+        <div style={{ padding: '14px 28px', borderBottom: `1px solid ${'var(--bs-border)'}`, display: 'flex', alignItems: 'center', gap: 16, background: 'var(--bs-glass)', backdropFilter: C.blur, position: 'sticky', top: 0, zIndex: 10 }}>
           <div style={{ flex: 1, position: 'relative', maxWidth: 480 }}>
             <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.slate }} />
             <input
@@ -451,10 +766,10 @@ export default function ByteSenseAdmin() {
                   {alerts.filter(a => a.status === 'open').slice(0, 5).map(a => {
                     const sevColor = a.severity === 'high' ? C.red : a.severity === 'medium' ? C.amber : C.teal;
                     return (
-                      <div key={a.id} onClick={() => { setTab('alerts'); setSelectedAlert(a); }} style={{ padding: '8px 0', borderBottom: `1px solid ${C.glassBorder}`, cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <div key={a.id} onClick={() => { setTab('alerts'); setSelectedAlert(a); }} style={{ padding: '8px 0', borderBottom: `1px solid ${'var(--bs-border)'}`, cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}>
                         <div style={{ width: 6, height: 6, borderRadius: '50%', background: sevColor }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12, color: C.white, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.title}</div>
+                          <div style={{ fontSize: 12, color: 'var(--bs-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.title}</div>
                           <div style={{ fontSize: 10, color: C.slate }}>{a.type.replace(/_/g, ' ')} · {new Date(a.created_at).toLocaleDateString()}</div>
                         </div>
                       </div>
@@ -471,10 +786,10 @@ export default function ByteSenseAdmin() {
                   </div>
                   {recentActivity.length === 0 && <div style={{ fontSize: 12, color: C.slate }}>No activity yet</div>}
                   {recentActivity.map((e, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: i < recentActivity.length - 1 ? `1px solid ${C.glassBorder}` : 'none' }}>
+                    <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: i < recentActivity.length - 1 ? `1px solid ${'var(--bs-border)'}` : 'none' }}>
                       <div style={{ width: 6, height: 6, borderRadius: '50%', background: e.color, marginTop: 6, flexShrink: 0 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, color: C.white, lineHeight: 1.4 }}>{e.label}</div>
+                        <div style={{ fontSize: 12, color: 'var(--bs-text)', lineHeight: 1.4 }}>{e.label}</div>
                         <div style={{ fontSize: 10, color: C.slate, marginTop: 2 }}>{new Date(e.ts).toLocaleString()}</div>
                       </div>
                     </div>
@@ -488,10 +803,10 @@ export default function ByteSenseAdmin() {
                   </div>
                   {topPractices.length === 0 && <div style={{ fontSize: 12, color: C.slate }}>No data yet</div>}
                   {topPractices.map((p, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < topPractices.length - 1 ? `1px solid ${C.glassBorder}` : 'none' }}>
-                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: i === 0 ? C.gold : C.glassBorder, color: i === 0 ? '#000' : C.ash, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800 }}>{i + 1}</div>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < topPractices.length - 1 ? `1px solid ${'var(--bs-border)'}` : 'none' }}>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: i === 0 ? C.gold : 'var(--bs-border)', color: i === 0 ? '#000' : C.ash, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800 }}>{i + 1}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: C.white, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
                         <div style={{ fontSize: 10, color: C.slate }}>{p.staff} staff</div>
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{p.modules}</div>
@@ -529,7 +844,7 @@ export default function ByteSenseAdmin() {
                         {data.map(d => (
                           <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color }} />
-                            <span style={{ fontSize: 11, color: C.ash }}>{d.name}: <strong style={{ color: C.white }}>{d.value}</strong></span>
+                            <span style={{ fontSize: 11, color: C.ash }}>{d.name}: <strong style={{ color: 'var(--bs-text)' }}>{d.value}</strong></span>
                           </div>
                         ))}
                       </div>
@@ -570,7 +885,7 @@ export default function ByteSenseAdmin() {
               </div>
 
               <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                {pill(codeFilter === 'all', C.white, 'All', codes.length, () => { setCodeFilter('all'); setCodePage(0); })}
+                {pill(codeFilter === 'all', C.ash, 'All', codes.length, () => { setCodeFilter('all'); setCodePage(0); })}
                 {pill(codeFilter === 'active', C.green, 'Active', codes.filter(c => c.status === 'active').length, () => { setCodeFilter('active'); setCodePage(0); })}
                 {pill(codeFilter === 'used', C.teal, 'Used', codes.filter(c => c.status === 'used').length, () => { setCodeFilter('used'); setCodePage(0); })}
                 {pill(codeFilter === 'expired', C.amber, 'Expired', codes.filter(c => c.status === 'expired').length, () => { setCodeFilter('expired'); setCodePage(0); })}
@@ -581,7 +896,7 @@ export default function ByteSenseAdmin() {
               {pagedCodes.map(c => (
                 <div key={c.id} style={{ ...glass, padding: '12px 16px', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
-                    <span style={{ fontWeight: 800, letterSpacing: 3, fontSize: 15, color: C.white, fontFamily: 'monospace' }}>{c.code}</span>
+                    <span style={{ fontWeight: 800, letterSpacing: 3, fontSize: 15, color: 'var(--bs-text)', fontFamily: 'monospace' }}>{c.code}</span>
                     <button onClick={() => copyToClipboard(c.code, 'Code')} style={{ background: 'none', border: 'none', color: C.slate, cursor: 'pointer', display: 'flex' }}>
                       <Copy size={13} />
                     </button>
@@ -592,7 +907,7 @@ export default function ByteSenseAdmin() {
                     <span style={{ fontSize: 10, fontWeight: 700, color: statusColor(c.status), textTransform: 'uppercase', background: `${statusColor(c.status)}15`, padding: '3px 10px', borderRadius: 999 }}>{c.status}</span>
                     <span style={{ fontSize: 10, color: C.slate }}>exp {new Date(c.expires_at).toLocaleDateString()}</span>
                     {c.status === 'active' && (
-                      <button onClick={() => revokeCode(c.id)} style={{ background: 'none', border: `1px solid ${C.glassBorder}`, color: C.ash, padding: '5px 12px', fontSize: 11, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusXs }}>
+                      <button onClick={() => revokeCode(c.id)} style={{ background: 'none', border: `1px solid ${'var(--bs-border)'}`, color: C.ash, padding: '5px 12px', fontSize: 11, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusXs }}>
                         Revoke
                       </button>
                     )}
@@ -601,9 +916,9 @@ export default function ByteSenseAdmin() {
               ))}
               {totalCodePages > 1 && (
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-                  <button disabled={codePage === 0} onClick={() => setCodePage(p => p - 1)} style={{ background: 'transparent', border: `1px solid ${C.glassBorder}`, color: C.ash, padding: '6px 14px', borderRadius: C.radiusSm, cursor: codePage === 0 ? 'not-allowed' : 'pointer', fontFamily: C.fn, fontSize: 12, opacity: codePage === 0 ? 0.4 : 1 }}>← Prev</button>
+                  <button disabled={codePage === 0} onClick={() => setCodePage(p => p - 1)} style={{ background: 'transparent', border: `1px solid ${'var(--bs-border)'}`, color: C.ash, padding: '6px 14px', borderRadius: C.radiusSm, cursor: codePage === 0 ? 'not-allowed' : 'pointer', fontFamily: C.fn, fontSize: 12, opacity: codePage === 0 ? 0.4 : 1 }}>← Prev</button>
                   <span style={{ fontSize: 12, color: C.ash, alignSelf: 'center' }}>Page {codePage + 1} of {totalCodePages}</span>
-                  <button disabled={codePage >= totalCodePages - 1} onClick={() => setCodePage(p => p + 1)} style={{ background: 'transparent', border: `1px solid ${C.glassBorder}`, color: C.ash, padding: '6px 14px', borderRadius: C.radiusSm, cursor: codePage >= totalCodePages - 1 ? 'not-allowed' : 'pointer', fontFamily: C.fn, fontSize: 12, opacity: codePage >= totalCodePages - 1 ? 0.4 : 1 }}>Next →</button>
+                  <button disabled={codePage >= totalCodePages - 1} onClick={() => setCodePage(p => p + 1)} style={{ background: 'transparent', border: `1px solid ${'var(--bs-border)'}`, color: C.ash, padding: '6px 14px', borderRadius: C.radiusSm, cursor: codePage >= totalCodePages - 1 ? 'not-allowed' : 'pointer', fontFamily: C.fn, fontSize: 12, opacity: codePage >= totalCodePages - 1 ? 0.4 : 1 }}>Next →</button>
                 </div>
               )}
             </>
@@ -652,15 +967,15 @@ export default function ByteSenseAdmin() {
                       </div>
                     </div>
                     {isOpen && (
-                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${C.glassBorder}` }}>
+                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${'var(--bs-border)'}` }}>
                         <div style={{ fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 16, marginBottom: 10, fontWeight: 600 }}>Staff Members</div>
                         {(!p.profiles || p.profiles.length === 0) && <div style={{ fontSize: 12, color: C.slate }}>No staff yet</div>}
                         {p.profiles?.map((prof: any) => {
                           const tp = p.training_progress?.find((t: any) => t.user_id === prof.user_id);
                           return (
-                            <div key={prof.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${C.glassBorder}` }}>
+                            <div key={prof.user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${'var(--bs-border)'}` }}>
                               <div>
-                                <div style={{ fontSize: 13, color: C.white, fontWeight: 600 }}>{prof.full_name || '(no name)'}</div>
+                                <div style={{ fontSize: 13, color: 'var(--bs-text)', fontWeight: 600 }}>{prof.full_name || '(no name)'}</div>
                                 <div style={{ fontSize: 10, color: C.slate }}>Joined {new Date(prof.created_at).toLocaleDateString()}</div>
                               </div>
                               <div style={{ display: 'flex', gap: 12, fontSize: 11, color: C.ash }}>
@@ -679,11 +994,163 @@ export default function ByteSenseAdmin() {
             </>
           )}
 
+          {/* USERS — every Clerk user, joined with Supabase profile/role/training data */}
+          {tab === 'users' && (() => {
+            const totalPages = Math.max(1, Math.ceil(clerkUsersTotal / USERS_PAGE_SIZE));
+            return (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', flex: 1, minWidth: 280 }}>
+                    <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.slate }} />
+                    <input
+                      value={usersSearch}
+                      onChange={e => setUsersSearch(e.target.value)}
+                      placeholder="Search by name, email, or Clerk user ID…"
+                      style={{ ...inputStyle, padding: '10px 12px 10px 36px', fontSize: 13, width: '100%' }}
+                    />
+                  </div>
+                  <div style={{ fontSize: 12, color: C.ash }}>
+                    {clerkUsersLoading ? 'Loading…' : `${clerkUsersTotal.toLocaleString()} total`}
+                  </div>
+                </div>
+
+                {clerkUsersError && (
+                  <div style={{ padding: 14, background: `${C.red}15`, color: C.red, fontSize: 12, borderRadius: C.radiusSm, marginBottom: 14 }}>
+                    {clerkUsersError}
+                  </div>
+                )}
+
+                <div style={{ ...glass, padding: 0, overflow: 'hidden' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.1fr 0.8fr 0.6fr 0.6fr 0.8fr 1.3fr', gap: 0, padding: '12px 16px', fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 700, borderBottom: `1px solid ${'var(--bs-border)'}` }}>
+                    <div>User</div>
+                    <div>Practice</div>
+                    <div>Roles</div>
+                    <div>Intake</div>
+                    <div>Training</div>
+                    <div style={{ textAlign: 'right' }}>Joined / Last seen</div>
+                    <div style={{ textAlign: 'right' }}>Actions</div>
+                  </div>
+                  {clerkUsers.length === 0 && !clerkUsersLoading && (
+                    <div style={{ padding: 24, fontSize: 12, color: C.slate, textAlign: 'center' }}>
+                      No users found{usersDebouncedSearch ? ` for "${usersDebouncedSearch}"` : ''}.
+                    </div>
+                  )}
+                  {clerkUsers.map(u => {
+                    const display = u.firstName || u.lastName
+                      ? `${u.firstName} ${u.lastName}`.trim()
+                      : (u.full_name || u.email || u.clerk_user_id.slice(0, 12));
+                    return (
+                      <div key={u.clerk_user_id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.1fr 0.8fr 0.6fr 0.6fr 0.8fr 1.3fr', gap: 0, padding: '12px 16px', fontSize: 12, color: 'var(--bs-text)', borderBottom: `1px solid ${'var(--bs-border)'}`, alignItems: 'center' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{display}</div>
+                          <div style={{ fontSize: 10, color: C.ash, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email || '(no email)'}</div>
+                          <div style={{ fontSize: 9, color: C.slate, fontFamily: 'monospace', marginTop: 2 }}>{u.clerk_user_id.slice(0, 18)}…</div>
+                        </div>
+                        <div style={{ fontSize: 12, color: u.practice_name ? 'var(--bs-text)' : C.slate }}>
+                          {u.practice_name || '—'}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {u.roles.length === 0 && <span style={{ fontSize: 10, color: C.slate }}>—</span>}
+                          {u.roles.map(r => (
+                            <span key={r} style={{
+                              fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                              background: r === 'bytesense_admin' ? `${C.red}25` : r === 'admin' ? `${C.gold}25` : r === 'staff' ? `${C.teal}25` : `${C.slate}25`,
+                              color: r === 'bytesense_admin' ? C.red : r === 'admin' ? C.gold : r === 'staff' ? C.teal : C.slate,
+                              textTransform: 'uppercase', letterSpacing: 0.5,
+                            }}>{r === 'bytesense_admin' ? 'BS Admin' : r}</span>
+                          ))}
+                        </div>
+                        <div style={{ fontSize: 11, color: u.intake_done ? C.green : C.slate }}>
+                          {u.intake_done ? '✓ Done' : '—'}
+                        </div>
+                        <div style={{ fontSize: 11 }}>
+                          <div>{u.module_count} mod{u.module_count === 1 ? '' : 's'}</div>
+                          <div style={{ fontSize: 10, color: C.gold }}>{u.xp} XP</div>
+                        </div>
+                        <div style={{ fontSize: 10, color: C.ash, textAlign: 'right' }}>
+                          <div>Joined {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</div>
+                          <div style={{ color: C.slate }}>
+                            Active {u.last_active_at ? new Date(u.last_active_at).toLocaleDateString() : 'never'}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          {(() => {
+                            const isSelf = u.clerk_user_id === user?.id;
+                            const isConfirming = confirmDeleteUserId === u.clerk_user_id;
+                            const isDeleting = deletingUserId === u.clerk_user_id;
+                            const isAdmin = u.roles.includes('bytesense_admin');
+                            const isPromoting = promotingClerkId === u.clerk_user_id;
+                            if (isSelf) return <span style={{ fontSize: 10, color: C.slate }}>You</span>;
+                            if (isConfirming) {
+                              return (
+                                <div style={{ display: 'inline-flex', gap: 4 }}>
+                                  <button onClick={() => removeClerkUser(u.clerk_user_id)} disabled={isDeleting}
+                                    style={{ fontSize: 10, fontWeight: 700, fontFamily: C.fn, padding: '4px 8px', background: C.red, color: '#fff', border: 'none', borderRadius: C.radiusSm, cursor: isDeleting ? 'default' : 'pointer', opacity: isDeleting ? 0.6 : 1 }}>
+                                    {isDeleting ? '···' : 'Confirm'}
+                                  </button>
+                                  <button onClick={() => setConfirmDeleteUserId(null)} disabled={isDeleting}
+                                    style={{ fontSize: 10, fontWeight: 600, fontFamily: C.fn, padding: '4px 8px', background: 'transparent', color: C.ash, border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, cursor: 'pointer' }}>
+                                    Cancel
+                                  </button>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                                {isAdmin ? (
+                                  <span title="Already a bytesense_admin"
+                                    style={{ fontSize: 9, color: C.red, fontWeight: 700, padding: '3px 7px', background: `${C.red}15`, borderRadius: C.radiusSm, letterSpacing: 0.5 }}>
+                                    BS ADMIN
+                                  </span>
+                                ) : (
+                                  <button onClick={() => makeAdmin(u.clerk_user_id, u.email)} disabled={isPromoting || !u.email}
+                                    title={u.email ? 'Grant bytesense_admin role to this user' : 'User has no email on file'}
+                                    style={{ fontSize: 10, fontWeight: 700, fontFamily: C.fn, padding: '4px 10px', background: 'transparent', color: C.teal, border: `1px solid ${C.teal}40`, borderRadius: C.radiusSm, cursor: isPromoting ? 'default' : 'pointer', opacity: isPromoting || !u.email ? 0.5 : 1 }}>
+                                    {isPromoting ? '···' : 'Make Admin'}
+                                  </button>
+                                )}
+                                <button onClick={() => setConfirmDeleteUserId(u.clerk_user_id)}
+                                  title="Delete user from Clerk + remove all data"
+                                  style={{ fontSize: 10, fontWeight: 600, fontFamily: C.fn, padding: '4px 10px', background: 'transparent', color: C.red, border: `1px solid ${C.red}40`, borderRadius: C.radiusSm, cursor: 'pointer' }}>
+                                  Remove
+                                </button>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, fontSize: 12, color: C.ash }}>
+                  <div>
+                    Page {usersPage + 1} of {totalPages} · showing {clerkUsers.length} of {clerkUsersTotal.toLocaleString()}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => setUsersPage(p => Math.max(0, p - 1))}
+                      disabled={usersPage === 0 || clerkUsersLoading}
+                      style={{ fontSize: 11, fontFamily: C.fn, padding: '6px 12px', background: 'transparent', color: usersPage === 0 ? C.slate : 'var(--bs-text)', border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, cursor: usersPage === 0 ? 'default' : 'pointer' }}>
+                      ← Prev
+                    </button>
+                    <button
+                      onClick={() => setUsersPage(p => Math.min(totalPages - 1, p + 1))}
+                      disabled={usersPage >= totalPages - 1 || clerkUsersLoading}
+                      style={{ fontSize: 11, fontFamily: C.fn, padding: '6px 12px', background: 'transparent', color: usersPage >= totalPages - 1 ? C.slate : 'var(--bs-text)', border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, cursor: usersPage >= totalPages - 1 ? 'default' : 'pointer' }}>
+                      Next →
+                    </button>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+
           {/* DEMOS */}
           {tab === 'demos' && (
             <>
               <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                {pill(demoFilter === 'all', C.white, 'All', demos.length, () => setDemoFilter('all'))}
+                {pill(demoFilter === 'all', C.ash, 'All', demos.length, () => setDemoFilter('all'))}
                 {pill(demoFilter === 'new', C.amber, 'New', demos.filter(d => d.status === 'new').length, () => setDemoFilter('new'))}
                 {pill(demoFilter === 'contacted', C.teal, 'Contacted', demos.filter(d => d.status === 'contacted').length, () => setDemoFilter('contacted'))}
                 {pill(demoFilter === 'converted', C.green, 'Converted', demos.filter(d => d.status === 'converted').length, () => setDemoFilter('converted'))}
@@ -722,7 +1189,7 @@ export default function ByteSenseAdmin() {
                       </div>
                     </div>
                     {isOpen && (
-                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${C.glassBorder}` }}>
+                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${'var(--bs-border)'}` }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, paddingTop: 14 }}>
                           {[
                             { label: 'Operatories', value: d.operatories || '—' },
@@ -734,7 +1201,7 @@ export default function ByteSenseAdmin() {
                           ].map((it, i) => (
                             <div key={i}>
                               <div style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4, fontWeight: 600 }}>{it.label}</div>
-                              <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>{it.value}</div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--bs-text)' }}>{it.value}</div>
                             </div>
                           ))}
                         </div>
@@ -786,7 +1253,7 @@ export default function ByteSenseAdmin() {
           {tab === 'alerts' && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: C.white }}>Health Alerts</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--bs-text)' }}>Health Alerts</div>
                 <span style={{ fontSize: 11, color: C.slate }}>{alerts.filter(a => a.status === 'open').length} open</span>
                 <button onClick={runHealthMonitor} disabled={runningMonitor} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: `1px solid ${C.teal}40`, color: C.teal, padding: '8px 14px', fontSize: 12, fontWeight: 600, fontFamily: C.fn, cursor: runningMonitor ? 'wait' : 'pointer', borderRadius: C.radiusSm, opacity: runningMonitor ? 0.6 : 1 }}>
                   <RefreshCw size={13} style={{ animation: runningMonitor ? 'spin 1s linear infinite' : 'none' }} /> Run scan now
@@ -796,7 +1263,7 @@ export default function ByteSenseAdmin() {
                 {pill(alertFilter === 'open', C.red, 'Open', alerts.filter(a => a.status === 'open').length, () => setAlertFilter('open'))}
                 {pill(alertFilter === 'snoozed', C.amber, 'Snoozed', alerts.filter(a => a.status === 'snoozed').length, () => setAlertFilter('snoozed'))}
                 {pill(alertFilter === 'resolved', C.green, 'Resolved', alerts.filter(a => a.status === 'resolved').length, () => setAlertFilter('resolved'))}
-                {pill(alertFilter === 'all', C.white, 'All', alerts.length, () => setAlertFilter('all'))}
+                {pill(alertFilter === 'all', C.ash, 'All', alerts.length, () => setAlertFilter('all'))}
               </div>
               {alerts.filter(a => alertFilter === 'all' || a.status === alertFilter).length === 0 && (
                 <div style={{ ...glass, padding: 40, textAlign: 'center', color: C.slate, fontSize: 13 }}>
@@ -815,7 +1282,7 @@ export default function ByteSenseAdmin() {
                           <span style={{ fontSize: 9, color: C.slate, textTransform: 'uppercase', letterSpacing: 1 }}>{a.status}</span>
                           {practice && <span style={{ fontSize: 11, color: C.ash }}>· {practice.name}</span>}
                         </div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>{a.title}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--bs-text)' }}>{a.title}</div>
                         <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>{a.body}</div>
                       </div>
                       <div style={{ fontSize: 10, color: C.slate, whiteSpace: 'nowrap' }}>{new Date(a.created_at).toLocaleDateString()}</div>
@@ -844,7 +1311,7 @@ export default function ByteSenseAdmin() {
                   <div key={b.id} style={{ ...glass, padding: 16, marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 10 }}>
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{b.name || '(no name)'} <span style={{ color: C.slate, fontWeight: 400 }}>· {b.email}</span></div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--bs-text)' }}>{b.name || '(no name)'} <span style={{ color: C.slate, fontWeight: 400 }}>· {b.email}</span></div>
                         <div style={{ fontSize: 11, color: C.ash, marginTop: 4 }}>Booked: {b.booking_date} at {b.booking_time}</div>
                         <div style={{ fontSize: 10, color: C.slate, marginTop: 2 }}>Created {new Date(b.created_at).toLocaleString()}</div>
                       </div>
@@ -853,13 +1320,13 @@ export default function ByteSenseAdmin() {
                         <span style={{ fontSize: 10, color: C.slate, textTransform: 'uppercase', letterSpacing: 1 }}>{b.triage_status}</span>
                       </div>
                     </div>
-                    {b.notes && <div style={{ fontSize: 12, color: C.ash, marginBottom: 10, padding: 10, background: 'rgba(255,255,255,0.03)', borderRadius: C.radiusSm }}>{b.notes}</div>}
+                    {b.notes && <div style={{ fontSize: 12, color: C.ash, marginBottom: 10, padding: 10, background: 'var(--bs-card)', borderRadius: C.radiusSm }}>{b.notes}</div>}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                       <div>
                         <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Assign to</label>
                         <select value={b.assigned_to ?? ''} onChange={e => updateBooking(b.id, { assigned_to: e.target.value || null, triage_status: e.target.value ? 'in_progress' : b.triage_status })} style={{ ...inputStyle, marginTop: 4 }}>
                           <option value="">Unassigned</option>
-                          {admins.map((a: any) => <option key={a.clerk_user_id} value={a.clerk_user_id}>{a.full_name || a.clerk_user_id.slice(0, 12)}</option>)}
+                          {admins.map((a: any) => <option key={a.clerk_user_id} value={a.clerk_user_id}>{a.full_name || a.email || a.clerk_user_id.slice(0, 12)}</option>)}
                         </select>
                       </div>
                       <div>
@@ -893,10 +1360,10 @@ export default function ByteSenseAdmin() {
                   <Shield size={14} style={{ color: C.teal }} /> Your Account
                 </div>
                 <div style={{ fontSize: 11, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4, fontWeight: 600 }}>Email</div>
-                <div style={{ fontSize: 14, color: C.white, marginBottom: 16, wordBreak: 'break-all' }}>{user?.email}</div>
+                <div style={{ fontSize: 14, color: 'var(--bs-text)', marginBottom: 16, wordBreak: 'break-all' }}>{user?.email}</div>
                 <div style={{ fontSize: 11, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4, fontWeight: 600 }}>Role</div>
                 <div style={{ fontSize: 13, color: C.red, fontWeight: 700, marginBottom: 20, textTransform: 'uppercase', letterSpacing: 1 }}>ByteSense Admin</div>
-                <button onClick={sendChangePassword} style={{ background: 'transparent', border: `1px solid ${C.glassBorder}`, color: C.white, padding: '10px 18px', fontSize: 12, fontWeight: 600, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, width: '100%' }}>
+                <button onClick={sendChangePassword} style={{ background: 'transparent', border: `1px solid ${'var(--bs-border)'}`, color: 'var(--bs-text)', padding: '10px 18px', fontSize: 12, fontWeight: 600, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm, width: '100%' }}>
                   Send password reset email
                 </button>
               </div>
@@ -904,9 +1371,6 @@ export default function ByteSenseAdmin() {
               <div style={{ ...glass, padding: 24 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Mail size={14} style={{ color: C.gold }} /> Invite Admin
-                </div>
-                <div style={{ fontSize: 12, color: C.ash, marginBottom: 12, lineHeight: 1.6 }}>
-                  Send a setup link to a new ByteSense admin. They must already have an account — assign the bytesense_admin role separately.
                 </div>
                 <input
                   value={inviteEmail}
@@ -920,14 +1384,91 @@ export default function ByteSenseAdmin() {
               </div>
 
               <div style={{ ...glass, padding: 24, gridColumn: '1 / -1' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                  Pending Invitations ({pendingInvites.length})
+                </div>
+                <div style={{ fontSize: 11, color: C.ash, marginBottom: 14, lineHeight: 1.5 }}>
+                  These users were invited but haven't signed in yet. The bytesense_admin role is granted automatically on their first login. Cancel to prevent auto-grant.
+                </div>
+                {pendingInvites.length === 0 && <div style={{ fontSize: 12, color: C.slate }}>No pending invitations</div>}
+                {pendingInvites.map((p) => {
+                  const isCanceling = cancelingInviteEmail === p.email;
+                  return (
+                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${'var(--bs-border)'}`, gap: 12 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, color: 'var(--bs-text)', fontWeight: 600, wordBreak: 'break-all' }}>{p.email}</div>
+                        <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>
+                          Invited {new Date(p.invited_at).toLocaleString()} · role: {p.role}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <button
+                          onClick={() => { setInviteEmail(p.email); }}
+                          title="Re-send (existing pending row will be upserted)"
+                          style={{ fontSize: 11, fontWeight: 600, fontFamily: C.fn, padding: '4px 10px', background: 'transparent', color: C.ash, border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, cursor: 'pointer' }}>
+                          Re-send
+                        </button>
+                        <button
+                          onClick={() => cancelPendingInvite(p.email)}
+                          disabled={isCanceling}
+                          style={{ fontSize: 11, fontWeight: 700, fontFamily: C.fn, padding: '4px 10px', background: C.red, color: '#fff', border: 'none', borderRadius: C.radiusSm, cursor: isCanceling ? 'default' : 'pointer', opacity: isCanceling ? 0.6 : 1 }}>
+                          {isCanceling ? '···' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ ...glass, padding: 24, gridColumn: '1 / -1' }}>
                 <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 14 }}>Current Admins ({admins.length})</div>
                 {admins.length === 0 && <div style={{ fontSize: 12, color: C.slate }}>No admins found</div>}
-                {admins.map((a: any) => (
-                  <div key={a.clerk_user_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${C.glassBorder}` }}>
-                    <div style={{ fontSize: 13, color: C.white, fontWeight: 600 }}>{a.full_name || '(no name)'}</div>
-                    <div style={{ fontSize: 11, color: C.slate, fontFamily: 'monospace' }}>{a.clerk_user_id.slice(0, 12)}…</div>
-                  </div>
-                ))}
+                {admins.map((a: any) => {
+                  const isSelf = a.clerk_user_id === user?.id;
+                  const isConfirming = confirmRemoveId === a.clerk_user_id;
+                  const isRemoving = removingAdminId === a.clerk_user_id;
+                  return (
+                    <div key={a.clerk_user_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${'var(--bs-border)'}`, gap: 12 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, color: 'var(--bs-text)', fontWeight: 600 }}>
+                          {a.full_name || a.email || '(no name)'}
+                          {isSelf && <span style={{ fontSize: 10, color: C.teal, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', marginLeft: 8 }}>You</span>}
+                        </div>
+                        {a.email && a.full_name && (
+                          <div style={{ fontSize: 11, color: C.ash, marginTop: 2 }}>{a.email}</div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <div style={{ fontSize: 11, color: C.slate, fontFamily: 'monospace' }}>{a.clerk_user_id.slice(0, 12)}…</div>
+                        {!isSelf && (
+                          isConfirming ? (
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button
+                                onClick={() => removeAdmin(a.clerk_user_id)}
+                                disabled={isRemoving}
+                                style={{ fontSize: 11, fontWeight: 700, fontFamily: C.fn, padding: '4px 10px', background: C.red, color: '#fff', border: 'none', borderRadius: C.radiusSm, cursor: isRemoving ? 'default' : 'pointer', opacity: isRemoving ? 0.6 : 1 }}>
+                                {isRemoving ? '···' : 'Confirm'}
+                              </button>
+                              <button
+                                onClick={() => setConfirmRemoveId(null)}
+                                disabled={isRemoving}
+                                style={{ fontSize: 11, fontWeight: 600, fontFamily: C.fn, padding: '4px 10px', background: 'transparent', color: C.ash, border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, cursor: 'pointer' }}>
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmRemoveId(a.clerk_user_id)}
+                              title="Remove admin access"
+                              style={{ fontSize: 11, fontWeight: 600, fontFamily: C.fn, padding: '4px 10px', background: 'transparent', color: C.ash, border: `1px solid ${'var(--bs-border)'}`, borderRadius: C.radiusSm, cursor: 'pointer' }}>
+                              Revoke
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -936,11 +1477,11 @@ export default function ByteSenseAdmin() {
       {/* ALERT DETAIL DRAWER */}
       {selectedAlert && (
         <div onClick={() => setSelectedAlert(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: 480, maxWidth: '100%', height: '100vh', background: '#141420', borderLeft: `1px solid ${C.glassBorder}`, padding: 28, overflowY: 'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: 480, maxWidth: '100%', height: '100vh', background: 'var(--bs-bg2)', borderLeft: `1px solid ${'var(--bs-border)'}`, padding: 28, overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
               <div>
                 <div style={{ fontSize: 9, fontWeight: 800, color: selectedAlert.severity === 'high' ? C.red : C.amber, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 }}>{selectedAlert.type.replace(/_/g, ' ')} · {selectedAlert.severity}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: C.white }}>{selectedAlert.title}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--bs-text)' }}>{selectedAlert.title}</div>
               </div>
               <button onClick={() => setSelectedAlert(null)} style={{ background: 'none', border: 'none', color: C.slate, cursor: 'pointer' }}>
                 <X size={18} />
@@ -961,7 +1502,7 @@ export default function ByteSenseAdmin() {
               <label style={{ fontSize: 9, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, display: 'block', marginBottom: 6 }}>Assigned to</label>
               <select value={selectedAlert.assigned_to ?? ''} onChange={e => updateAlert(selectedAlert.id, { assigned_to: e.target.value || null })} style={inputStyle}>
                 <option value="">Unassigned</option>
-                {admins.map((a: any) => <option key={a.clerk_user_id} value={a.clerk_user_id}>{a.full_name || a.clerk_user_id.slice(0, 12)}</option>)}
+                {admins.map((a: any) => <option key={a.clerk_user_id} value={a.clerk_user_id}>{a.full_name || a.email || a.clerk_user_id.slice(0, 12)}</option>)}
               </select>
             </div>
             <div style={{ marginBottom: 16 }}>
@@ -987,7 +1528,7 @@ export default function ByteSenseAdmin() {
                 <button onClick={() => { reopenAlert(selectedAlert.id); }} style={{ background: 'transparent', border: `1px solid ${C.red}40`, color: C.red, padding: '10px 18px', fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>Re-open</button>
               )}
             </div>
-            <div style={{ fontSize: 10, color: C.slate, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.glassBorder}` }}>
+            <div style={{ fontSize: 10, color: C.slate, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${'var(--bs-border)'}` }}>
               Created {new Date(selectedAlert.created_at).toLocaleString()}
               {selectedAlert.resolved_at && <> · Resolved {new Date(selectedAlert.resolved_at).toLocaleString()}</>}
             </div>

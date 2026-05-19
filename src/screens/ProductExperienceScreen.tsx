@@ -312,8 +312,8 @@ function TrustCard1() {
 
       {/* Caption */}
       <div style={{ padding: '24px 8px 0' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: '#F4EFEA', marginBottom: 14 }}>Trust &amp; Loyalty</div>
-        <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 28, lineHeight: 1.18, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 12px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: 'var(--bs-text2)', marginBottom: 14 }}>Trust &amp; Loyalty</div>
+        <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 28, lineHeight: 1.18, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 12px' }}>
           The provider <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>who notices.</span>
         </h3>
         <p style={{ fontFamily: C.fn, fontSize: 14.5, lineHeight: 1.6, color: DIM, margin: 0 }}>
@@ -382,8 +382,8 @@ function TrustCard2() {
 
       {/* Caption */}
       <div style={{ padding: '24px 8px 0' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: '#F4EFEA', marginBottom: 14 }}>Trust &amp; Loyalty</div>
-        <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 28, lineHeight: 1.18, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 12px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: 'var(--bs-text2)', marginBottom: 14 }}>Trust &amp; Loyalty</div>
+        <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 28, lineHeight: 1.18, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 12px' }}>
           The body, <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>getting better with you.</span>
         </h3>
         <p style={{ fontFamily: C.fn, fontSize: 14.5, lineHeight: 1.6, color: DIM, margin: 0 }}>
@@ -436,8 +436,8 @@ function TrustCard3() {
 
       {/* Caption */}
       <div style={{ padding: '24px 8px 0' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: '#F4EFEA', marginBottom: 14 }}>Trust &amp; Loyalty</div>
-        <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 28, lineHeight: 1.18, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 12px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: 'var(--bs-text2)', marginBottom: 14 }}>Trust &amp; Loyalty</div>
+        <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: 28, lineHeight: 1.18, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 12px' }}>
           A practice that <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>writes back.</span>
         </h3>
         <p style={{ fontFamily: C.fn, fontSize: 14.5, lineHeight: 1.6, color: DIM, margin: 0 }}>
@@ -566,11 +566,11 @@ function LiabilitySection() {
           <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: 'rgb(255,139,92)', marginBottom: 16 }}>
             Liability Protection
           </div>
-          <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 28 : 36, lineHeight: 1.18, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 18px' }}>
+          <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 28 : 36, lineHeight: 1.18, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 18px' }}>
             Protecting{' '}
             <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>the work, every night.</span>
           </h3>
-          <p style={{ fontSize: 16, lineHeight: 1.62, color: 'rgba(244,239,234,0.78)', margin: '0 0 32px', textWrap: 'pretty' as any, maxWidth: 520 }}>
+          <p style={{ fontSize: 16, lineHeight: 1.62, color: 'var(--bs-ash)', margin: '0 0 32px', textWrap: 'pretty' as any, maxWidth: 520 }}>
             Continuous compliance visibility creates a defensible record of patient engagement and treatment adherence. byteSense quietly tracks appliance use, behavioral signals, and provider follow-through — protecting both the restorations and the practice that placed them, without ever feeling fear-based or legalistic.
           </p>
 
@@ -759,7 +759,7 @@ function SophisticationSection() {
           <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: '#FF6B70', marginBottom: 16 }}>
             Provider Sophistication
           </div>
-          <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 28 : 36, lineHeight: 1.18, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 18px' }}>
+          <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 28 : 36, lineHeight: 1.18, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 18px' }}>
             Operating{' '}
             <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>at the frontier of preventative care.</span>
           </h3>
@@ -947,7 +947,7 @@ function PremiumDifferentiationSection() {
           <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: '#FF6B70', marginBottom: 16 }}>
             Premium Differentiation
           </div>
-          <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 28 : 36, lineHeight: 1.18, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 18px' }}>
+          <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 28 : 36, lineHeight: 1.18, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 18px' }}>
             A practice{' '}
             <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>that feels different.</span>
           </h3>
@@ -1189,13 +1189,13 @@ function PatientRetentionSection() {
             <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.18em', color: '#FF8B5C', marginBottom: 14 }}>
               Patient Retention &amp; Follow-Up
             </div>
-            <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 24 : 32, lineHeight: 1.15, letterSpacing: '-0.005em', color: '#F4EFEA', margin: '0 0 14px' }}>
+            <h3 style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400, fontSize: isMobile ? 24 : 32, lineHeight: 1.15, letterSpacing: '-0.005em', color: 'var(--bs-text)', margin: '0 0 14px' }}>
               From{' '}
               <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>two touchpoints a year</span>
               {' '}to{' '}
               <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>three-hundred-and-sixty-five.</span>
             </h3>
-            <p style={{ fontFamily: C.fn, fontSize: 15, lineHeight: 1.6, color: 'rgba(244,239,234,0.78)', margin: 0 }}>
+            <p style={{ fontFamily: C.fn, fontSize: 15, lineHeight: 1.6, color: 'var(--bs-ash)', margin: 0 }}>
               The at-home sensor passively tracks appliance usage, nighttime oral activity, movement, and recovery-related patterns — translating them into gentle, behaviorally-timed nudges between appointments.
             </p>
           </div>
@@ -1715,11 +1715,11 @@ function CbSection({
     <div data-sid={sid} style={{ padding: isMobile ? '40px 16px' : '80px 64px', borderTop: `1px solid ${BORDER}`, fontFamily: C.fn }}>
       {/* Heading row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginBottom: isMobile ? 32 : 56, ...(isMobile ? { flexDirection: 'column', alignItems: 'flex-start', gap: 16 } : {}) }}>
-        <h2 style={{ fontSize: isMobile ? 36 : 60, fontWeight: 400, lineHeight: 1.04, letterSpacing: '-0.015em', margin: 0, color: '#F4EFEA', fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', maxWidth: '18ch', textWrap: 'balance' as any }}>
+        <h2 style={{ fontSize: isMobile ? 36 : 60, fontWeight: 400, lineHeight: 1.04, letterSpacing: '-0.015em', margin: 0, color: 'var(--bs-text)', fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', maxWidth: '18ch', textWrap: 'balance' as any }}>
           {heading}{' '}
           <span style={{ fontFamily: C.fn, fontStyle: 'normal', fontWeight: 500, letterSpacing: '-0.02em' }}>{headingSans}</span>
         </h2>
-        <div style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(244,239,234,0.45)', flexShrink: 0, paddingBottom: isMobile ? 0 : 18, whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--bs-ash)', flexShrink: 0, paddingBottom: isMobile ? 0 : 18, whiteSpace: 'nowrap' }}>
           {index}
         </div>
       </div>
@@ -1727,8 +1727,8 @@ function CbSection({
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0,1.05fr) minmax(0,1fr)', gap: isMobile ? 48 : 80, alignItems: 'center' }}>
         {visual}
         <div style={{ padding: '8px 0' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#F4EFEA', marginBottom: 22, fontFamily: C.fn }}>{eyebrow}</div>
-          <p style={{ fontSize: 17, lineHeight: 1.55, color: 'rgba(244,239,234,0.78)', margin: '0 0 32px', maxWidth: '46ch', textWrap: 'pretty' as any, fontFamily: C.fn }}>{body}</p>
+          <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--bs-ash)', marginBottom: 22, fontFamily: C.fn }}>{eyebrow}</div>
+          <p style={{ fontSize: 17, lineHeight: 1.55, color: 'var(--bs-ash)', margin: '0 0 32px', maxWidth: '46ch', textWrap: 'pretty' as any, fontFamily: C.fn }}>{body}</p>
           {hasDropdown ? (
             <button
               onClick={onToggle}

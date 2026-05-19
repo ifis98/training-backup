@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { Component, ReactNode } from "react";
+import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
 import "./index.css";
 
@@ -10,9 +11,28 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("VITE_CLERK_PUBLISHABLE_KEY is not set in .env");
 }
 
+// Initialize Sentry as early as possible so even ClerkProvider errors are captured.
+const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: import.meta.env.MODE,
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.05,
+    replaysOnErrorSampleRate: 1.0,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+    ],
+  });
+}
+
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
   static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: { componentStack: string }) {
+    Sentry.captureException(error, { contexts: { react: { componentStack: info.componentStack } } });
+  }
   render() {
     if (this.state.error) {
       const err = this.state.error as Error;
@@ -32,7 +52,9 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 
 // Catch async / unhandled promise rejections
 window.addEventListener('unhandledrejection', (e) => {
-  const msg = e.reason?.message || String(e.reason) || 'Unknown async error';
+  const reason = e.reason instanceof Error ? e.reason : new Error(String(e.reason ?? 'Unknown async error'));
+  Sentry.captureException(reason);
+  const msg = reason.message || 'Unknown async error';
   document.getElementById('root')!.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0A0A0E;font-family:monospace;padding:24px">
       <div style="max-width:600px;color:#fff">

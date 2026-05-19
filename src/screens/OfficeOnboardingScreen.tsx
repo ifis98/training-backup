@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArrowLeft } from 'lucide-react';
+import { t, Lang } from '@/data/translations';
 
 // ── Colours (matches OfficeWorkflowScreen) ───────────────────────────────────
 const BG      = 'var(--bs-bg)';
@@ -141,7 +142,7 @@ function ScannerDetailPage({ scanner, onBack }: { scanner: typeof SCANNERS[0]; o
       </h2>
       <p style={sectionSubtitle}>{scanner.model} — Follow these steps to connect your scanner to Medit Link and submit your first byteSense case.</p>
 
-      <div style={{ background: '#0c0c10', border: `1px solid ${BORDER2}`, padding: '18px 22px', marginBottom: 40, display: 'flex', gap: 14 }}>
+      <div style={{ background: 'var(--bs-bg2)', border: `1px solid ${BORDER2}`, padding: '18px 22px', marginBottom: 40, display: 'flex', gap: 14 }}>
         <div style={{ color: TEAL_C, fontSize: 18, flexShrink: 0 }}>ℹ</div>
         <div style={{ fontSize: 13, color: DIM, lineHeight: 1.7, fontFamily: C.fn }}>
           All submissions go through <strong style={{ color: 'var(--bs-text)' }}>Medit Link</strong> to <strong style={{ color: 'var(--bs-text)' }}>Florida Oral Labs</strong>. Complete this once before your first case.
@@ -172,7 +173,7 @@ function ScannerRegistrationSection({ onSelectScanner }: { onSelectScanner: (id:
       <h2 style={sectionTitle}>Scanner <span style={accent}>Registration</span></h2>
       <p style={sectionSubtitle}>Connect your intraoral scanner to Medit Link and Florida Oral Labs before submitting your first case. Select your scanner below.</p>
 
-      <div style={{ background: '#0c0c10', border: `1px solid ${BORDER2}`, padding: '18px 22px', marginBottom: 36, display: 'flex', gap: 14 }}>
+      <div style={{ background: 'var(--bs-bg2)', border: `1px solid ${BORDER2}`, padding: '18px 22px', marginBottom: 36, display: 'flex', gap: 14 }}>
         <div style={{ color: TEAL_C, fontSize: 18, flexShrink: 0 }}>ℹ</div>
         <div style={{ fontSize: 13, color: DIM, lineHeight: 1.7, fontFamily: C.fn }}>
           All case submissions go through <strong style={{ color: 'var(--bs-text)' }}>Medit Link</strong> to <strong style={{ color: 'var(--bs-text)' }}>Florida Oral Labs</strong>, regardless of which scanner your practice uses. Complete this registration once — it takes approximately 10 minutes.
@@ -391,7 +392,12 @@ function ActivationSection() {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function OfficeOnboardingScreen() {
+interface OfficeOnboardingScreenProps {
+  lang?: Lang;
+}
+
+export default function OfficeOnboardingScreen({ lang = 'en' }: OfficeOnboardingScreenProps) {
+  const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState('scanner-registration');
   const [selectedScanner, setSelectedScanner] = useState<string | null>(null);
@@ -487,7 +493,18 @@ export default function OfficeOnboardingScreen() {
             {navItems.map(item => (
               <div
                 key={item.id}
-                onClick={() => scrollToSection(item.id)}
+                onClick={() => {
+                  // If we're currently viewing a scanner detail page, clearing
+                  // the selection first re-mounts the three section anchors so
+                  // scrollToSection can find them on the next paint.
+                  if (selectedScanner) {
+                    setSelectedScanner(null);
+                    setActiveSection(item.id);
+                    requestAnimationFrame(() => scrollToSection(item.id));
+                  } else {
+                    scrollToSection(item.id);
+                  }
+                }}
                 style={navItemStyle(item.id)}
                 onMouseEnter={e => { if (activeSection !== item.id) e.currentTarget.style.background = CARD; }}
                 onMouseLeave={e => { if (activeSection !== item.id) e.currentTarget.style.background = 'transparent'; }}

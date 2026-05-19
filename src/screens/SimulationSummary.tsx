@@ -56,7 +56,12 @@ export default function SimulationSummary({ s, u, lang = "en" }: SimulationSumma
       const resp = await fetch(`${FUNCTIONS_URL}/functions/v1/ai-coach`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${FUNCTIONS_KEY}` },
-        body: JSON.stringify({ messages: [{ role: "user", content: `Here is the full simulation conversation:\n\n${conversationText}\n\nPlease analyze and provide the structured coaching summary.` }], mode: "summary", lang }),
+        body: JSON.stringify({
+          messages: [{ role: "user", content: `Here is the full simulation conversation:\n\n${conversationText}\n\nPlease analyze and provide the structured coaching summary.` }],
+          mode: "summary",
+          lang,
+          clerkUserId: (window as any).__clerkUserId,
+        }),
       });
       if (!resp.ok) throw new Error("Failed to generate summary");
       const data = await resp.json();

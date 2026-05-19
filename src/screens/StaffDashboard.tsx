@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { C, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
 import { Logo } from '@/components/ByteSenseLogo';
@@ -39,6 +39,7 @@ const glass = {
 export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut }: StaffDashboardProps) {
   const isMobile = useIsMobile();
   const { user: clerkUser } = useUser();
+  const { getToken } = useClerkAuth();
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
@@ -57,9 +58,10 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     if (!clerkUserId) return;
     const fetchData = async () => {
       try {
-        const { data: casesData } = await supabase.from('cases').select('*')
-          .eq('clerk_user_id', clerkUserId).order('created_at', { ascending: false });
-        if (casesData) setCases(casesData);
+        const { data } = await supabase.functions.invoke('manage-cases', {
+          body: { op: 'list', requesterClerkId: clerkUserId },
+        });
+        if (data?.success && Array.isArray(data.cases)) setCases(data.cases);
       } catch {}
     };
     fetchData();
@@ -82,15 +84,20 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
     const clerkUserId = clerkUser?.id;
     if (!clerkUserId || !newCase.patient_name) return;
     try {
-      const { data, error } = await supabase.from('cases').insert({
-        clerk_user_id: clerkUserId,
-        patient_name: newCase.patient_name,
-        status: newCase.status,
-        case_value: newCase.case_value,
-        notes: newCase.notes,
-      } as any).select().single();
-      if (!error && data) {
-        setCases([data, ...cases]);
+      const { data, error } = await supabase.functions.invoke('manage-cases', {
+        body: {
+          op: 'create',
+          requesterClerkId: clerkUserId,
+          payload: {
+            patient_name: newCase.patient_name,
+            status: newCase.status,
+            case_value: newCase.case_value,
+            notes: newCase.notes,
+          },
+        },
+      });
+      if (!error && data?.success && data.case) {
+        setCases([data.case, ...cases]);
         setNewCase({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
         setShowAddCase(false);
       }
@@ -98,14 +105,20 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
   };
 
   const handleUpdateCaseStatus = async (caseId: string, newStatus: string) => {
-    const { error } = await supabase.from('cases').update({ status: newStatus }).eq('id', caseId);
-    if (!error) {
+    const clerkUserId = clerkUser?.id;
+    if (!clerkUserId) return;
+    const { error, data } = await supabase.functions.invoke('manage-cases', {
+      body: { op: 'update', id: caseId, patch: { status: newStatus }, requesterClerkId: clerkUserId },
+    });
+    if (!error && data?.success) {
       setCases(cases.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
       if (newStatus === 'follow_up') {
         const caseData = cases.find(c => c.id === caseId);
         if (caseData) {
+          const clerkToken = await getToken().catch(() => null);
           supabase.functions.invoke('notify-case-followup', {
             body: { caseId, patientName: caseData.patient_name },
+            headers: clerkToken ? { 'X-Clerk-Token': clerkToken } : undefined,
           }).catch(() => {});
         }
       }

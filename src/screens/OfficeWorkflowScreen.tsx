@@ -43,7 +43,7 @@ const sectionSubtitle: React.CSSProperties = {
 const accent: React.CSSProperties = { color: RED_B };
 
 const highlightBox = (teal = false): React.CSSProperties => ({
-  background: teal ? TEAL_MUT : '#1a0a0a',
+  background: teal ? TEAL_MUT : RED_MUT,
   border: `1px solid ${teal ? TEAL_C + '55' : RED_BDR}`,
   padding: '24px 28px',
   marginBottom: 24,

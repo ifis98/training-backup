@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -100,7 +100,25 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [codeInput, setCodeInput] = useState('');
   const [codeStatus, setCodeStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [codeError, setCodeError] = useState('');
-  const [inviteAccepted, setInviteAccepted] = useState(() => !!localStorage.getItem('bsa6_invite'));
+
+  // Skip the gate if:
+  //  (a) a registration code was already redeemed (practice invite), OR
+  //  (b) a Clerk admin invitation ticket is present in the URL (__clerk_ticket)
+  const hasClerkTicket = new URLSearchParams(window.location.search).has('__clerk_ticket');
+  const [inviteAccepted, setInviteAccepted] = useState(
+    () => !!localStorage.getItem('bsa6_invite') || hasClerkTicket
+  );
+
+  // AuthScreen is reused across /login (mode='sign-in') and /register
+  // (mode='sign-up') — React reconciles them as the same component, so
+  // useState's lazy initializer doesn't re-run on navigation. Re-read
+  // localStorage when mode flips so a freshly-cleared invite triggers the
+  // code gate on /register instead of falling through to Clerk's SignUp form.
+  useEffect(() => {
+    if (mode === 'sign-up') {
+      setInviteAccepted(!!localStorage.getItem('bsa6_invite') || hasClerkTicket);
+    }
+  }, [mode, hasClerkTicket]);
 
   const handleCodeSubmit = async () => {
     const code = codeInput.trim().toUpperCase();
@@ -246,10 +264,44 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
           </p>
         </div>
 
-        {mode === "sign-in"
-          ? <SignIn routing="path" path="/login" signUpUrl="/register" afterSignInUrl="/app" appearance={clerkAppearance} />
-          : <SignUp routing="path" path="/register" signInUrl="/login" afterSignUpUrl="/app" appearance={clerkAppearance} />
-        }
+        {mode === "sign-in" ? (
+          <>
+            <SignIn
+              routing="path"
+              path="/login"
+              signUpUrl="/"
+              afterSignInUrl="/app"
+              appearance={{
+                ...clerkAppearance,
+                elements: {
+                  ...clerkAppearance.elements,
+                  // Hide Clerk's default "Don't have an account? Sign up" —
+                  // we don't want random sign-ups, only code redemption.
+                  footerAction: { display: "none" },
+                },
+              }}
+            />
+            <div style={{ textAlign: "center", marginTop: 20 }}>
+              <button
+                onClick={() => { localStorage.removeItem('bsa6_invite'); navigate('/register'); }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: C.teal,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  fontFamily: C.fn,
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                Got a Code? →
+              </button>
+            </div>
+          </>
+        ) : (
+          <SignUp routing="path" path="/register" signInUrl="/login" afterSignUpUrl="/app" appearance={clerkAppearance} />
+        )}
       </div>
     </div>
   );

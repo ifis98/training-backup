@@ -64,7 +64,7 @@ const sectionSubtitle: React.CSSProperties = {
 const accent: React.CSSProperties = { color: RED_B };
 
 const highlightBox = (teal = false): React.CSSProperties => ({
-  background: teal ? TEAL_MUT : '#1a0a0a',
+  background: teal ? TEAL_MUT : RED_MUT,
   border: `1px solid ${teal ? TEAL_C + '55' : RED_BDR}`,
   padding: '24px 28px',
   marginBottom: 24,
@@ -368,7 +368,7 @@ function PricingSection() {
           { label: 'Premium Tier', price: '$1,200–$1,500', note: 'High-value practice positioning', featured: false, features: ['All Standard inclusions', 'White-glove delivery experience', 'Quarterly data review appointment', 'Priority support channel', 'Practice co-marketing inclusion'] },
         ].map(({ label, price, note, featured, features }) => (
           <div key={label} style={{
-            background: featured ? '#1a0a0a' : CARD,
+            background: featured ? RED_MUT : CARD,
             border: `1px solid ${featured ? RED_BDR : BORDER2}`,
             padding: '24px 22px',
           }}>

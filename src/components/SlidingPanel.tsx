@@ -49,7 +49,7 @@ export default function SlidingPanel({ src, title, onClose }: SlidingPanelProps)
         transition: 'transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column',
-        background: '#0A0A0A',
+        background: 'var(--bs-bg)',
         willChange: 'transform',
         boxShadow: isOpen ? '-8px 0 40px rgba(0,0,0,0.5)' : 'none',
       }}
@@ -57,8 +57,8 @@ export default function SlidingPanel({ src, title, onClose }: SlidingPanelProps)
     >
       {/* Top bar */}
       <div style={{
-        background: '#111111',
-        borderBottom: '1px solid #252525',
+        background: 'var(--bs-bg2)',
+        borderBottom: '1px solid var(--bs-border)',
         padding: '10px 16px',
         display: 'flex',
         alignItems: 'center',

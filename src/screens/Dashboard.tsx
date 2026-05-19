@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { toast } from 'sonner';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
 import { Module } from '@/data/constants';
@@ -45,10 +45,12 @@ const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
 export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut }: DashboardProps) {
   const isMobile = useIsMobile();
   const { user: clerkUser } = useUser();
+  const { getToken } = useClerkAuth();
   const displayName = clerkUser?.firstName || clerkUser?.fullName || s.name || '';
   const allModsDone = dN === myM.length && myM.length > 0;
   const allComplete = allModsDone && s.simP >= 3;
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
   const [staffData, setStaffData] = useState<any[]>([]);
   const [simReviews, setSimReviews] = useState<any[]>([]);
   const [notes, setNotes] = useState(() => localStorage.getItem('bsa6_notes') || '');
@@ -92,17 +94,16 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
     const load = async () => {
       try {
-        const { data: casesData } = await supabase
-          .from('cases').select('*')
-          .eq('clerk_user_id', clerkUserId)
-          .order('created_at', { ascending: false });
-        if (casesData) setCases(casesData);
-
-        const { data: goalsData } = await supabase
-          .from('practice_goals').select('*')
-          .eq('clerk_user_id', clerkUserId)
-          .maybeSingle();
-        if (goalsData) setPracticeGoals(goalsData);
+        const [casesRes, goalsRes] = await Promise.all([
+          supabase.functions.invoke('manage-cases', { body: { op: 'list', requesterClerkId: clerkUserId } }),
+          supabase.functions.invoke('manage-practice-goals', { body: { op: 'get', requesterClerkId: clerkUserId } }),
+        ]);
+        if (casesRes.data?.success && Array.isArray(casesRes.data.cases)) {
+          setCases(casesRes.data.cases);
+        }
+        if (goalsRes.data?.success && goalsRes.data.goals) {
+          setPracticeGoals(goalsRes.data.goals);
+        }
       } catch {}
     };
     load();
@@ -126,16 +127,21 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     const clerkUserId = clerkUser?.id;
     if (!clerkUserId || !newCase.patient_name) return;
     try {
-      const { data, error } = await supabase.from('cases').insert({
-        clerk_user_id: clerkUserId,
-        patient_name: newCase.patient_name,
-        status: newCase.status,
-        case_value: newCase.case_value,
-        notes: newCase.notes,
-      } as any).select().single();
-      if (error) { toast.error('Failed to add case'); return; }
-      if (data) {
-        setCases([data, ...cases]);
+      const { data, error } = await supabase.functions.invoke('manage-cases', {
+        body: {
+          op: 'create',
+          requesterClerkId: clerkUserId,
+          payload: {
+            patient_name: newCase.patient_name,
+            status: newCase.status,
+            case_value: newCase.case_value,
+            notes: newCase.notes,
+          },
+        },
+      });
+      if (error || !data?.success) { toast.error(data?.error || 'Failed to add case'); return; }
+      if (data.case) {
+        setCases([data.case, ...cases]);
         setNewCase({ patient_name: '', status: 'pending', case_value: 0, notes: '' });
         setShowAddCase(false);
       }
@@ -143,14 +149,20 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
   };
 
   const handleUpdateCaseStatus = async (caseId: string, newStatus: string) => {
-    const { error } = await supabase.from('cases').update({ status: newStatus }).eq('id', caseId);
-    if (!error) {
+    const clerkUserId = clerkUser?.id;
+    if (!clerkUserId) return;
+    const { error, data } = await supabase.functions.invoke('manage-cases', {
+      body: { op: 'update', id: caseId, patch: { status: newStatus }, requesterClerkId: clerkUserId },
+    });
+    if (!error && data?.success) {
       setCases(cases.map(c => c.id === caseId ? { ...c, status: newStatus } : c));
       if (newStatus === 'follow_up') {
         const caseData = cases.find(c => c.id === caseId);
         if (caseData) {
+          const clerkToken = await getToken().catch(() => null);
           supabase.functions.invoke('notify-case-followup', {
             body: { caseId, patientName: caseData.patient_name },
+            headers: clerkToken ? { 'X-Clerk-Token': clerkToken } : undefined,
           }).catch(() => {});
         }
       }
@@ -175,13 +187,18 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
     }
 
     try {
-      const { data, error } = await supabase.from('practice_goals').upsert({
-        clerk_user_id: clerkUserId,
-        monthly_case_goal: editCaseGoal,
-        monthly_revenue_goal: autoRevenue,
-        price_per_case: editPricePerCase,
-      } as any, { onConflict: 'clerk_user_id' }).select().single();
-      setPracticeGoals(error ? localGoals : (data || localGoals));
+      const { data, error } = await supabase.functions.invoke('manage-practice-goals', {
+        body: {
+          op: 'upsert',
+          requesterClerkId: clerkUserId,
+          payload: {
+            monthly_case_goal: editCaseGoal,
+            monthly_revenue_goal: autoRevenue,
+            price_per_case: editPricePerCase,
+          },
+        },
+      });
+      setPracticeGoals(error || !data?.success ? localGoals : (data.goals || localGoals));
     } catch {
       setPracticeGoals(localGoals);
     }
@@ -608,7 +625,32 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: isMobile ? 10 : 16, marginBottom: isMobile ? 16 : 28 }}>
           {/* Knowledge Score Gauge */}
           <div style={{ background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 14, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 28px -10px rgba(0,0,0,0.3)" }}>
-            <div style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 16, fontWeight: 600 }}>{T("knowledge_score")}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16, position: "relative" }}>
+              <div style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: "0.18em", fontWeight: 600 }}>Knowledge Score</div>
+              <div
+                onMouseEnter={() => setShowScoreInfo(true)}
+                onMouseLeave={() => setShowScoreInfo(false)}
+                onClick={() => setShowScoreInfo(v => !v)}
+                style={{ width: 14, height: 14, borderRadius: "50%", background: "var(--bs-card2)", border: "1px solid var(--bs-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "var(--bs-ash)", cursor: "help", flexShrink: 0 }}
+              >ⓘ</div>
+              {showScoreInfo && (
+                <div role="tooltip" style={{
+                  position: "absolute", top: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+                  background: "var(--bs-bg2)", border: "1px solid var(--bs-border)",
+                  borderRadius: 8, padding: "10px 12px", minWidth: 220, zIndex: 50,
+                  boxShadow: "0 12px 28px -8px rgba(0,0,0,0.35)",
+                  fontSize: 11, color: "var(--bs-text)", textTransform: "none", letterSpacing: "normal", fontWeight: 500, lineHeight: 1.5,
+                }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>How this is calculated</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "var(--bs-ash)" }}><span>Baseline quiz</span><span>30%</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "var(--bs-ash)" }}><span>Modules done</span><span>40%</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", color: "var(--bs-ash)" }}><span>AI simulations</span><span>30%</span></div>
+                  <div style={{ marginTop: 8, fontSize: 10, color: "var(--bs-ash)" }}>
+                    Completing a recommended module raises this score.
+                  </div>
+                </div>
+              )}
+            </div>
             <div style={{ position: "relative", width: 140, height: 140 }}>
               <svg width="140" height="140" viewBox="0 0 140 140">
                 <circle cx="70" cy="70" r="58" fill="none" stroke="var(--bs-card2)" strokeWidth="8" />
@@ -1114,9 +1156,9 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             {T("schedule_call")}
           </button>
           <button onClick={reset}
-            style={{ background: "transparent", color: "var(--bs-card2)", border: "1px solid var(--bs-border)", padding: "8px 16px", fontSize: 11, fontFamily: C.fn, cursor: "pointer", borderRadius: 8, transition: "all 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.color = C.red; e.currentTarget.style.borderColor = "rgba(204,16,16,0.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "var(--bs-card2)"; e.currentTarget.style.borderColor = "var(--bs-border)"; }}>
+            style={{ background: "transparent", color: C.red, border: `1px solid ${C.red}40`, padding: "8px 16px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: 8, transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${C.red}10`; e.currentTarget.style.borderColor = C.red; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = `${C.red}40`; }}>
             {T("reset_progress")}
           </button>
         </div>

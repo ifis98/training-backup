@@ -3,6 +3,7 @@ import { scrollTop } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
 import { useIsMobile } from '@/hooks/use-mobile';
+import IntakeShell from '@/screens/intake/IntakeShell';
 
 interface BaselineProps {
   s: AppState;
@@ -10,48 +11,74 @@ interface BaselineProps {
   lang?: Lang;
 }
 
-export default function Baseline({ s, u, lang = "en" }: BaselineProps) {
+export default function Baseline({ s, u, lang = 'en' }: BaselineProps) {
   const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
   const qs = s.blQs || BL.map((v, i) => v[(s.seed + i) % v.length]);
   const q = qs[s.blIdx];
   const sel = s.bl[s.blIdx];
+  const isLast = s.blIdx >= qs.length - 1;
+  const totalSteps = qs.length;
+
+  const goBack = () => {
+    if (s.blIdx > 0) {
+      u({ blIdx: s.blIdx - 1 });
+      scrollTop();
+    }
+  };
+
+  const goNext = () => {
+    if (!isLast) {
+      u({ blIdx: s.blIdx + 1 });
+      scrollTop();
+    } else {
+      const score = Math.round(s.bl.reduce((a, v) => a + v * 25, 0) / qs.length);
+      u({ phase: 'blR', blScore: score });
+      scrollTop();
+    }
+  };
 
   return (
-    <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: "100vh" }}>
-      <div style={{ background: "var(--bs-bg2)", padding: isMobile ? "14px 16px" : "18px 24px" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ fontSize: 10, letterSpacing: 3, color: C.ash, textTransform: "uppercase" }}>{T("step2_baseline")}</div>
-          <p style={{ fontSize: 13, color: C.ash, marginTop: 4 }}>{T("no_wrong_answers")}</p>
-          <div style={{ display: "flex", gap: 3, marginTop: 10 }}>
-            {qs.map((_: any, i: number) => <div key={i} style={{ flex: 1, height: 3, background: i <= s.blIdx ? C.teal : C.dark3 }} />)}
-          </div>
-        </div>
-      </div>
-      <div style={{ background: "var(--bs-bg)", padding: isMobile ? "24px 16px" : "32px 24px" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ fontSize: 12, color: C.ash, marginBottom: 8 }}>Q {s.blIdx + 1}/{qs.length}</div>
-          <div style={{ fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--bs-text, #F4F4F6)", marginBottom: 18, lineHeight: 1.5 }}>{q.q}</div>
-          {q.opts.map((o: string, i: number) => (
-            <div key={i} onClick={() => { const b = [...s.bl]; b[s.blIdx] = i; u({ bl: b }); }}
-              style={{ padding: isMobile ? "12px 14px" : "13px 16px", marginBottom: 5, background: sel === i ? "rgba(20,184,166,0.12)" : "var(--bs-card, rgba(255,255,255,0.04))", border: `1.5px solid ${sel === i ? C.teal : "var(--bs-border, rgba(255,255,255,0.07))"}`, cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${sel === i ? C.teal : "var(--bs-ash, #9898A8)"}`, background: sel === i ? C.teal : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {sel === i && <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.white }} />}
+    <IntakeShell
+      step={s.blIdx + 1}
+      totalSteps={totalSteps}
+      title={q.q}
+      subtitle={T('no_wrong_answers')}
+      onBack={s.blIdx > 0 ? goBack : undefined}
+      onContinue={goNext}
+      continueLabel={isLast ? T('see_results') : T('next_arrow')}
+      continueDisabled={sel === undefined}
+    >
+      <div style={{ marginBottom: 20 }}>
+        {q.opts.map((o: string, i: number) => {
+          const isSel = sel === i;
+          return (
+            <div
+              key={i}
+              onClick={() => { const b = [...s.bl]; b[s.blIdx] = i; u({ bl: b }); }}
+              style={{
+                padding: isMobile ? '13px 14px' : '14px 16px',
+                marginBottom: 6,
+                cursor: 'pointer',
+                background: isSel ? 'var(--bs-teal-muted)' : 'var(--bs-card)',
+                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
+                display: 'flex', alignItems: 'center', gap: 12, borderRadius: 2,
+                transition: 'all 0.15s',
+              }}
+            >
+              <div style={{
+                width: 20, height: 20, borderRadius: '50%',
+                border: `2px solid ${isSel ? C.teal : 'var(--bs-ash)'}`,
+                background: isSel ? C.teal : 'transparent',
+                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {isSel && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
               </div>
-              <span style={{ fontSize: 14, color: "var(--bs-text, #F4F4F6)" }}>{o}</span>
+              <span style={{ fontSize: 14, color: isSel ? 'var(--bs-text)' : 'var(--bs-text2)' }}>{o}</span>
             </div>
-          ))}
-          {sel !== undefined && (
-            <button onClick={() => {
-              if (s.blIdx < qs.length - 1) { u({ blIdx: s.blIdx + 1 }); scrollTop(); }
-              else { u({ phase: "blR", blScore: Math.round(s.bl.reduce((a, v) => a + v * 25, 0) / qs.length) }); scrollTop(); }
-            }}
-              style={{ background: C.teal, color: "#fff", border: "none", padding: isMobile ? "13px 20px" : "14px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", marginTop: 14, display: isMobile ? "flex" : "inline-flex", width: isMobile ? "100%" : "auto", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              {s.blIdx < qs.length - 1 ? T("next_arrow") : T("see_results")}
-            </button>
-          )}
-        </div>
+          );
+        })}
       </div>
-    </div>
+    </IntakeShell>
   );
 }

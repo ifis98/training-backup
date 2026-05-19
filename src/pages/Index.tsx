@@ -26,6 +26,7 @@ import BookingModal from '@/components/BookingModal';
 import { Lang } from '@/data/translations';
 import { BL } from '@/data/constants';
 import { C } from '@/data/constants';
+import { supabase } from '@/integrations/supabase/client';
 
 interface IndexProps { forceView?: 'staff' | 'owner'; forcePhase?: string; }
 
@@ -75,18 +76,13 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     u({ intakeDone: true, phase: 'dashboard' });
   }, [dbLoaded, authLoading, s.intakeDone, isByteSenseAdmin]);
 
-  // Invite code gate: new users without a redeemed code are sent to the landing page.
-  // Existing users (intakeDone: true) and bytesense_admins are exempt — no code required.
+  // POST_INTAKE_PHASES retained for the sidebar layout logic below. The
+  // previous "bounce to / if no invite" effect was removed: it caused a
+  // redirect loop with Welcome.tsx's auto-redirect-to-/app for signed-in
+  // users who arrived without a `bsa6_invite` (e.g. logging in on a new
+  // device). IntakeFlow handles the no-invite case gracefully — it just
+  // doesn't prefill the practice name.
   const POST_INTAKE_PHASES = ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report'];
-  useEffect(() => {
-    if (!dbLoaded || authLoading) return;
-    if (s.intakeDone) return;
-    if (isByteSenseAdmin) return;
-    if (POST_INTAKE_PHASES.includes(s.phase)) return;
-    if (!localStorage.getItem('bsa6_invite')) {
-      navigate('/');
-    }
-  }, [dbLoaded, authLoading, s.intakeDone, s.phase, isByteSenseAdmin, navigate]);
 
   // Close coach whenever the user navigates to a new phase
   useEffect(() => {
@@ -127,6 +123,15 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           clerkUserId={clerkUserId}
           prefilledPracticeName={inviteData?.practice_name || ''}
           onDone={(staffRoles, intakeData) => {
+            // Best-effort: bind the redeemed code to this Clerk user. Lets
+            // admins later answer "which user redeemed code XYZ" via the
+            // registration_codes.used_by_clerk_user_id column.
+            if (inviteData?.code && clerkUserId) {
+              const email = clerkUser?.primaryEmailAddress?.emailAddress ?? '';
+              supabase.functions.invoke('manage-registration-codes', {
+                body: { op: 'link', code: inviteData.code, clerkUserId, email },
+              }).catch(() => { /* non-blocking */ });
+            }
             localStorage.removeItem('bsa6_invite'); // consume the stored invite
             const seed = Date.now() % 100000;
             const update = {
@@ -170,7 +175,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     if (forcePhase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
     if (forcePhase === 'product-experience') return <ProductExperienceScreen />;
     if (forcePhase === 'office-workflow')    return <OfficeWorkflowScreen />;
-    if (forcePhase === 'office-onboarding') return <OfficeOnboardingScreen />;
+    if (forcePhase === 'office-onboarding') return <OfficeOnboardingScreen lang={lang} />;
     if (forcePhase === 'contact-support')   return <ContactSupportScreen />;
     if (forcePhase === 'roleplay')          return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
 
@@ -178,7 +183,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     if (s.phase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
     if (s.phase === 'product-experience') return <ProductExperienceScreen />;
     if (s.phase === 'office-workflow')    return <OfficeWorkflowScreen />;
-    if (s.phase === 'office-onboarding') return <OfficeOnboardingScreen />;
+    if (s.phase === 'office-onboarding') return <OfficeOnboardingScreen lang={lang} />;
     if (s.phase === 'contact-support')   return <ContactSupportScreen />;
     if (s.phase === 'roleplay') return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
 
@@ -188,8 +193,11 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     return <Dashboard {...dashboardProps} />;
   };
 
-  // Show the sidebar layout for all screens once intake is complete (or on a section URL)
-  const showLayout = !!forcePhase || !!forceView || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'office-onboarding', 'roleplay', 'contact-support'].includes(s.phase);
+  // Show the sidebar layout for all screens once intake is complete (or on a section URL).
+  // Exception: baseline + baseline-results are part of the onboarding flow and should
+  // render full-screen (Typeform-style) like the intake itself — no sidebar.
+  const isOnboardingFlow = s.phase === 'baseline' || s.phase === 'blR';
+  const showLayout = !isOnboardingFlow && (!!forcePhase || !!forceView || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'office-onboarding', 'roleplay', 'contact-support'].includes(s.phase));
 
   if (showLayout) {
     return (

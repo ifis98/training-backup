@@ -16,7 +16,7 @@ const glass = {
   background: C.glass,
   backdropFilter: C.blur,
   WebkitBackdropFilter: C.blur,
-  border: `1px solid ${C.glassBorder}`,
+  border: '1px solid var(--bs-border)',
   borderRadius: C.radius,
 } as React.CSSProperties;
 
@@ -88,15 +88,21 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
     setLoading(true);
     try {
       const clerkUserId = (window as any).__clerkUserId as string | undefined;
-      const { error } = await supabase.from('support_bookings').insert({
-        clerk_user_id: clerkUserId || null,
-        name,
-        email,
-        booking_date: formatDate(selectedDate),
-        booking_time: selectedTime,
-        notes,
-      } as any);
-      if (!error) setSuccess(true);
+      if (!clerkUserId) { setLoading(false); return; }
+      const { data, error } = await supabase.functions.invoke('manage-support-bookings', {
+        body: {
+          op: 'create',
+          requesterClerkId: clerkUserId,
+          booking: {
+            name,
+            email,
+            booking_date: formatDate(selectedDate),
+            booking_time: selectedTime,
+            notes,
+          },
+        },
+      });
+      if (!error && data?.success) setSuccess(true);
     } catch {}
     setLoading(false);
   };
@@ -116,10 +122,10 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       onClick={handleClose}>
-      <div style={{ ...glass, maxWidth: 520, width: '90%', maxHeight: '85vh', overflow: 'auto', padding: 0, background: "var(--bs-bg2)", border: `1px solid ${C.glassBorder}` }}
+      <div style={{ ...glass, maxWidth: 520, width: '90%', maxHeight: '85vh', overflow: 'auto', padding: 0, background: "var(--bs-bg2)", border: '1px solid var(--bs-border)' }}
         onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: `1px solid ${C.glassBorder}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--bs-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Calendar size={18} strokeWidth={1.5} color={C.teal} />
             <span style={{ fontSize: 16, fontWeight: 700, fontFamily: C.fn }}>{T("book_support_call")}</span>
@@ -132,13 +138,13 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
         {success ? (
           <div style={{ padding: 40, textAlign: 'center' }}>
             <CheckCircle2 size={48} strokeWidth={1.5} color={C.green} style={{ margin: '0 auto 16px' }} />
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: C.white, fontFamily: C.fn }}>{T("booking_confirmed")}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: 'var(--bs-text)', fontFamily: C.fn }}>{T("booking_confirmed")}</div>
             <div style={{ fontSize: 13, color: C.ash, marginBottom: 4, fontFamily: C.fn }}>
               {selectedDate && formatDateDisplay(selectedDate)} · {TIME_SLOTS.find(s => s.value === selectedTime)?.label} PST
             </div>
             <div style={{ fontSize: 12, color: C.ash, fontFamily: C.fn }}>{T("booking_confirmation_sent")}</div>
             <button onClick={handleClose}
-              style={{ marginTop: 24, background: C.gradTeal, color: C.white, border: 'none', padding: '10px 24px', fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
+              style={{ marginTop: 24, background: C.gradTeal, color: '#fff', border: 'none', padding: '10px 24px', fontSize: 13, fontWeight: 700, fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusSm }}>
               {T("close")}
             </button>
           </div>
@@ -158,9 +164,9 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
                   return (
                     <button key={formatDate(d)} onClick={() => { setSelectedDate(d); setSelectedTime(null); }}
                       style={{
-                        background: isSelected ? C.gradTeal : 'rgba(255,255,255,0.04)',
-                        color: isSelected ? C.white : C.ash,
-                        border: `1px solid ${isSelected ? C.teal : C.glassBorder}`,
+                        background: isSelected ? C.gradTeal : 'var(--bs-card)',
+                        color: isSelected ? '#fff' : 'var(--bs-ash)',
+                        border: `1px solid ${isSelected ? C.teal : "var(--bs-border)"}`,
                         padding: '8px 14px', fontSize: 11, fontWeight: isSelected ? 700 : 400,
                         fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusXs,
                         transition: 'all 0.2s',
@@ -187,9 +193,9 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
                       return (
                         <button key={slot.value} onClick={() => setSelectedTime(slot.value)}
                           style={{
-                            background: isSelected ? C.gradTeal : 'rgba(255,255,255,0.04)',
-                            color: isSelected ? C.white : C.ash,
-                            border: `1px solid ${isSelected ? C.teal : C.glassBorder}`,
+                            background: isSelected ? C.gradTeal : 'var(--bs-card)',
+                            color: isSelected ? '#fff' : 'var(--bs-ash)',
+                            border: `1px solid ${isSelected ? C.teal : "var(--bs-border)"}`,
                             padding: '10px 8px', fontSize: 12, fontWeight: isSelected ? 700 : 400,
                             fontFamily: C.fn, cursor: 'pointer', borderRadius: C.radiusXs,
                             transition: 'all 0.2s',
@@ -210,18 +216,18 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
                   <div>
                     <label style={{ fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, marginBottom: 4, display: 'block', fontFamily: C.fn }}>{T("your_name")}</label>
                     <input value={name} onChange={e => setName(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.glassBorder}`, color: C.white, padding: '10px 12px', fontSize: 12, fontFamily: C.fn, outline: 'none', borderRadius: C.radiusXs }} />
+                      style={{ width: '100%', background: 'var(--bs-card)', border: '1px solid var(--bs-border)', color: 'var(--bs-text)', padding: '10px 12px', fontSize: 12, fontFamily: C.fn, outline: 'none', borderRadius: C.radiusXs }} />
                   </div>
                   <div>
                     <label style={{ fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, marginBottom: 4, display: 'block', fontFamily: C.fn }}>{T("your_email")}</label>
                     <input value={email} onChange={e => setEmail(e.target.value)} type="email"
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.glassBorder}`, color: C.white, padding: '10px 12px', fontSize: 12, fontFamily: C.fn, outline: 'none', borderRadius: C.radiusXs }} />
+                      style={{ width: '100%', background: 'var(--bs-card)', border: '1px solid var(--bs-border)', color: 'var(--bs-text)', padding: '10px 12px', fontSize: 12, fontFamily: C.fn, outline: 'none', borderRadius: C.radiusXs }} />
                   </div>
                 </div>
                 <div>
                   <label style={{ fontSize: 10, color: C.ash, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600, marginBottom: 4, display: 'block', fontFamily: C.fn }}>{T("booking_notes")}</label>
                   <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={T("booking_notes_placeholder")}
-                    style={{ width: '100%', minHeight: 60, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.glassBorder}`, color: C.white, padding: '10px 12px', fontSize: 12, fontFamily: C.fn, outline: 'none', resize: 'vertical', borderRadius: C.radiusXs }} />
+                    style={{ width: '100%', minHeight: 60, background: 'var(--bs-card)', border: '1px solid var(--bs-border)', color: 'var(--bs-text)', padding: '10px 12px', fontSize: 12, fontFamily: C.fn, outline: 'none', resize: 'vertical', borderRadius: C.radiusXs }} />
                 </div>
               </div>
             )}
@@ -230,8 +236,8 @@ export default function BookingModal({ open, onClose, lang, userName = '', userE
             {selectedTime && (
               <button onClick={handleBook} disabled={loading || !name || !email}
                 style={{
-                  width: '100%', background: (name && email) ? C.gradTeal : 'rgba(255,255,255,0.05)',
-                  color: C.white, border: 'none', padding: '14px', fontSize: 14, fontWeight: 700,
+                  width: '100%', background: (name && email) ? C.gradTeal : 'var(--bs-bg3)',
+                  color: (name && email) ? '#fff' : 'var(--bs-ash)', border: 'none', padding: '14px', fontSize: 14, fontWeight: 700,
                   fontFamily: C.fn, cursor: (name && email) ? 'pointer' : 'not-allowed',
                   borderRadius: C.radiusSm, boxShadow: (name && email) ? C.glow(C.teal, 0.2) : 'none',
                   transition: 'all 0.3s',

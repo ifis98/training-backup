@@ -22,7 +22,7 @@ export default function Step03PrimaryAdvocate({ step, totalSteps, data, update, 
       continueDisabled={!canContinue}
     >
       <div style={{ background: 'rgba(32,200,185,0.06)', border: `1px solid ${C.teal}30`, padding: '12px 14px', marginBottom: 20, borderRadius: 2 }}>
-        <div style={{ fontSize: 12, color: C.ash, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 12, color: 'var(--bs-ash)', lineHeight: 1.6 }}>
           Typically the lead Hygienist, Treatment Coordinator, or an engaged clinical team member.
         </div>
       </div>

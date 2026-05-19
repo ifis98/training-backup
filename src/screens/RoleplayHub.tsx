@@ -37,17 +37,17 @@ export default function RoleplayHub({ s, u, lang }: Props) {
       {/* ── Roleplay sidebar ── */}
       <div style={{
         width: SIDEBAR_W, minWidth: SIDEBAR_W, flexShrink: 0,
-        background: '#111111', borderRight: '1px solid #252525',
+        background: 'var(--bs-bg2)', borderRight: '1px solid var(--bs-border)',
         display: 'flex', flexDirection: 'column', overflowY: 'auto',
       }}>
         {/* Logo */}
-        <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid #252525' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: '#F4F4F4', marginBottom: 8 }}>
+        <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--bs-border)' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--bs-text)', marginBottom: 8 }}>
             byte<span style={{ color: '#E63434' }}>Sense</span>
           </div>
           <div style={{
             fontSize: 10, fontWeight: 600, letterSpacing: 2, color: '#D01B1B',
-            background: '#3A1515', border: '1px solid #5a1010', padding: '3px 10px', display: 'inline-block',
+            background: 'var(--bs-red-muted)', border: '1px solid var(--bs-red-border)', padding: '3px 10px', display: 'inline-block',
           }}>
             BETA PARTNER
           </div>
@@ -57,7 +57,7 @@ export default function RoleplayHub({ s, u, lang }: Props) {
         <div style={{ padding: '16px 0', flex: 1 }}>
           <div style={{
             padding: '8px 24px 4px', fontSize: 9, fontWeight: 700,
-            letterSpacing: 2.5, color: '#555555', textTransform: 'uppercase',
+            letterSpacing: 2.5, color: 'var(--bs-ash)', textTransform: 'uppercase',
           }}>
             Roleplay Tools
           </div>
@@ -71,13 +71,13 @@ export default function RoleplayHub({ s, u, lang }: Props) {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '9px 24px', fontSize: 13, fontWeight: isActive ? 600 : 500,
-                  color: isActive ? '#E63434' : '#A0A0A0',
+                  color: isActive ? '#E63434' : 'var(--bs-ash)',
                   cursor: 'pointer',
                   borderLeft: isActive ? '2px solid #D01B1B' : '2px solid transparent',
-                  background: isActive ? '#3A1515' : 'transparent',
+                  background: isActive ? 'var(--bs-red-muted)' : 'transparent',
                   transition: 'all 0.2s',
                 }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#181818'; }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--bs-bg3)'; }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
               >
                 <div style={{
@@ -91,13 +91,13 @@ export default function RoleplayHub({ s, u, lang }: Props) {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '20px 24px', borderTop: '1px solid #252525' }}>
-          <div style={{ background: '#3A1515', border: '1px solid #5a1010', padding: 14 }}>
+        <div style={{ padding: '20px 24px', borderTop: '1px solid var(--bs-border)' }}>
+          <div style={{ background: 'var(--bs-red-muted)', border: '1px solid var(--bs-red-border)', padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: '#E63434', fontWeight: 700, marginBottom: 6 }}>
               CONTACT SUPPORT
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F4', marginBottom: 2 }}>+1 (888) 397-7073</div>
-            <div style={{ fontSize: 13, color: '#A0A0A0' }}>support@bytesense.ai</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>+1 (888) 397-7073</div>
+            <div style={{ fontSize: 13, color: 'var(--bs-ash)' }}>support@bytesense.ai</div>
           </div>
         </div>
       </div>

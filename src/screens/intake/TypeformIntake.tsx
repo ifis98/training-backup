@@ -98,7 +98,7 @@ function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8 }}>
       {/* Country picker button */}
       <button type="button" onClick={() => setOpen(o => !o)}
-        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, color: C.white, fontSize: fs - 2, fontFamily: ff, flexShrink: 0 }}>
+        style={{ background: 'var(--bs-card)', border: '1px solid var(--bs-border)', borderRadius: 8, padding: '7px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--bs-text)', fontSize: fs - 2, fontFamily: ff, flexShrink: 0 }}>
         <span style={{ fontSize: 18, lineHeight: 1 }}>{country.flag}</span>
         <span>{country.code}</span>
         <span style={{ opacity: 0.4, fontSize: 10 }}>▾</span>
@@ -106,19 +106,19 @@ function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
 
       {/* Dropdown */}
       {open && (
-        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, width: 270, maxHeight: 300, display: 'flex', flexDirection: 'column', background: 'rgba(14,14,20,0.99)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, boxShadow: '0 16px 48px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
-          <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, width: 270, maxHeight: 300, display: 'flex', flexDirection: 'column', background: 'var(--bs-bg2)', border: '1px solid var(--bs-border)', borderRadius: 10, boxShadow: '0 16px 48px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--bs-border)' }}>
             <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search country..."
-              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 10px', color: C.white, fontSize: 13, fontFamily: ff, outline: 'none', boxSizing: 'border-box' }} />
+              style={{ width: '100%', background: 'var(--bs-card)', border: '1px solid var(--bs-border)', borderRadius: 6, padding: '6px 10px', color: 'var(--bs-text)', fontSize: 13, fontFamily: ff, outline: 'none', boxSizing: 'border-box' }} />
           </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {filtered.map((c, i) => {
               const isActive = c.code === country.code && c.flag === country.flag;
               return (
                 <div key={c.name} onClick={() => selectCountry(c)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', cursor: 'pointer', background: isActive ? 'rgba(20,184,166,0.1)' : 'transparent', color: isActive ? C.teal : C.ash, fontSize: 13, fontFamily: ff, borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', cursor: 'pointer', background: isActive ? 'rgba(20,184,166,0.1)' : 'transparent', color: isActive ? C.teal : 'var(--bs-text2)', fontSize: 13, fontFamily: ff, borderBottom: i < filtered.length - 1 ? '1px solid var(--bs-border)' : 'none' }}
+                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'var(--bs-card)'; }}
                   onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}>
                   <span style={{ fontSize: 18 }}>{c.flag}</span>
                   <span style={{ flex: 1 }}>{c.name}</span>
@@ -134,7 +134,7 @@ function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
       <input type="tel" value={number}
         onChange={e => { setNumber(e.target.value); onChange(country.code + (e.target.value ? ' ' + e.target.value : '')); }}
         placeholder={placeholder || '000-000-0000'}
-        style={{ flex: 1, background: 'transparent', border: 'none', color: C.white, fontSize: fs, fontFamily: ff, padding: '6px 0', outline: 'none' }} />
+        style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--bs-text)', fontSize: fs, fontFamily: ff, padding: '6px 0', outline: 'none' }} />
     </div>
   );
 }
@@ -564,7 +564,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
       display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
     }}>
       {/* Progress bar */}
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.06)', zIndex: 10 }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, background: 'var(--bs-bg2)', zIndex: 10 }}>
         <div style={{ height: '100%', width: `${progress}%`, background: C.teal, transition: 'width 0.5s ease', borderRadius: '0 2px 2px 0' }} />
       </div>
 
@@ -572,7 +572,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
       {qIdx > 0 && current.type !== 'complete' && (
         <button onClick={goBack} style={{
           position: 'fixed', top: 18, left: isMobile ? 16 : 24, zIndex: 10,
-          background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)',
+          background: 'none', border: 'none', color: 'var(--bs-ash)',
           fontSize: 13, cursor: 'pointer', fontFamily: C.fn,
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '6px 0',
@@ -622,8 +622,8 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
               onClick={handleOK}
               disabled={!canAdvance()}
               style={{
-                background: canAdvance() ? C.teal : 'rgba(255,255,255,0.08)',
-                color: canAdvance() ? C.white : 'rgba(255,255,255,0.25)',
+                background: canAdvance() ? C.teal : 'var(--bs-card)',
+                color: canAdvance() ? C.white : 'var(--bs-ash)',
                 border: 'none', borderRadius: 6,
                 padding: isMobile ? '11px 20px' : '12px 22px',
                 fontSize: 14, fontWeight: 700, fontFamily: C.fn,
@@ -636,8 +636,8 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
             </button>
           )}
           {!isMobile && (
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', letterSpacing: 0.5 }}>
-              press <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 3, fontFamily: 'monospace' }}>Enter</kbd>
+            <span style={{ fontSize: 11, color: 'var(--bs-ash)', letterSpacing: 0.5 }}>
+              press <kbd style={{ background: 'var(--bs-card)', padding: '2px 6px', borderRadius: 3, fontFamily: 'monospace' }}>Enter</kbd>
             </span>
           )}
         </div>
@@ -678,15 +678,15 @@ function WelcomeScreen({ onStart, isMobile }: { onStart: () => void; isMobile: b
   return (
     <div style={{ textAlign: 'center', padding: isMobile ? '0 4px' : '0 20px' }}>
       <Logo size={36} light />
-      <h1 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: C.white, margin: '28px 0 16px', lineHeight: 1.2 }}>
+      <h1 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: 'var(--bs-text)', margin: '28px 0 16px', lineHeight: 1.2 }}>
         Get Your Practice Ready<br />for ByteSense
       </h1>
-      <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.45)', lineHeight: 1.8, marginBottom: 20, maxWidth: 460, margin: '0 auto 24px' }}>
-        Takes about <strong style={{ color: 'rgba(255,255,255,0.7)' }}>2–3 minutes</strong>. Just answer as you go — we'll configure everything for you.
+      <p style={{ fontSize: 16, color: 'var(--bs-ash)', lineHeight: 1.8, marginBottom: 20, maxWidth: 460, margin: '0 auto 24px' }}>
+        Takes about <strong style={{ color: 'var(--bs-text)' }}>2–3 minutes</strong>. Just answer as you go — we'll configure everything for you.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', marginBottom: 36 }}>
         {['Staff training', 'Scanner & lab setup', 'Case workflow', 'Ongoing support'].map((item, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--bs-ash)' }}>
             <span style={{ color: C.teal, fontSize: 14 }}>✓</span> {item}
           </div>
         ))}
@@ -712,11 +712,11 @@ function QHeader({ num, question, description, isMobile }: { num?: string; quest
           <span style={{ color: C.teal, fontSize: 13 }}>→</span>
         </div>
       )}
-      <h2 style={{ fontSize: isMobile ? 22 : 28, fontWeight: 800, color: C.white, margin: 0, lineHeight: 1.3 }}>
+      <h2 style={{ fontSize: isMobile ? 22 : 28, fontWeight: 800, color: 'var(--bs-text)', margin: 0, lineHeight: 1.3 }}>
         {question}
       </h2>
       {description && (
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginTop: 10, lineHeight: 1.7, marginBottom: 0 }}>
+        <p style={{ fontSize: 14, color: 'var(--bs-ash)', marginTop: 10, lineHeight: 1.7, marginBottom: 0 }}>
           {description}
         </p>
       )}
@@ -740,24 +740,24 @@ function RadioScreen({ q, data, onSelect, isMobile }: { q: QuestionDef; data: In
               style={{
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: isMobile ? '13px 16px' : '14px 18px',
-                background: isSel ? 'rgba(32,200,185,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `1.5px solid ${isSel ? C.teal : 'rgba(255,255,255,0.1)'}`,
+                background: isSel ? 'rgba(32,200,185,0.12)' : 'var(--bs-card)',
+                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
                 borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                 transition: 'all 0.15s ease', width: '100%',
               }}
             >
               <span style={{
                 width: 26, height: 26, borderRadius: 5,
-                border: `1.5px solid ${isSel ? C.teal : 'rgba(255,255,255,0.2)'}`,
+                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
                 background: isSel ? C.teal : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 11, fontWeight: 800,
-                color: isSel ? C.dark : 'rgba(255,255,255,0.4)',
+                color: isSel ? '#fff' : 'var(--bs-ash)',
                 flexShrink: 0, transition: 'all 0.15s',
               }}>
                 {isSel ? '✓' : opt.key}
               </span>
-              <span style={{ fontSize: isMobile ? 14 : 15, color: isSel ? C.white : 'rgba(255,255,255,0.75)', fontWeight: isSel ? 600 : 400 }}>
+              <span style={{ fontSize: isMobile ? 14 : 15, color: isSel ? 'var(--bs-text)' : 'var(--bs-ash)', fontWeight: isSel ? 600 : 400 }}>
                 {opt.label}
               </span>
             </button>
@@ -789,24 +789,24 @@ function MultiScreen({ q, data, update, isMobile }: { q: QuestionDef; data: Inta
               style={{
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: isMobile ? '13px 16px' : '14px 18px',
-                background: isSel ? 'rgba(32,200,185,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `1.5px solid ${isSel ? C.teal : 'rgba(255,255,255,0.1)'}`,
+                background: isSel ? 'rgba(32,200,185,0.12)' : 'var(--bs-card)',
+                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
                 borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                 transition: 'all 0.15s ease', width: '100%',
               }}
             >
               <span style={{
                 width: 26, height: 26, borderRadius: 5,
-                border: `1.5px solid ${isSel ? C.teal : 'rgba(255,255,255,0.2)'}`,
+                border: `1.5px solid ${isSel ? C.teal : 'var(--bs-border)'}`,
                 background: isSel ? C.teal : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 11, fontWeight: 800,
-                color: isSel ? C.dark : 'rgba(255,255,255,0.4)',
+                color: isSel ? '#fff' : 'var(--bs-ash)',
                 flexShrink: 0, transition: 'all 0.15s',
               }}>
                 {isSel ? '✓' : opt.key}
               </span>
-              <span style={{ fontSize: isMobile ? 14 : 15, color: isSel ? C.white : 'rgba(255,255,255,0.75)', fontWeight: isSel ? 600 : 400 }}>
+              <span style={{ fontSize: isMobile ? 14 : 15, color: isSel ? 'var(--bs-text)' : 'var(--bs-ash)', fontWeight: isSel ? 600 : 400 }}>
                 {opt.label}
               </span>
             </button>
@@ -839,8 +839,8 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
       <QHeader num={q.num} question={q.question} description={q.description} isMobile={isMobile} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         {fields.map((field, i) => (
-          <div key={field.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 4, marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>
+          <div key={field.id} style={{ borderBottom: '1px solid var(--bs-border)', paddingBottom: 4, marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: 'var(--bs-ash)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>
               {field.label}{field.required && <span style={{ color: C.teal, marginLeft: 3 }}>*</span>}
             </label>
             {field.type === 'tel' ? (
@@ -861,7 +861,7 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
                 placeholder={field.placeholder}
                 style={{
                   width: '100%', background: 'transparent', border: 'none',
-                  color: C.white, fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
+                  color: 'var(--bs-text)', fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
                   padding: '6px 0', outline: 'none', boxSizing: 'border-box',
                 }}
               />
@@ -887,7 +887,7 @@ function CompleteScreen({ onComplete, saving, isMobile }: { onComplete: () => Pr
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
             <Loader2 size={44} strokeWidth={1.5} color={C.teal} style={{ animation: "spin 1s linear infinite" }} />
           </div>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.4)' }}>Saving your setup…</p>
+          <p style={{ fontSize: 16, color: 'var(--bs-ash)' }}>Saving your setup…</p>
         </>
       ) : (
         <>
@@ -897,10 +897,10 @@ function CompleteScreen({ onComplete, saving, isMobile }: { onComplete: () => Pr
           <div style={{ fontSize: 11, letterSpacing: 3, color: C.teal, textTransform: 'uppercase', fontWeight: 700, marginBottom: 16 }}>
             Setup Complete
           </div>
-          <h2 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, color: C.white, marginBottom: 14, lineHeight: 1.3 }}>
+          <h2 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 14, lineHeight: 1.3 }}>
             Your practice is configured.
           </h2>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.8, maxWidth: 400, margin: '0 auto' }}>
+          <p style={{ fontSize: 15, color: 'var(--bs-ash)', lineHeight: 1.8, maxWidth: 400, margin: '0 auto' }}>
             ByteSense has everything it needs. Now let's get your team trained and ready for the first patient case.
           </p>
         </>
