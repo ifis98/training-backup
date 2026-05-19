@@ -291,8 +291,7 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
         {mode === "sign-in" ? (
           <>
             <SignIn
-              routing="path"
-              path="/login"
+              routing="virtual"
               signUpUrl="/"
               afterSignInUrl="/app"
               appearance={signInAppearance}
@@ -316,7 +315,7 @@ function AuthScreen({ mode }: { mode: "sign-in" | "sign-up" }) {
             </div>
           </>
         ) : (
-          <SignUp routing="path" path="/register" signInUrl="/login" afterSignUpUrl="/app" appearance={clerkAppearance} />
+          <SignUp routing="virtual" signInUrl="/login" afterSignUpUrl="/app" appearance={clerkAppearance} />
         )}
       </div>
     </div>
