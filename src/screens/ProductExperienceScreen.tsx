@@ -509,29 +509,29 @@ function LiabilitySection() {
             <div style={{ position: 'absolute', top: '70%', right: 0, bottom: 0, left: 0, background: 'radial-gradient(ellipse 70% 100% at 50% 0%, rgba(255,160,100,0.18) 0%, rgba(140,90,70,0.06) 35%, transparent 60%)', zIndex: 1, pointerEvents: 'none' }} />
 
             {/* Top-left pill */}
-            <div style={glassPin({ top: 28, left: 28, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', whiteSpace: 'nowrap' })}>
+            <div style={glassPin({ top: isMobile ? 14 : 28, left: isMobile ? 14 : 28, display: 'inline-flex', alignItems: 'center', gap: isMobile ? 5 : 7, padding: isMobile ? '4px 8px' : '5px 10px 5px 9px', borderRadius: 999, fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.14em', whiteSpace: 'nowrap', maxWidth: isMobile ? '55%' : 'none' })}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(156,201,176)', boxShadow: "none", flexShrink: 0 }} />
               Protection protocol · active
             </div>
 
             {/* Top-right pill — alert / amber */}
-            <div style={glassPin({ top: 28, right: 28, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', whiteSpace: 'nowrap' })}>
+            <div style={glassPin({ top: isMobile ? 14 : 28, right: isMobile ? 14 : 28, display: 'inline-flex', alignItems: 'center', gap: isMobile ? 5 : 7, padding: isMobile ? '4px 8px' : '5px 10px 5px 9px', borderRadius: 999, fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.14em', whiteSpace: 'nowrap' })}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(255,139,92)', boxShadow: "none", flexShrink: 0 }} />
               Grinding ↑ night 8
             </div>
 
             {/* Hero number — 92% */}
-            <div style={{ position: 'absolute', left: 28, top: 84, zIndex: 4 }}>
-              <div style={{ fontWeight: 300, fontSize: 96, lineHeight: 1, letterSpacing: '-0.04em', color: '#F4EFEA' }}>
-                92<span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontSize: 28, color: 'rgb(156,201,176)', marginLeft: 4 }}>%</span>
+            <div style={{ position: 'absolute', left: isMobile ? 18 : 28, top: isMobile ? 64 : 84, zIndex: 4 }}>
+              <div style={{ fontWeight: 300, fontSize: isMobile ? 68 : 96, lineHeight: 1, letterSpacing: '-0.04em', color: '#F4EFEA' }}>
+                92<span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontSize: isMobile ? 20 : 28, color: 'rgb(156,201,176)', marginLeft: 4 }}>%</span>
               </div>
-              <div style={{ fontFamily: 'monospace', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.16em', color: 'rgba(244,239,234,0.55)', marginTop: 4 }}>
+              <div style={{ fontFamily: 'monospace', fontSize: isMobile ? 9.5 : 11, textTransform: 'uppercase' as const, letterSpacing: '0.16em', color: 'rgba(244,239,234,0.55)', marginTop: 4 }}>
                 Appliance usage · this month
               </div>
             </div>
 
             {/* Glass timeline card */}
-            <div style={glassCard({ left: 28, right: 28, bottom: 28, padding: '16px 18px 18px', borderRadius: 18 })}>
+            <div style={glassCard({ left: isMobile ? 14 : 28, right: isMobile ? 14 : 28, bottom: isMobile ? 14 : 28, padding: isMobile ? '12px 14px 14px' : '16px 18px 18px', borderRadius: 18 })}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
                 <span style={{ fontFamily: 'monospace', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: 'rgba(244,239,234,0.6)' }}>Night-guard adherence</span>
                 <span style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgb(156,201,176)' }}>14 consecutive nights</span>
@@ -696,13 +696,13 @@ function SophisticationSection() {
             <div style={{ position: 'absolute', inset: '20% 25%', background: 'radial-gradient(circle, rgba(180,200,255,0.10) 0%, transparent 60%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
 
             {/* Top-left pill: Preventative monitoring */}
-            <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.30)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
+            <div style={{ position: 'absolute', top: isMobile ? 14 : 28, left: isMobile ? 14 : 28, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: isMobile ? 5 : 7, padding: isMobile ? '4px 8px' : '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.30)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap', maxWidth: isMobile ? '55%' : 'none' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: MINT, boxShadow: "none", flexShrink: 0 }} />
               Preventative monitoring · active
             </div>
 
             {/* Top-right pill: Adaptive intelligence */}
-            <div style={{ position: 'absolute', top: 28, right: 28, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.30)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
+            <div style={{ position: 'absolute', top: isMobile ? 14 : 28, right: isMobile ? 14 : 28, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: isMobile ? 5 : 7, padding: isMobile ? '4px 8px' : '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.30)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.14em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: INDIGO, boxShadow: "none", flexShrink: 0 }} />
               Adaptive intelligence
             </div>
@@ -743,7 +743,7 @@ function SophisticationSection() {
             </div>
 
             {/* Bottom center pill */}
-            <div style={{ position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)', zIndex: 6, padding: '7px 14px', borderRadius: 999, background: 'rgba(20,14,10,0.45)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(244,239,234,0.85)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
+            <div style={{ position: 'absolute', bottom: isMobile ? 16 : 28, left: '50%', transform: 'translateX(-50%)', zIndex: 6, padding: isMobile ? '6px 11px' : '7px 14px', borderRadius: 999, background: 'rgba(20,14,10,0.45)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(244,239,234,0.85)', fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.14em', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 24px)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Sleep <em style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', textTransform: 'none', letterSpacing: 0, color: MINT, margin: '0 4px' }}>·</em> Stress <em style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', textTransform: 'none', letterSpacing: 0, color: MINT, margin: '0 4px' }}>·</em> Recovery — correlated
             </div>
 
@@ -885,13 +885,13 @@ function PremiumDifferentiationSection() {
             <div style={{ position: 'absolute', width: 280, height: 280, right: -40, top: '50%', transform: 'translateY(-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(180,210,180,0.20) 0%, transparent 65%)', filter: 'blur(35px)', pointerEvents: 'none' }} />
 
             {/* Top-left pill */}
-            <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.13em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
+            <div style={{ position: 'absolute', top: isMobile ? 12 : 20, left: isMobile ? 12 : 20, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: isMobile ? 5 : 7, padding: isMobile ? '4px 8px' : '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.13em', color: '#F4EFEA', whiteSpace: 'nowrap', maxWidth: isMobile ? '55%' : 'none' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: MINT, boxShadow: "none", flexShrink: 0 }} />
               Personalized recovery · live
             </div>
 
             {/* Top-right pill */}
-            <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '0.13em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
+            <div style={{ position: 'absolute', top: isMobile ? 12 : 20, right: isMobile ? 12 : 20, zIndex: 6, display: 'inline-flex', alignItems: 'center', gap: isMobile ? 5 : 7, padding: isMobile ? '4px 8px' : '5px 10px 5px 9px', borderRadius: 999, background: 'rgba(20,14,10,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.10)', fontSize: isMobile ? 8.5 : 10, textTransform: 'uppercase' as const, letterSpacing: isMobile ? '0.1em' : '0.13em', color: '#F4EFEA', whiteSpace: 'nowrap' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: EMBER, boxShadow: "none", flexShrink: 0 }} />
               Member tier · premium
             </div>
