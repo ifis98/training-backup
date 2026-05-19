@@ -29,12 +29,20 @@ const clerkAppearance = {
     fontSize: "15px",
   },
   elements: {
+    // rootBox + cardBox + card all get overflow:hidden so the "Last seen"
+    // / returning-user badge that Clerk inserts when a previous session
+    // exists in the browser can't poke off the right edge.
+    rootBox: { overflow: "hidden", maxWidth: "100%", width: "100%" },
+    cardBox: { overflow: "hidden", maxWidth: "100%", width: "100%" },
     card: {
       boxShadow: "none",
       border: "none",
       background: "transparent",
       padding: 0,
       gap: 0,
+      overflow: "hidden",
+      maxWidth: "100%",
+      width: "100%",
     },
     header: { display: "none" },
     socialButtonsBlockButton: {
