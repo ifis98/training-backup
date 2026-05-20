@@ -830,8 +830,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                     <option value="converted" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_converted")}</option>
                     <option value="rejected" style={{ background: "var(--bs-bg2)", color: "var(--bs-text)" }}>{T("status_rejected")}</option>
                   </select>
-                  <input type="number" value={newCase.case_value} onChange={e => setNewCase({ ...newCase, case_value: +e.target.value })} placeholder={T("case_value")}
-                    style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs }} />
+                  <div style={{ position: "relative" }} title={T("case_value_hint")}>
+                    <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--bs-ash)", fontSize: 12, fontWeight: 600, pointerEvents: "none" }}>$</span>
+                    <input type="number" min={0} value={newCase.case_value || ''} onChange={e => setNewCase({ ...newCase, case_value: e.target.value === '' ? 0 : +e.target.value })} placeholder={T("case_value")}
+                      style={{ width: "100%", background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", padding: "8px 12px 8px 22px", fontSize: 12, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, boxSizing: "border-box" }} />
+                  </div>
                   <button onClick={handleAddCase} disabled={!newCase.patient_name}
                     style={{ background: newCase.patient_name ? C.gradTeal : "var(--bs-card)", color: "var(--bs-text)", border: "none", padding: "8px 14px", fontSize: 12, fontWeight: 700, fontFamily: C.fn, cursor: newCase.patient_name ? "pointer" : "not-allowed", borderRadius: C.radiusXs }}>
                     {T("save")}
