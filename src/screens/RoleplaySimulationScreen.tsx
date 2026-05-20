@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RoleplaySimulationScreenProps {
   s: any;
   u: (d: any) => void;
-  openCoach: (mode: string) => void;
   lang?: string;
 }
 
@@ -185,8 +185,9 @@ function AISimulationsSection({ u }: { u: (d: any) => void }) {
 }
 
 // ── AI Coach Section ──────────────────────────────────────────────────────────
-function AICoachSection({ openCoach }: { openCoach: (mode: string) => void }) {
+function AICoachSection() {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const coachCards = [
     {
       title: 'Ask Anything',
@@ -255,7 +256,7 @@ function AICoachSection({ openCoach }: { openCoach: (mode: string) => void }) {
       <div style={divider} />
 
       <button
-        onClick={() => openCoach('general')}
+        onClick={() => navigate('/ai-coach/general')}
         style={{
           background: TEAL_C,
           color: '#000',
@@ -278,7 +279,7 @@ function AICoachSection({ openCoach }: { openCoach: (mode: string) => void }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function RoleplaySimulationScreen({ s, u, openCoach, lang }: RoleplaySimulationScreenProps) {
+export default function RoleplaySimulationScreen({ s, u, lang }: RoleplaySimulationScreenProps) {
   const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState('ai-simulations');
 
@@ -392,7 +393,7 @@ export default function RoleplaySimulationScreen({ s, u, openCoach, lang }: Role
         {/* Section content */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {activeSection === 'ai-simulations' && <AISimulationsSection u={u} />}
-          {activeSection === 'ai-coach'       && <AICoachSection openCoach={openCoach} />}
+          {activeSection === 'ai-coach'       && <AICoachSection />}
         </div>
       </div>
     </div>

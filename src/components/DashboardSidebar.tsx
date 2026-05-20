@@ -6,7 +6,7 @@ import { t, Lang } from '@/data/translations';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Package, Building2, Mail, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Package, Building2, Mail, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck, ClipboardList, Brain } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardSidebarProps {
@@ -14,7 +14,6 @@ interface DashboardSidebarProps {
   u: (d: Partial<AppState>) => void;
   allD: boolean;
   allComplete: boolean;
-  openCoach: (mode: string) => void;
   onSignOut: () => void;
   onOpenSettings: () => void;
   onOpenBooking?: () => void;
@@ -28,7 +27,7 @@ const glass = {
   borderRight: `1px solid var(--bs-border)`,
 } as React.CSSProperties;
 
-export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, onSignOut, onOpenSettings, onOpenBooking, lang }: DashboardSidebarProps) {
+export default function DashboardSidebar({ s, u, allD, allComplete, onSignOut, onOpenSettings, onOpenBooking, lang }: DashboardSidebarProps) {
   const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -61,6 +60,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     : path.startsWith('/office-workflow')      ? 'office-workflow'
     : path.startsWith('/office-onboarding')    ? 'office-onboarding'
     : path.startsWith('/roleplay')             ? 'roleplay'
+    : path.startsWith('/ai-coach')             ? 'ai-coach'
     : path.startsWith('/contact-support')      ? 'contact'
     : s.phase === 'report'                     ? 'report'
     : 'dashboard';
@@ -70,6 +70,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
     { id: "sales-training",     icon: TrendingUp,      label: "Sales Training",      action: () => { navigate('/sales-training'); scrollTop(); } },
     { id: "product-training",   icon: Package,         label: "Product Experience",  action: () => { navigate('/product-experience'); scrollTop(); } },
     { id: "office-workflow",    icon: Building2,       label: "Office Workflow",     action: () => { navigate('/office-workflow'); scrollTop(); } },
+    { id: "ai-coach",           icon: Brain,           label: "AI Coach",            action: () => { navigate('/ai-coach/general'); scrollTop(); } },
     { id: "roleplay",           icon: Swords,          label: "Roleplay Simulation", action: () => { navigate('/roleplay'); scrollTop(); } },
     { id: "contact",            icon: Mail,            label: "Contact Support",     action: () => { navigate('/contact-support'); scrollTop(); } },
     { id: "settings",           icon: Settings,        label: "Settings",            action: onOpenSettings },
@@ -196,6 +197,25 @@ export default function DashboardSidebar({ s, u, allD, allComplete, openCoach, o
               <span style={{ fontSize: 12, fontWeight: 700, color: C.red }}>Office Onboarding</span>
             </button>
           </div>
+
+          {/* Admin Panel — mobile (only for bytesense admins) */}
+          {isByteSenseAdmin && (
+            <div style={{ padding: '0 16px 10px', flexShrink: 0 }}>
+              <button
+                onClick={() => { setMobileOpen(false); navigate('/bytesense-admin'); scrollTop(); }}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                  background: 'rgba(212,175,55,0.08)',
+                  border: '1px solid rgba(212,175,55,0.25)',
+                  borderRadius: 8, padding: '10px 14px',
+                  cursor: 'pointer', fontFamily: C.fn,
+                }}
+              >
+                <ShieldCheck size={15} color={C.gold} strokeWidth={2} style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>Admin Panel</span>
+              </button>
+            </div>
+          )}
 
           {/* User info */}
           <div style={{ padding: '14px 20px', borderTop: '1px solid var(--bs-border)', flexShrink: 0 }}>

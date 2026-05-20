@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +34,9 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+  const coachMode = params.mode || 'general';
   const clerkUserId = clerkUser?.id ?? null;
   const isMobile = useIsMobile();
 
@@ -44,10 +47,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const { isStaff, isAdmin, isByteSenseAdmin, loading: authLoading } = useAuth();
   const lang = (s.lang || 'en') as Lang;
 
-  // Global coach state
-  const [showCoach, setShowCoach] = useState(false);
   const [showBookingGlobal, setShowBookingGlobal] = useState(false);
-  const [coachMode, setCoachMode] = useState('general');
 
   // Global settings state
   const [showSettings, setShowSettings] = useState(false);
@@ -84,22 +84,24 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   // doesn't prefill the practice name.
   const POST_INTAKE_PHASES = ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report'];
 
-  // Close coach whenever the user navigates to a new phase
+  // When the user navigates to a section URL while in a transient phase
+  // (module / simulation / simSummary / report), drop the phase back to
+  // dashboard so the URL — not stale phase state — drives rendering.
+  const TRANSIENT_PHASES = ['module', 'simulation', 'simSummary', 'report'];
+  const SECTION_PATHS = ['/sales-training', '/product-experience', '/office-workflow', '/office-onboarding', '/roleplay', '/ai-coach', '/contact-support'];
   useEffect(() => {
-    setShowCoach(false);
-  }, [s.phase]);
-
-  const openCoach = (mode: string) => {
-    setCoachMode(mode);
-    setShowCoach(true);
-  };
+    if (!TRANSIENT_PHASES.includes(s.phase)) return;
+    if (location.pathname === '/app' || SECTION_PATHS.some(p => location.pathname.startsWith(p))) {
+      if (location.pathname !== '/app') u({ phase: 'dashboard' });
+    }
+  }, [location.pathname]);
 
   const handleSignOut = async () => {
     try { await signOut({ redirectUrl: '/' }); } catch {}
   };
 
   const dashboardProps = {
-    s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach,
+    s, u, sRoles, myPH, myM, dN, pr, allD, reset,
     onOpenSettings: () => setShowSettings(true),
     onSignOut: handleSignOut,
   };
@@ -114,10 +116,16 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
       );
     }
 
-    // ── Intake flow (first-time setup) ──────────────────────────────────
+    // ── Invite-only gate ────────────────────────────────────────────────
+    // A signed-in user with no completed intake AND no invite code in
+    // localStorage must have bypassed /register (e.g. signed up via Google
+    // OAuth). ByteSense is invite-only — sign them out and send them home.
     if (!s.intakeDone && !['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report'].includes(s.phase)) {
       const inviteRaw = localStorage.getItem('bsa6_invite');
       const inviteData = inviteRaw ? (() => { try { return JSON.parse(inviteRaw); } catch { return null; } })() : null;
+      if (!inviteData?.code) {
+        return <NoInviteRedirect onSignOut={handleSignOut} />;
+      }
       return (
         <IntakeFlow
           clerkUserId={clerkUserId}
@@ -163,21 +171,24 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
         return null;
       }
     }
-    // ── Transient states always take priority (even when on a section URL) ──
+    // ── Onboarding phases — render before sidebar, can't be URL-jumped out of ──
     if (s.phase === 'baseline') return <Baseline s={s} u={u} lang={lang} />;
     if (s.phase === 'blR') return <BaselineResults s={s} u={u} sc={sc} sRoles={sRoles} myPH={myPH} myM={myM} lang={lang} />;
-    if (s.phase === 'module' && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} lang={lang} />;
-    if (s.phase === 'simulation') return <Simulation s={s} u={u} lang={lang} />;
-    if (s.phase === 'simSummary') return <SimulationSummary s={s} u={u} lang={lang} />;
-    if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
 
-    // ── URL-based section routing ────────────────────────────────────────
+    // ── URL-based section routing wins over remaining transient phases ─────
     if (forcePhase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
     if (forcePhase === 'product-experience') return <ProductExperienceScreen />;
     if (forcePhase === 'office-workflow')    return <OfficeWorkflowScreen />;
     if (forcePhase === 'office-onboarding') return <OfficeOnboardingScreen lang={lang} />;
     if (forcePhase === 'contact-support')   return <ContactSupportScreen />;
-    if (forcePhase === 'roleplay')          return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
+    if (forcePhase === 'roleplay')          return <RoleplaySimulationScreen s={s} u={u} lang={lang} />;
+    if (forcePhase === 'ai-coach')          return <AICoach mode={coachMode} lang={lang} />;
+
+    // ── Transient phases (when no URL match) ────────────────────────────
+    if (s.phase === 'module' && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} lang={lang} />;
+    if (s.phase === 'simulation') return <Simulation s={s} u={u} lang={lang} />;
+    if (s.phase === 'simSummary') return <SimulationSummary s={s} u={u} lang={lang} />;
+    if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
 
     // ── Phase-state routing (used internally, e.g. from mobile menu) ─────
     if (s.phase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
@@ -185,7 +196,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     if (s.phase === 'office-workflow')    return <OfficeWorkflowScreen />;
     if (s.phase === 'office-onboarding') return <OfficeOnboardingScreen lang={lang} />;
     if (s.phase === 'contact-support')   return <ContactSupportScreen />;
-    if (s.phase === 'roleplay') return <RoleplaySimulationScreen s={s} u={u} openCoach={openCoach} lang={lang} />;
+    if (s.phase === 'roleplay') return <RoleplaySimulationScreen s={s} u={u} lang={lang} />;
 
     if (forceView === 'staff') return <StaffDashboard {...dashboardProps} />;
     if (forceView === 'owner') return <Dashboard {...dashboardProps} />;
@@ -207,7 +218,6 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           s={s} u={u}
           allD={allD}
           allComplete={allComplete}
-          openCoach={openCoach}
           onSignOut={handleSignOut}
           onOpenSettings={() => setShowSettings(true)}
           onOpenBooking={() => setShowBookingGlobal(true)}
@@ -228,19 +238,29 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
 
         {/* Global overlays */}
         <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} s={s} u={u} lang={lang} allComplete={allComplete} />
-        <AICoach isOpen={showCoach} onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />
         <BookingModal open={showBookingGlobal} onClose={() => setShowBookingGlobal(false)} lang={lang} />
       </div>
     );
   }
 
   // Intake / loading — no sidebar
-  return (
-    <>
-      {renderContent()}
-      <AICoach isOpen={showCoach} onClose={() => setShowCoach(false)} initialMode={coachMode} lang={lang} />
-    </>
-  );
+  return <>{renderContent()}</>;
 };
 
 export default Index;
+
+/**
+ * Renders briefly while we sign out a signed-in user who has no invite code.
+ * Triggered when a Google OAuth user lands on /app without ever redeeming a
+ * code. They get bounced straight back to the home page.
+ */
+function NoInviteRedirect({ onSignOut }: { onSignOut: () => Promise<void> | void }) {
+  useEffect(() => {
+    (async () => { try { await onSignOut(); } catch { window.location.href = '/'; } })();
+  }, [onSignOut]);
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bs-bg)', color: 'var(--bs-ash)', fontFamily: C.fn, fontSize: 14 }}>
+      Invite required — redirecting…
+    </div>
+  );
+}

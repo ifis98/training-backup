@@ -17,7 +17,6 @@ interface SalesTrainingScreenProps {
   pr: number;
   allD: boolean;
   reset: () => void;
-  openCoach: (mode: string) => void;
   onOpenSettings: () => void;
   onSignOut: () => void;
   onOpenPanel?: (src: string, title: string) => void;

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { toast } from 'sonner';
 import { C, PH, Role, Phase, ROLES } from '@/data/constants';
@@ -22,7 +23,6 @@ interface DashboardProps {
   pr: number;
   allD: boolean;
   reset: () => void;
-  openCoach: (mode: string) => void;
   onOpenSettings: () => void;
   onSignOut: () => void;
 }
@@ -42,8 +42,9 @@ const glassHover = (e: React.MouseEvent<HTMLDivElement>, enter: boolean) => {
 };
 
 
-export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut }: DashboardProps) {
+export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, onOpenSettings, onSignOut }: DashboardProps) {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { user: clerkUser } = useUser();
   const { getToken } = useClerkAuth();
   const displayName = clerkUser?.firstName || clerkUser?.fullName || s.name || '';
@@ -1123,7 +1124,7 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
               { mode: "objections", Icon: Shield, label: T("handle_objections"), desc: T("objections_desc"), color: C.violet },
               { mode: "educational", Icon: BookOpen, label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
             ].map(tool => (
-              <div key={tool.mode} onClick={() => openCoach(tool.mode)}
+              <div key={tool.mode} onClick={() => { navigate(`/ai-coach/${tool.mode}`); scrollTop(); }}
                 style={{ background: "var(--bs-card)", border: "1px solid var(--bs-border)", borderRadius: 14, padding: "16px 14px", cursor: "pointer", transition: "all 240ms cubic-bezier(0.2,0.8,0.2,1)" }}
                 onMouseEnter={e => { e.currentTarget.style.background = `${tool.color}0d`; e.currentTarget.style.borderColor = `${tool.color}30`; e.currentTarget.style.transform = "translateY(-2px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "var(--bs-card)"; e.currentTarget.style.borderColor = "var(--bs-border)"; e.currentTarget.style.transform = "translateY(0)"; }}>

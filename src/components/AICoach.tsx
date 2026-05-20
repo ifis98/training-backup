@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { C } from '@/data/constants';
 import { t, Lang } from '@/data/translations';
 import { toast } from 'sonner';
@@ -6,9 +7,7 @@ import { Brain, Copy, Star, Trash2, MessageSquare, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AICoachProps {
-  isOpen: boolean;
-  onClose: () => void;
-  initialMode?: string;
+  mode?: string;
   lang?: Lang;
 }
 
@@ -16,9 +15,14 @@ type Msg = { role: "user" | "assistant"; content: string };
 type SavedResponse = { content: string; mode: string; savedAt: string };
 
 const FAVORITES_KEY = "bsa6_favorites";
+const SESSION_KEY = "bsa6_coach_session";
 
 function loadFavorites(): SavedResponse[] {
   try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]"); } catch { return []; }
+}
+
+function loadSession(): { messages: Msg[]; mode: string } | null {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); } catch { return null; }
 }
 
 const TypingDots = () => (
@@ -32,9 +36,10 @@ const TypingDots = () => (
   </div>
 );
 
-export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: AICoachProps) {
+export default function AICoach({ mode: modeProp, lang = "en" }: AICoachProps) {
   const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const MODES = [
     { id: "general", label: T("ask_anything"), desc: T("ask_anything_desc"), icon: "✦" },
@@ -44,31 +49,48 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
     { id: "educational", label: T("education_label"), desc: T("education_mode_desc"), icon: "◎" },
   ];
 
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const goBack = useCallback(() => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/app');
+  }, [navigate]);
+
+  // Restore prior session if the URL mode matches; otherwise start fresh.
+  const initialSession = loadSession();
+  const initialMode = modeProp || initialSession?.mode || "general";
+  const initialMessages: Msg[] = initialSession && initialSession.mode === initialMode ? initialSession.messages : [];
+
+  const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState(initialMode || "general");
+  const [mode, setMode] = useState(initialMode);
   const [tab, setTab] = useState<"chat" | "saved">("chat");
   const [favorites, setFavorites] = useState<SavedResponse[]>(loadFavorites);
   const chatEnd = useRef<HTMLDivElement>(null);
+
+  // Sync mode from URL when route param changes
+  useEffect(() => {
+    if (modeProp && modeProp !== mode) {
+      setMode(modeProp);
+      const prior = loadSession();
+      setMessages(prior && prior.mode === modeProp ? prior.messages : []);
+    }
+  }, [modeProp]);
+
+  // Persist conversation across short nav so coming back keeps the chat
+  useEffect(() => {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ messages, mode }));
+  }, [messages, mode]);
 
   useEffect(() => {
     chatEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Lock body scroll when panel is open
-  useEffect(() => {
-    if (isOpen) { document.body.style.overflow = 'hidden'; }
-    else { document.body.style.overflow = ''; }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
-
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') goBack(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, [goBack]);
 
   const sendMessage = useCallback(async (overrideText?: string) => {
     const msg = (overrideText || input).trim();
@@ -101,7 +123,11 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
     }
   }, [messages, input, loading, mode, lang]);
 
-  const handleModeChange = (newMode: string) => { setMode(newMode); setMessages([]); };
+  const handleModeChange = (newMode: string) => {
+    setMode(newMode);
+    setMessages([]);
+    navigate(`/ai-coach/${newMode}`, { replace: true });
+  };
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => toast.success(T("copied")));
@@ -131,16 +157,10 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
 
   return (
     <div style={{
-      position: "fixed",
-      top: 0, right: 0, bottom: 0,
-      left: isMobile ? 0 : "calc(var(--bs-sidebar-w, 220px) + var(--bs-roleplay-w, 0px))",
-      zIndex: isMobile ? 300 : 200,
       display: "flex", flexDirection: "column",
+      minHeight: "100vh",
       background: "radial-gradient(ellipse at top, var(--bs-bg3), var(--bs-bg))",
       fontFamily: C.fn,
-      transform: isOpen ? "translateX(0)" : "translateX(105%)",
-      transition: "transform 0.38s cubic-bezier(0.4, 0, 0.2, 1)",
-      willChange: "transform",
       boxShadow: "none",
     }}>
       {/* Header */}
@@ -164,7 +184,7 @@ export default function AICoach({ isOpen, onClose, initialMode, lang = "en" }: A
             <div style={{ fontSize: 11, color: C.ash }}>{MODES.find(m => m.id === mode)?.desc}</div>
           </div>
         </div>
-        <button onClick={onClose} style={{
+        <button onClick={goBack} aria-label={T("close") || "Close"} style={{
           background: "var(--bs-card)", border: "1px solid var(--bs-border)",
           color: "var(--bs-ash)", width: 36, height: 36, borderRadius: C.radiusSm,
           fontSize: 16, cursor: "pointer", fontFamily: C.fn,

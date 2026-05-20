@@ -368,6 +368,8 @@ function AppRoutes() {
         <Route path="/office-workflow"    element={isSignedIn ? <Index forcePhase="office-workflow" />    : <Navigate to="/login" />} />
         <Route path="/office-onboarding" element={isSignedIn ? <Index forcePhase="office-onboarding" /> : <Navigate to="/login" />} />
         <Route path="/roleplay"          element={isSignedIn ? <Index forcePhase="roleplay" />           : <Navigate to="/login" />} />
+        <Route path="/ai-coach"          element={isSignedIn ? <Index forcePhase="ai-coach" />          : <Navigate to="/login" />} />
+        <Route path="/ai-coach/:mode"    element={isSignedIn ? <Index forcePhase="ai-coach" />          : <Navigate to="/login" />} />
         <Route path="/contact-support"   element={isSignedIn ? <Index forcePhase="contact-support" />   : <Navigate to="/login" />} />
 
         <Route path="/staff" element={isSignedIn ? <Index forceView="staff" /> : <Navigate to="/login" />} />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser, useAuth as useClerkAuth } from '@clerk/clerk-react';
 import { C, Role, Phase } from '@/data/constants';
 import { Module } from '@/data/constants';
@@ -23,7 +24,6 @@ interface StaffDashboardProps {
   pr: number;
   allD: boolean;
   reset: () => void;
-  openCoach: (mode: string) => void;
   onOpenSettings: () => void;
   onSignOut: () => void;
 }
@@ -36,8 +36,9 @@ const glass = {
   borderRadius: C.radius,
 } as React.CSSProperties;
 
-export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, openCoach, onOpenSettings, onSignOut }: StaffDashboardProps) {
+export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset, onOpenSettings, onSignOut }: StaffDashboardProps) {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { user: clerkUser } = useUser();
   const { getToken } = useClerkAuth();
   const allModsDone = dN === myM.length && myM.length > 0;
@@ -586,7 +587,7 @@ export default function StaffDashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, 
               { mode: "objections", Icon: Shield, label: T("handle_objections"), desc: T("objections_desc"), color: C.violet },
               { mode: "educational", Icon: BookOpen, label: T("educational_material"), desc: T("educational_desc"), color: C.gold },
             ].map(tool => (
-              <div key={tool.mode} onClick={() => openCoach(tool.mode)}
+              <div key={tool.mode} onClick={() => { navigate(`/ai-coach/${tool.mode}`); scrollTop(); }}
                 style={{ ...glass, padding: "18px 14px", cursor: "pointer", transition: "all 0.3s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = `${tool.color}40`; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = C.glow(tool.color, 0.12); }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.glassBorder; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
