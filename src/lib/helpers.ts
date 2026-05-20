@@ -70,7 +70,7 @@ function cleanTextForSpeech(text: string): string {
     .trim();
 }
 
-export function speak(text: string) {
+export function speak(text: string, onEnd?: () => void) {
   window.speechSynthesis?.cancel();
   const cleaned = cleanTextForSpeech(text);
 
@@ -93,12 +93,27 @@ export function speak(text: string) {
       window.speechSynthesis?.speak(pause);
     }
 
+    if (i === sentences.length - 1 && onEnd) u.onend = () => onEnd();
+
     window.speechSynthesis?.speak(u);
   });
 }
 
 export function stopSpeech() {
   window.speechSynthesis?.cancel();
+}
+
+export function pauseSpeech() {
+  window.speechSynthesis?.pause();
+}
+
+export function resumeSpeech() {
+  // Chrome stalls speechSynthesis after ~15s of pause; nudge it.
+  window.speechSynthesis?.resume();
+}
+
+export function isSpeechPaused(): boolean {
+  return !!window.speechSynthesis?.paused;
 }
 
 // Maps intake main_blocker to the most relevant module ID to surface first

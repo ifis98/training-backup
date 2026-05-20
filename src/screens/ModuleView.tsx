@@ -1,7 +1,8 @@
 import { C, PH, Module } from '@/data/constants';
 import { ContentRenderer } from '@/components/ByteSenseLogo';
 import { ChevronLeft } from 'lucide-react';
-import { scrollTop, speak, stopSpeech } from '@/lib/helpers';
+import { scrollTop, speak, stopSpeech, pauseSpeech, resumeSpeech } from '@/lib/helpers';
+import { useState } from 'react';
 import { ShuffledQuestion } from '@/lib/helpers';
 import { AppState } from '@/hooks/useAppState';
 import { t, Lang } from '@/data/translations';
@@ -18,6 +19,7 @@ interface ModuleViewProps {
 export default function ModuleView({ s, u, myM, getQuestion, lang = "en" }: ModuleViewProps) {
   const T = (key: string) => t(lang, key);
   const isMobile = useIsMobile();
+  const [paused, setPaused] = useState(false);
   const mod = myM.find(m => m.id === s.curMod);
   if (!mod) { u({ phase: "dashboard" }); return null; }
 
@@ -29,16 +31,25 @@ export default function ModuleView({ s, u, myM, getQuestion, lang = "en" }: Modu
     <div style={{ fontFamily: C.fn, background: "var(--bs-bg)", minHeight: "100vh" }}>
       <div style={{ background: "var(--bs-bg2)", padding: isMobile ? "12px 16px" : "14px 24px" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 44 }}>
-          <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); u({ spk: false }); scrollTop(); }}
+          <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); setPaused(false); u({ spk: false }); scrollTop(); }}
             style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
             <ChevronLeft size={14} strokeWidth={2} /> {T("dashboard_back")}
           </button>
           <button onClick={() => {
-            if (s.spk) { stopSpeech(); u({ spk: false }); }
-            else { speak(mod.content); u({ spk: true }); }
+            if (s.spk && !paused) {
+              pauseSpeech();
+              setPaused(true);
+            } else if (s.spk && paused) {
+              resumeSpeech();
+              setPaused(false);
+            } else {
+              speak(mod.content, () => { u({ spk: false }); setPaused(false); });
+              u({ spk: true });
+              setPaused(false);
+            }
           }}
             style={{ background: "none", border: `1px solid ${C.borderD}`, color: s.spk ? C.teal : C.ash, padding: "6px 12px", fontSize: isMobile ? 10 : 11, cursor: "pointer", fontFamily: C.fn, whiteSpace: "nowrap" }}>
-            {s.spk ? T("stop_listen") : T("play_listen")}
+            {!s.spk ? T("play_listen") : paused ? T("resume_listen") : T("pause_listen")}
           </button>
         </div>
       </div>
@@ -85,17 +96,17 @@ export default function ModuleView({ s, u, myM, getQuestion, lang = "en" }: Modu
             {s.ckA !== null && (
               <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 10, marginTop: 14 }}>
                 {next ? (
-                  <button onClick={() => { u({ phase: "module", curMod: next.id, ckA: null, spk: false }); stopSpeech(); scrollTop(); }}
+                  <button onClick={() => { u({ phase: "module", curMod: next.id, ckA: null, spk: false }); stopSpeech(); setPaused(false); scrollTop(); }}
                     style={{ background: C.teal, color: "#fff", border: "none", padding: "14px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: isMobile ? "100%" : "auto" }}>
                     {T("next_section")}
                   </button>
                 ) : (
-                  <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null, spk: false }); stopSpeech(); scrollTop(); }}
+                  <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null, spk: false }); stopSpeech(); setPaused(false); scrollTop(); }}
                     style={{ background: C.teal, color: "#fff", border: "none", padding: "14px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: isMobile ? "100%" : "auto" }}>
                     {T("complete_return")}
                   </button>
                 )}
-                <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null, spk: false }); stopSpeech(); scrollTop(); }}
+                <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null, spk: false }); stopSpeech(); setPaused(false); scrollTop(); }}
                   style={{ background: "transparent", color: C.slate, border: `1px solid ${C.border}`, padding: "14px 28px", fontSize: 14, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", width: isMobile ? "100%" : "auto" }}>
                   {T("dashboard")}
                 </button>
