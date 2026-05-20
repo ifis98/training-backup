@@ -6,7 +6,7 @@ import { t, Lang } from '@/data/translations';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Package, Building2, Mail, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck, ClipboardList, Brain } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Package, Building2, Mail, ChevronLeft, ChevronRight, Settings, Swords, Phone, ShieldCheck, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardSidebarProps {
@@ -70,7 +70,6 @@ export default function DashboardSidebar({ s, u, allD, allComplete, onSignOut, o
     { id: "sales-training",     icon: TrendingUp,      label: "Sales Training",      action: () => { navigate('/sales-training'); scrollTop(); } },
     { id: "product-training",   icon: Package,         label: "Product Experience",  action: () => { navigate('/product-experience'); scrollTop(); } },
     { id: "office-workflow",    icon: Building2,       label: "Office Workflow",     action: () => { navigate('/office-workflow'); scrollTop(); } },
-    { id: "ai-coach",           icon: Brain,           label: "AI Coach",            action: () => { navigate('/ai-coach/general'); scrollTop(); } },
     { id: "roleplay",           icon: Swords,          label: "Roleplay Simulation", action: () => { navigate('/roleplay'); scrollTop(); } },
     { id: "contact",            icon: Mail,            label: "Contact Support",     action: () => { navigate('/contact-support'); scrollTop(); } },
     { id: "settings",           icon: Settings,        label: "Settings",            action: onOpenSettings },

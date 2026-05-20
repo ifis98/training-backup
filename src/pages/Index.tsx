@@ -171,11 +171,18 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
         return null;
       }
     }
-    // ── Onboarding phases — render before sidebar, can't be URL-jumped out of ──
+    // ── Transient phases take priority. The location.pathname useEffect
+    //    above resets these to 'dashboard' when the user navigates to a
+    //    section URL via the sidebar, so URLs still win in that case
+    //    without breaking sim launches from inside /roleplay etc.
     if (s.phase === 'baseline') return <Baseline s={s} u={u} lang={lang} />;
     if (s.phase === 'blR') return <BaselineResults s={s} u={u} sc={sc} sRoles={sRoles} myPH={myPH} myM={myM} lang={lang} />;
+    if (s.phase === 'module' && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} lang={lang} />;
+    if (s.phase === 'simulation') return <Simulation s={s} u={u} lang={lang} />;
+    if (s.phase === 'simSummary') return <SimulationSummary s={s} u={u} lang={lang} />;
+    if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
 
-    // ── URL-based section routing wins over remaining transient phases ─────
+    // ── URL-based section routing ────────────────────────────────────────
     if (forcePhase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
     if (forcePhase === 'product-experience') return <ProductExperienceScreen />;
     if (forcePhase === 'office-workflow')    return <OfficeWorkflowScreen />;
@@ -183,12 +190,6 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     if (forcePhase === 'contact-support')   return <ContactSupportScreen />;
     if (forcePhase === 'roleplay')          return <RoleplaySimulationScreen s={s} u={u} lang={lang} />;
     if (forcePhase === 'ai-coach')          return <AICoach mode={coachMode} lang={lang} />;
-
-    // ── Transient phases (when no URL match) ────────────────────────────
-    if (s.phase === 'module' && s.curMod) return <ModuleView s={s} u={u} myM={myM} getQuestion={getQuestion} lang={lang} />;
-    if (s.phase === 'simulation') return <Simulation s={s} u={u} lang={lang} />;
-    if (s.phase === 'simSummary') return <SimulationSummary s={s} u={u} lang={lang} />;
-    if (s.phase === 'report') return <Report s={s} u={u} sc={sc} myPH={myPH} myM={myM} dN={dN} pr={pr} lang={lang} />;
 
     // ── Phase-state routing (used internally, e.g. from mobile menu) ─────
     if (s.phase === 'sales-training')    return <SalesTrainingScreen {...dashboardProps} lang={lang} />;
