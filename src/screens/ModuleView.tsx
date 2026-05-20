@@ -31,7 +31,7 @@ export default function ModuleView({ s, u, myM, getQuestion, lang = "en" }: Modu
         <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 44 }}>
           <button onClick={() => { u({ phase: "dashboard", curMod: null, ckA: null }); stopSpeech(); u({ spk: false }); scrollTop(); }}
             style={{ background: "none", border: "none", color: C.ash, fontSize: 13, cursor: "pointer", fontFamily: C.fn, display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
-            <ChevronLeft size={16} strokeWidth={2} /> {T("dashboard_back")}
+            <ChevronLeft size={14} strokeWidth={2} /> {T("dashboard_back")}
           </button>
           <button onClick={() => {
             if (s.spk) { stopSpeech(); u({ spk: false }); }

@@ -499,33 +499,33 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
 
             {/* Goals Editor */}
             {editingGoals && (
-              <div style={{ ...glass, padding: "20px 24px", marginBottom: 16, boxShadow: "none", border: `1px solid ${C.teal}30` }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 14, alignItems: "end" }}>
-                  <div>
+              <div style={{ ...glass, padding: isMobile ? "16px 14px" : "20px 24px", marginBottom: 16, boxShadow: "none", border: `1px solid ${C.teal}30` }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(140px, 1fr))", gap: isMobile ? 12 : 14, alignItems: "end" }}>
+                  <div style={{ minWidth: 0 }}>
                     <label style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 6, display: "block" }}>{T("case_goal")}</label>
                     <input type="number" value={editCaseGoal} onChange={e => setEditCaseGoal(+e.target.value)}
-                      style={{ width: "100%", background: "var(--bs-card2)", border: `1px solid ${C.teal}40`, color: "var(--bs-text)", padding: "10px 14px", fontSize: 18, fontWeight: 700, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, textAlign: "center" }} />
+                      style={{ width: "100%", background: "var(--bs-card2)", border: `1px solid ${C.teal}40`, color: "var(--bs-text)", padding: "10px 14px", fontSize: 18, fontWeight: 700, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, textAlign: "center", boxSizing: "border-box" }} />
                   </div>
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <label style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 6, display: "block" }}>{T("price_per_case")}</label>
                     <div style={{ position: "relative" }}>
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--bs-ash)", fontSize: 14, fontWeight: 600 }}>$</span>
                       <input type="number" value={editPricePerCase} onChange={e => setEditPricePerCase(+e.target.value)}
-                        style={{ width: "100%", background: "var(--bs-card2)", border: `1px solid ${C.gold}40`, color: "var(--bs-text)", padding: "10px 14px 10px 26px", fontSize: 18, fontWeight: 700, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, textAlign: "center" }} />
+                        style={{ width: "100%", background: "var(--bs-card2)", border: `1px solid ${C.gold}40`, color: "var(--bs-text)", padding: "10px 14px 10px 26px", fontSize: 18, fontWeight: 700, fontFamily: C.fn, outline: "none", borderRadius: C.radiusXs, textAlign: "center", boxSizing: "border-box" }} />
                     </div>
                   </div>
-                  <div style={{ textAlign: "center", padding: "0 8px" }}>
+                  <div style={{ textAlign: "center", padding: "0 8px", minWidth: 0 }}>
                     <div style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 6 }}>{T("auto_calculated")}</div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: C.gold, lineHeight: 1.2 }}>= ${(editCaseGoal * editPricePerCase).toLocaleString()}</div>
+                    <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: C.gold, lineHeight: 1.25, overflowWrap: "anywhere", wordBreak: "break-word" }}>= ${(editCaseGoal * editPricePerCase).toLocaleString()}</div>
                     <div style={{ fontSize: 9, color: "var(--bs-ash)", marginTop: 2 }}>{T("monthly_target")}</div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", gap: isMobile ? 8 : 6, minWidth: 0 }}>
                     <button onClick={handleSaveGoals}
-                      style={{ background: C.gradTeal, color: "var(--bs-text)", border: "none", padding: "10px 18px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 5 }}>
+                      style={{ flex: isMobile ? 1 : undefined, justifyContent: "center", background: C.gradTeal, color: "var(--bs-text)", border: "none", padding: "10px 18px", fontSize: 11, fontWeight: 700, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 5 }}>
                       <Save size={12} strokeWidth={2} /> {T("save")}
                     </button>
                     <button onClick={() => setEditingGoals(false)}
-                      style={{ background: "transparent", color: "var(--bs-ash)", border: `1px solid var(--bs-border)`, padding: "8px 14px", fontSize: 11, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs }}>
+                      style={{ flex: isMobile ? "0 0 56px" : undefined, background: "transparent", color: "var(--bs-ash)", border: `1px solid var(--bs-border)`, padding: "8px 14px", fontSize: 11, fontFamily: C.fn, cursor: "pointer", borderRadius: C.radiusXs }}>
                       ✕
                     </button>
                   </div>
@@ -556,13 +556,13 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             )}
             {(practiceGoals || cases.length > 0) && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 14 }}>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none", minWidth: 0 }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: C.gradTeal }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <Briefcase size={14} strokeWidth={1.5} color={C.teal} />
                   <span style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("cases_this_month")}</span>
                 </div>
-                <div style={{ fontSize: 36, fontWeight: 800, color: C.teal, lineHeight: 1 }}>{convertedCases.length}</div>
+                <div style={{ fontSize: 36, fontWeight: 800, color: C.teal, lineHeight: 1, overflowWrap: "anywhere" }}>{convertedCases.length}</div>
                 {monthlyGoal > 0 && (
                   <>
                     <div style={{ fontSize: 11, color: "var(--bs-ash)", marginTop: 6 }}>{T("goal_label")}: {monthlyGoal}</div>
@@ -572,23 +572,23 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
                   </>
                 )}
               </div>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none", minWidth: 0 }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: C.gradGold }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <DollarSign size={14} strokeWidth={1.5} color={C.gold} />
                   <span style={{ fontSize: 10, color: "var(--bs-ash)", textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>{T("revenue_actual")}</span>
                 </div>
-                <div style={{ fontSize: 36, fontWeight: 800, color: C.gold, lineHeight: 1 }}>${totalCaseRevenue.toLocaleString()}</div>
+                <div style={{ fontSize: 36, fontWeight: 800, color: C.gold, lineHeight: 1.05, overflowWrap: "anywhere", wordBreak: "break-word" }}>${totalCaseRevenue.toLocaleString()}</div>
                 {revenueGoal > 0 && (
                   <>
-                    <div style={{ fontSize: 11, color: "var(--bs-ash)", marginTop: 6 }}>{T("goal_label")}: ${revenueGoal.toLocaleString()}</div>
+                    <div style={{ fontSize: 11, color: "var(--bs-ash)", marginTop: 6, overflowWrap: "anywhere" }}>{T("goal_label")}: ${revenueGoal.toLocaleString()}</div>
                     <div style={{ height: 4, background: "var(--bs-card2)", borderRadius: 999, marginTop: 8 }}>
                       <div style={{ height: "100%", width: `${Math.min((totalCaseRevenue / revenueGoal) * 100, 100)}%`, background: C.gold, borderRadius: 999, transition: "width 0.5s" }} />
                     </div>
                   </>
                 )}
               </div>
-              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none"}}>
+              <div style={{ ...glass, padding: "22px 18px", position: "relative", overflow: "hidden", boxShadow: "none", minWidth: 0 }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${C.gold}, ${C.green})` }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <Clock size={14} strokeWidth={1.5} color={C.gold} />
