@@ -727,7 +727,7 @@ export default function OfficeWorkflowScreen() {
         <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ background: RED_MUT, border: `1px solid ${RED_BDR}`, padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Contact Support</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>909-527-9602</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>(855) 301-0424</div>
             <div style={{ fontSize: 13, color: DIM }}>support@bytesense.ai</div>
           </div>
         </div>
