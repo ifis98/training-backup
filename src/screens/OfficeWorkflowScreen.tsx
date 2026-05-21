@@ -551,7 +551,7 @@ function SupportSection() {
         <div style={cardStyle('red')}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: RED_B, marginBottom: 12 }}>YOUR DEDICATED BYTESENSE CONTACT</div>
           <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 4 }}>Natasha L. Blake</div>
-          <div style={{ fontSize: 13, color: DIM, marginBottom: 2 }}>Chief Strategy &amp; Innovation Officer</div>
+          <div style={{ fontSize: 13, color: DIM, marginBottom: 2 }}>Onboarding Manager</div>
           <div style={{ fontSize: 13, color: DIM, marginBottom: 16 }}>byteSense</div>
           <div style={{ fontSize: 24, fontWeight: 700, color: RED_B, marginBottom: 4 }}>909-527-9602</div>
           <div style={{ fontSize: 12, color: FAINT, marginBottom: 16 }}>Call or text — Natasha responds personally to all Beta partner inquiries</div>

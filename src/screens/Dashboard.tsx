@@ -405,11 +405,11 @@ export default function Dashboard({ s, u, sRoles, myPH, myM, dN, pr, allD, reset
             {/* Right: Schedule call button + settings (desktop only) */}
             {isMobile ? null : (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <button onClick={() => setShowBooking(true)}
+                {/* <button onClick={() => setShowBooking(true)}
                   style={{ background: C.teal, border: "none", color: "#000", height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", gap: 7, padding: "0 14px", cursor: "pointer", flexShrink: 0, fontSize: 12, fontWeight: 700, fontFamily: C.fn, transition: "all 0.15s" }}>
                   <Phone size={13} strokeWidth={2} />
                   Schedule Support Call
-                </button>
+                </button> */}
                 <button
                   onClick={() => window.open('https://app.bytesense.ai/api/proxy?url=https://tawk.to/chat/691e1e6b3c3c13194fe65a35/1jaeqdl1b', '_blank')}
                   style={{ background: "var(--bs-card)", border: `1px solid var(--bs-border)`, color: "var(--bs-text)", width: 36, height: 36, borderRadius: C.radiusXs, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all 0.15s" }}

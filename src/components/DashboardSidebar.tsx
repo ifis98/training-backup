@@ -88,7 +88,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, onSignOut, o
         }}>
           <Logo size={20} light />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {onOpenBooking && (
+            {/* {onOpenBooking && (
               <button
                 onClick={onOpenBooking}
                 style={{
@@ -102,7 +102,7 @@ export default function DashboardSidebar({ s, u, allD, allComplete, onSignOut, o
                 <Phone size={12} strokeWidth={2.5} />
                 Schedule Call
               </button>
-            )}
+            )} */}
             <button
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation"

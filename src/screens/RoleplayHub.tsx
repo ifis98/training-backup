@@ -96,7 +96,7 @@ export default function RoleplayHub({ s, u, lang }: Props) {
             <div style={{ fontSize: 9, letterSpacing: 2, color: '#E63434', fontWeight: 700, marginBottom: 6 }}>
               CONTACT SUPPORT
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>+1 (888) 397-7073</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>(855) 301-0424</div>
             <div style={{ fontSize: 13, color: 'var(--bs-ash)' }}>support@bytesense.ai</div>
           </div>
         </div>

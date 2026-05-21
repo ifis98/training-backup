@@ -676,7 +676,7 @@ function SupportSection() {
         <div style={cardStyle('red')}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: RED_B, marginBottom: 12 }}>YOUR DEDICATED BYTESENSE CONTACT</div>
           <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 4 }}>Natasha L. Blake</div>
-          <div style={{ fontSize: 13, color: DIM, marginBottom: 2 }}>Chief Strategy &amp; Innovation Officer</div>
+          <div style={{ fontSize: 13, color: DIM, marginBottom: 2 }}>Onboarding Manager</div>
           <div style={{ fontSize: 13, color: DIM, marginBottom: 16 }}>byteSense</div>
           <div style={{ fontSize: 24, fontWeight: 700, color: RED_B, marginBottom: 4 }}>909-527-9602</div>
           <div style={{ fontSize: 12, color: FAINT, marginBottom: 16 }}>Call or text — Natasha responds personally to all Beta partner inquiries</div>
@@ -863,7 +863,7 @@ export default function SalesTrainingScreen(props: SalesTrainingScreenProps) {
         <div style={{ padding: '20px 24px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ background: RED_MUT, border: `1px solid ${RED_BDR}`, padding: 14 }}>
             <div style={{ fontSize: 9, letterSpacing: 2, color: RED_B, fontWeight: 700, marginBottom: 6 }}>Contact Support</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>+1 (888) 397-7073</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--bs-text)', marginBottom: 2 }}>(855) 301-0424</div>
             <div style={{ fontSize: 13, color: DIM }}>support@bytesense.ai</div>
           </div>
         </div>
