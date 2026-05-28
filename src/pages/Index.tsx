@@ -43,6 +43,46 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   // Make Clerk user ID accessible to legacy screens that can't receive it as a prop
   if (clerkUserId) (window as any).__clerkUserId = clerkUserId;
 
+  // Set OAuth user flag for TypeformIntake SSO password step
+  useEffect(() => {
+    const isOAuthUser = (clerkUser?.externalAccounts?.length ?? 0) > 0;
+    (window as any).__isOAuthUser = isOAuthUser;
+  }, [clerkUser]);
+
+  // webapp_account status check — gates /app until create-webapp-account succeeds
+  const [webappAccountStatus, setWebappAccountStatus] = useState<string | null>(null);
+  const [checkingAccount, setCheckingAccount] = useState(true);
+  useEffect(() => {
+    if (!clerkUserId) { setCheckingAccount(false); return; }
+    supabase
+      .from('webapp_account')
+      .select('status')
+      .eq('clerk_user_id', clerkUserId)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        setWebappAccountStatus(row?.status ?? null);
+        setCheckingAccount(false);
+      })
+      .catch(() => { setCheckingAccount(false); });
+  }, [clerkUserId]);
+
+  // Re-fetch webapp_account status when intakeDone transitions to true,
+  // since the account was created during intake via the submit step.
+  useEffect(() => {
+    if (!s.intakeDone || !clerkUserId) return;
+    setCheckingAccount(true);
+    supabase
+      .from('webapp_account')
+      .select('status')
+      .eq('clerk_user_id', clerkUserId)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        setWebappAccountStatus(row?.status ?? null);
+        setCheckingAccount(false);
+      })
+      .catch(() => { setCheckingAccount(false); });
+  }, [s.intakeDone, clerkUserId]);
+
   const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync } = useAppState(clerkUserId);
   const { isStaff, isAdmin, isByteSenseAdmin, loading: authLoading } = useAuth();
   const lang = (s.lang || 'en') as Lang;
@@ -108,7 +148,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
 
   const renderContent = () => {
     // Wait for DB check before deciding if intake is needed
-    if (!dbLoaded && clerkUserId) {
+    if ((!dbLoaded || checkingAccount) && clerkUserId) {
       return (
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bs-bg, #0C0C0E)" }}>
           <div style={{ width: 32, height: 32, border: "3px solid rgba(128,128,128,0.2)", borderTopColor: C.teal, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
@@ -160,6 +200,27 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           }}
         />
       );
+    }
+
+    // ── Webapp account gate ──────────────────────────────────────────────
+    // After intake is done, require webapp_account.status = 'created' before
+    // showing the training dashboard. The submit step inside TypeformIntake
+    // calls create-webapp-account; if it failed silently, offer a retry.
+    if (s.intakeDone && !checkingAccount && webappAccountStatus !== 'created') {
+      return <WebappAccountRetry clerkUserId={clerkUserId} onRetry={() => {
+        setCheckingAccount(true);
+        setWebappAccountStatus(null);
+        supabase
+          .from('webapp_account')
+          .select('status')
+          .eq('clerk_user_id', clerkUserId)
+          .maybeSingle()
+          .then(({ data: row }) => {
+            setWebappAccountStatus(row?.status ?? null);
+            setCheckingAccount(false);
+          })
+          .catch(() => { setCheckingAccount(false); });
+      }} />;
     }
 
     // ── Training flow ────────────────────────────────────────────────────
@@ -262,6 +323,33 @@ function NoInviteRedirect({ onSignOut }: { onSignOut: () => Promise<void> | void
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bs-bg)', color: 'var(--bs-ash)', fontFamily: C.fn, fontSize: 14 }}>
       Invite required — redirecting…
+    </div>
+  );
+}
+
+function WebappAccountRetry({ clerkUserId, onRetry }: { clerkUserId: string | null; onRetry: () => void }) {
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bs-bg)', fontFamily: C.fn }}>
+      <div style={{ maxWidth: 480, width: '100%', padding: '40px 24px', textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 20 }}>⚠</div>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--bs-text)', marginBottom: 12 }}>
+          Account Setup Incomplete
+        </h2>
+        <p style={{ fontSize: 14, color: 'var(--bs-ash)', lineHeight: 1.8, marginBottom: 28 }}>
+          Your account is still being set up on the byteSense portal. This may be because the account creation step was interrupted or hasn't finished yet.
+        </p>
+        <button onClick={onRetry}
+          style={{
+            background: C.teal, color: C.white, border: 'none',
+            padding: '14px 32px', fontSize: 15, fontWeight: 700,
+            fontFamily: C.fn, cursor: 'pointer', borderRadius: 6,
+          }}>
+          Check Again
+        </button>
+        <p style={{ fontSize: 12, color: 'var(--bs-ash)', marginTop: 16 }}>
+          If this persists, please contact support.
+        </p>
+      </div>
     </div>
   );
 }
