@@ -16,7 +16,7 @@ import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Logo } from '@/components/ByteSenseLogo';
 import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
-import { FUNCTIONS_URL, FUNCTIONS_KEY } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 // ─── Country phone codes ──────────────────────────────────────────────────────
 const COUNTRIES = [
@@ -591,16 +591,11 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     try {
       const sessionToken = await session?.getToken();
 
-      const resp = await fetch(
-        `${FUNCTIONS_URL}/functions/v1/create-webapp-account`,
+      const { data, error } = await supabase.functions.invoke(
+        'create-webapp-account',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${FUNCTIONS_KEY}`,
-            'X-Clerk-Token': sessionToken ?? '',
-          },
-          body: JSON.stringify({
+          headers: { 'X-Clerk-Token': sessionToken ?? '' },
+          body: {
             fName: intakeData.fName,
             lName: intakeData.lName,
             preferredPhoneNumber: intakeData.preferredPhoneNumber,
@@ -620,14 +615,12 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
             estimatedOrdersPerMonth: intakeData.estimatedOrdersPerMonth,
             dentalLicenseNumber: intakeData.dentalLicenseNumber,
             webappPassword: intakeData.webappPassword || undefined,
-          }),
+          },
         }
       );
 
-      if (!resp.ok && resp.status !== 201) {
-        const err = await resp.json().catch(() => ({ error: 'Account creation failed' }));
-        throw new Error(err.error || 'Account creation failed');
-      }
+      if (error) throw new Error(error.message || 'Account creation failed');
+      if (data && (data as any).error) throw new Error((data as any).error);
 
       return { success: true as const };
     } catch (err: any) {
