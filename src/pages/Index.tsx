@@ -191,10 +191,14 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     }
 
     // ── Webapp account gate ──────────────────────────────────────────────
-    // After intake is done, require webapp_account.status = 'created' before
-    // showing the training dashboard. The submit step inside TypeformIntake
-    // calls create-webapp-account; if it failed silently, offer a retry.
-    if (s.intakeDone && !checkingAccount && webappAccountStatus !== 'created') {
+    // Only block when there's an explicit in-flight/failed provisioning
+    // attempt ('pending' | 'failed'). A missing row (null) means the user
+    // predates unified registration — grandfather them through, since they
+    // completed intake before create-webapp-account existed and there is no
+    // attempt to retry. New users can't reach intakeDone without a 'created'
+    // row (onDone only runs on submit success), so this never lets a real
+    // new signup skip provisioning.
+    if (s.intakeDone && !checkingAccount && (webappAccountStatus === 'pending' || webappAccountStatus === 'failed')) {
       return <WebappAccountRetry clerkUserId={clerkUserId} onRetry={() => {
         setCheckingAccount(true);
         setWebappAccountStatus(null);
