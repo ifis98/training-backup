@@ -10,11 +10,13 @@
  * - Thin teal progress bar at very top
  */
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useSession } from '@clerk/clerk-react';
 import { useIntakeState, IntakeData } from '@/hooks/useIntakeState';
 import { C } from '@/data/constants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Logo } from '@/components/ByteSenseLogo';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { FUNCTIONS_URL, FUNCTIONS_KEY } from '@/integrations/supabase/client';
 
 // ─── Country phone codes ──────────────────────────────────────────────────────
 const COUNTRIES = [
@@ -141,22 +143,23 @@ function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
 
 // ─── Question definitions ─────────────────────────────────────────────────────
 
-type QType = 'welcome' | 'radio' | 'multiselect' | 'fields' | 'complete';
+type QType = 'welcome' | 'radio' | 'multiselect' | 'fields' | 'complete' | 'submit';
 
 interface Option { key: string; label: string; value: string }
-interface Field  { id: keyof IntakeData; label: string; placeholder?: string; type?: string; required?: boolean }
+interface Field  { id: keyof IntakeData; label: string; placeholder?: string; type?: string; required?: boolean; hint?: string }
 
 interface QuestionDef {
   id: string;
   type: QType;
-  num?: string;                              // "01", "02" …
+  num?: string;
   question?: string;
   description?: string;
   options?: Option[];
   fields?: Field[];
-  dataKey?: keyof IntakeData;               // single-value field
+  dataKey?: keyof IntakeData;
   showIf?: (d: IntakeData) => boolean;
-  autoAdvance?: boolean;                     // radio auto-advance (default true for radio)
+  autoAdvance?: boolean;
+  onSubmit?: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
 }
 
 const OPTS = {
@@ -251,12 +254,148 @@ const OPTS = {
     { key: 'E', label: 'Premium or fee-for-service patient', value: 'premium_ffs' },
     { key: 'F', label: 'Not sure', value: 'not_sure' },
   ],
+  TERMS: [
+    { key: 'A', label: 'Yes, I agree', value: 'yes' },
+    { key: 'B', label: 'No', value: 'no' },
+  ],
+  NOTIFY_METHOD: [
+    { key: 'A', label: 'Email', value: 'email' },
+    { key: 'B', label: 'SMS / Phone', value: 'sms' },
+    { key: 'C', label: 'Both', value: 'both' },
+  ],
+  ORDERS: [
+    { key: 'A', label: '1 – 5 per month', value: '1-5' },
+    { key: 'B', label: '6 – 10 per month', value: '6-10' },
+    { key: 'C', label: '11 – 20 per month', value: '11-20' },
+    { key: 'D', label: '20 + per month', value: '20+' },
+    { key: 'E', label: 'Not sure yet', value: 'not_sure' },
+  ],
 };
 
 const QUESTIONS: QuestionDef[] = [
   {
     id: 'welcome',
     type: 'welcome',
+  },
+  {
+    id: 'contact-basic',
+    type: 'fields',
+    num: 'P1',
+    question: "Let's set up your byteSense portal account — starting with your basic info.",
+    fields: [
+      { id: 'fName', label: 'First Name', type: 'text', required: true, placeholder: 'John' },
+      { id: 'lName', label: 'Last Name', type: 'text', required: true, placeholder: 'Smith' },
+      { id: 'preferredPhoneNumber', label: 'Phone Number', type: 'tel', required: true },
+    ],
+  },
+  {
+    id: 'contact-practice',
+    type: 'fields',
+    num: 'P2',
+    question: 'What is your practice or company information?',
+    fields: [
+      { id: 'companyName', label: 'Practice / Company Name', type: 'text', required: true, placeholder: 'e.g. Smile Dental Studio' },
+      { id: 'officeEmail', label: 'Office Email', type: 'email', required: true, placeholder: 'office@practice.com' },
+    ],
+  },
+  {
+    id: 'primary-contact',
+    type: 'fields',
+    num: 'P3',
+    question: 'Who is the primary contact for your account?',
+    description: 'We\u2019ll use this info for order confirmations and account updates.',
+    fields: [
+      { id: 'primaryContactName', label: 'Full Name', type: 'text', required: true, placeholder: 'Jane Smith' },
+      { id: 'primaryContactRole', label: 'Role / Title', type: 'text', placeholder: 'e.g. Office Manager' },
+      { id: 'primaryContactPhoneNumber', label: 'Direct Phone', type: 'tel', placeholder: '(555) 000-0000' },
+    ],
+  },
+  {
+    id: 'shipping-address',
+    type: 'fields',
+    num: 'P4',
+    question: 'What is your shipping address?',
+    description: 'Where should we send ByteSense supplies and hardware?',
+    fields: [
+      { id: 'addressLine1', label: 'Street Address', type: 'text', required: true, placeholder: '123 Main St, Suite 100' },
+      { id: 'city', label: 'City', type: 'text', required: true, placeholder: 'Los Angeles' },
+      { id: 'state', label: 'State / Province', type: 'text', required: true, placeholder: 'CA' },
+      { id: 'zipCode', label: 'ZIP / Postal Code', type: 'text', required: true, placeholder: '90001' },
+    ],
+  },
+  {
+    id: 'shipping-delivery',
+    type: 'fields',
+    num: 'P5',
+    question: 'Delivery preferences',
+    description: 'Tell us who receives shipments and how you prefer to be contacted.',
+    fields: [
+      { id: 'attentionRecipientName', label: 'Attention / Recipient Name', type: 'text', required: true, placeholder: 'Jane Smith or Office Manager' },
+    ],
+  },
+  {
+    id: 'shipping-notify',
+    type: 'radio',
+    num: 'P5b',
+    question: 'How should we notify you about shipments?',
+    options: OPTS.NOTIFY_METHOD,
+    dataKey: 'preferredNotificationMethod',
+  },
+  {
+    id: 'contact-preferences',
+    type: 'fields',
+    num: 'P5c',
+    question: 'Preferred contact methods',
+    description: 'Check all that apply.',
+    fields: [
+      { id: 'preferredContactMethodPhone', label: 'Phone', type: 'checkbox' },
+      { id: 'preferredContactMethodEmail', label: 'Email', type: 'checkbox' },
+    ],
+  },
+  {
+    id: 'operational',
+    type: 'fields',
+    num: 'P6',
+    question: 'Operational details',
+    description: 'Help us understand your practice volume and credentials.',
+    fields: [
+      { id: 'dentalLicenseNumber', label: 'Dental License Number', type: 'text', placeholder: 'e.g. CA-12345' },
+    ],
+  },
+  {
+    id: 'operational-orders',
+    type: 'radio',
+    num: 'P6b',
+    question: 'How many night guard orders do you estimate per month?',
+    options: OPTS.ORDERS,
+    dataKey: 'estimatedOrdersPerMonth',
+  },
+  {
+    id: 'legal-terms',
+    type: 'radio',
+    num: 'P7',
+    question: 'Do you agree to the byteSense Terms of Service and Privacy Policy?',
+    description: 'You must agree to continue.',
+    options: OPTS.TERMS,
+  },
+  {
+    id: 'sso-password',
+    type: 'fields',
+    num: 'P8',
+    question: 'Set a password for the byteSense portal (app.bytesense.ai)',
+    description: 'You signed in with Google. Set a password so you can also log in directly.',
+    showIf: () => !!(window as any).__isOAuthUser,
+    fields: [
+      { id: 'webappPassword', label: 'Portal Password', type: 'password', required: false,
+        hint: 'Minimum 4 characters. Skip if you don\u2019t want to set one now.', placeholder: '••••••••' },
+    ],
+  },
+  {
+    id: 'review-submit',
+    type: 'submit',
+    num: 'P9',
+    question: 'Review your portal account details',
+    description: 'Take a look before we create your account and set up your training.',
   },
   {
     id: 'practice_info',
@@ -430,7 +569,11 @@ interface Props {
 
 export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeName }: Props) {
   const { data, update, complete } = useIntakeState(clerkUserId);
+  const { session } = useSession();
   const isMobile = useIsMobile();
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Pre-fill practice name from invite code if the field is still empty
   useEffect(() => {
@@ -439,6 +582,61 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefilledPracticeName]);
+
+  // ── submit handler for the review-submit step ───────────────────────────────
+  const handleSubmit = useCallback(async (intakeData: IntakeData) => {
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const sessionToken = await session?.getToken();
+
+      const resp = await fetch(
+        `${FUNCTIONS_URL}/functions/v1/create-webapp-account`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${FUNCTIONS_KEY}`,
+            'X-Clerk-Token': sessionToken ?? '',
+          },
+          body: JSON.stringify({
+            fName: intakeData.fName,
+            lName: intakeData.lName,
+            preferredPhoneNumber: intakeData.preferredPhoneNumber,
+            companyName: intakeData.companyName,
+            officeEmail: intakeData.officeEmail,
+            primaryContactName: intakeData.primaryContactName,
+            primaryContactRole: intakeData.primaryContactRole,
+            primaryContactPhoneNumber: intakeData.primaryContactPhoneNumber,
+            preferredContactMethodPhone: intakeData.preferredContactMethodPhone,
+            preferredContactMethodEmail: intakeData.preferredContactMethodEmail,
+            addressLine1: intakeData.addressLine1,
+            city: intakeData.city,
+            state: intakeData.state,
+            zipCode: intakeData.zipCode,
+            attentionRecipientName: intakeData.attentionRecipientName,
+            preferredNotificationMethod: intakeData.preferredNotificationMethod,
+            estimatedOrdersPerMonth: intakeData.estimatedOrdersPerMonth,
+            dentalLicenseNumber: intakeData.dentalLicenseNumber,
+            webappPassword: intakeData.webappPassword || undefined,
+          }),
+        }
+      );
+
+      if (!resp.ok && resp.status !== 201) {
+        const err = await resp.json().catch(() => ({ error: 'Account creation failed' }));
+        throw new Error(err.error || 'Account creation failed');
+      }
+
+      return { success: true as const };
+    } catch (err: any) {
+      setSubmitError(err.message || 'Something went wrong. Please try again.');
+      return { success: false as const, error: err.message };
+    } finally {
+      setSubmitting(false);
+    }
+  }, [session]);
 
   // Visible question index (into QUESTIONS array, after filtering showIf)
   const [qIdx, setQIdx] = useState(0);
@@ -488,6 +686,14 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
 
   // ── auto-advance for radio ─────────────────────────────────────────────────
   const selectRadio = useCallback((q: QuestionDef, value: string) => {
+    if (q.id === 'legal-terms') {
+      update({ termsAccepted: value === 'yes' });
+      if (value === 'yes') {
+        if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+        autoAdvanceTimer.current = setTimeout(() => goNext(), 500);
+      }
+      return;
+    }
     if (!q.dataKey) return;
     update({ [q.dataKey]: value } as Partial<IntakeData>);
     if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
@@ -575,9 +781,13 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
   // ── canAdvance logic ───────────────────────────────────────────────────────
   const canAdvance = useCallback(() => {
     if (!current) return false;
-    if (current.type === 'welcome' || current.type === 'complete') return true;
+    if (current.type === 'welcome' || current.type === 'complete' || current.type === 'submit') return true;
     if (current.type === 'radio' && current.dataKey) {
       return !!(data[current.dataKey] as string);
+    }
+    // legal-terms radio step — must accept
+    if (current.type === 'radio' && current.id === 'legal-terms') {
+      return data.termsAccepted === true;
     }
     if (current.type === 'multiselect' && current.dataKey) {
       return ((data[current.dataKey] as string[]) || []).length > 0;
@@ -585,6 +795,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     if (current.type === 'fields') {
       const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return (current.fields || []).filter(f => f.required).every(f => {
+        if (f.type === 'checkbox') return true;
         const val = (data[f.id] as string)?.trim();
         if (!val) return false;
         if (f.type === 'email') return EMAIL_RE.test(val);
@@ -654,8 +865,11 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
             onRadioSelect={selectRadio}
             onOK={handleOK}
             onComplete={handleComplete}
+            onSubmit={handleSubmit}
             canAdvance={canAdvance()}
             saving={saving}
+            submitting={submitting}
+            submitError={submitError}
             isMobile={isMobile}
             inputRefs={inputRefs}
             highlightedIdx={highlightedIdx}
@@ -664,7 +878,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
       </div>
 
       {/* Bottom bar — OK button + Enter hint (not on welcome/complete) */}
-      {current.type !== 'welcome' && current.type !== 'complete' && (
+      {current.type !== 'welcome' && current.type !== 'complete' && current.type !== 'submit' && (
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10,
           padding: isMobile ? '14px 20px 20px' : '16px 32px 24px',
@@ -709,20 +923,24 @@ interface QProps {
   onRadioSelect: (q: QuestionDef, value: string) => void;
   onOK: () => void;
   onComplete: () => Promise<void>;
+  onSubmit: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
   canAdvance: boolean;
   saving: boolean;
+  submitting: boolean;
+  submitError: string | null;
   isMobile: boolean;
   inputRefs: React.MutableRefObject<(HTMLInputElement | null)[]>;
   highlightedIdx: number;
 }
 
-function QuestionRenderer({ q, data, update, onRadioSelect, onOK, onComplete, canAdvance, saving, isMobile, inputRefs, highlightedIdx }: QProps) {
+function QuestionRenderer({ q, data, update, onRadioSelect, onOK, onComplete, onSubmit, canAdvance, saving, submitting, submitError, isMobile, inputRefs, highlightedIdx }: QProps) {
   switch (q.type) {
     case 'welcome':   return <WelcomeScreen onStart={onOK} isMobile={isMobile} />;
     case 'complete':  return <CompleteScreen onComplete={onComplete} saving={saving} isMobile={isMobile} />;
     case 'radio':     return <RadioScreen q={q} data={data} onSelect={v => onRadioSelect(q, v)} isMobile={isMobile} highlightedIdx={highlightedIdx} />;
     case 'multiselect': return <MultiScreen q={q} data={data} update={update} isMobile={isMobile} highlightedIdx={highlightedIdx} />;
     case 'fields':    return <FieldsScreen q={q} data={data} update={update} onOK={onOK} inputRefs={inputRefs} isMobile={isMobile} />;
+    case 'submit':    return <SubmitScreen q={q} data={data} onSubmit={onSubmit} onOK={onOK} submitting={submitting} submitError={submitError} isMobile={isMobile} />;
     default: return null;
   }
 }
@@ -780,7 +998,9 @@ function QHeader({ num, question, description, isMobile }: { num?: string; quest
 }
 
 function RadioScreen({ q, data, onSelect, isMobile, highlightedIdx }: { q: QuestionDef; data: IntakeData; onSelect: (v: string) => void; isMobile: boolean; highlightedIdx: number }) {
-  const selected = q.dataKey ? (data[q.dataKey] as string) : '';
+  const selected = q.id === 'legal-terms'
+    ? (data.termsAccepted ? 'yes' : '')
+    : q.dataKey ? (data[q.dataKey] as string) : '';
 
   return (
     <div>
@@ -899,37 +1119,172 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
     <div>
       <QHeader num={q.num} question={q.question} description={q.description} isMobile={isMobile} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {fields.map((field, i) => (
-          <div key={field.id} style={{ borderBottom: '1px solid var(--bs-border)', paddingBottom: 4, marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: 'var(--bs-ash)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>
-              {field.label}{field.required && <span style={{ color: C.teal, marginLeft: 3 }}>*</span>}
-            </label>
-            {field.type === 'tel' ? (
-              <PhoneInput
-                value={(data[field.id] as string) || ''}
-                onChange={v => update({ [field.id]: v } as Partial<IntakeData>)}
-                placeholder={field.placeholder}
-                fontSize={isMobile ? 16 : 18}
-                fontFamily={C.fn}
-              />
-            ) : (
-              <input
-                ref={el => inputRefs.current[i] = el}
-                type={field.type || 'text'}
-                value={(data[field.id] as string) || ''}
-                onChange={e => update({ [field.id]: e.target.value } as Partial<IntakeData>)}
-                onKeyDown={e => handleKey(e, i)}
-                placeholder={field.placeholder}
-                style={{
-                  width: '100%', background: 'transparent', border: 'none',
-                  color: 'var(--bs-text)', fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
-                  padding: '6px 0', outline: 'none', boxSizing: 'border-box',
-                }}
-              />
-            )}
+        {fields.map((field, i) => {
+          if (field.type === 'checkbox') {
+            const checked = !!(data[field.id] as unknown as boolean);
+            return (
+              <div key={field.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--bs-border)', marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => update({ [field.id]: !checked } as Partial<IntakeData>)}
+                  style={{
+                    width: 22, height: 22, borderRadius: 4,
+                    border: `1.5px solid ${checked ? C.teal : 'var(--bs-border)'}`,
+                    background: checked ? C.teal : 'transparent',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
+                    padding: 0,
+                  }}
+                >
+                  {checked && <span style={{ color: '#fff', fontSize: 12, fontWeight: 800 }}>✓</span>}
+                </button>
+                <span style={{ fontSize: isMobile ? 14 : 16, color: 'var(--bs-text)', fontFamily: C.fn }}>{field.label}</span>
+              </div>
+            );
+          }
+          return (
+            <div key={field.id} style={{ borderBottom: '1px solid var(--bs-border)', paddingBottom: 4, marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: 'var(--bs-ash)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>
+                {field.label}{field.required && <span style={{ color: C.teal, marginLeft: 3 }}>*</span>}
+              </label>
+              {field.type === 'tel' ? (
+                <PhoneInput
+                  value={(data[field.id] as string) || ''}
+                  onChange={v => update({ [field.id]: v } as Partial<IntakeData>)}
+                  placeholder={field.placeholder}
+                  fontSize={isMobile ? 16 : 18}
+                  fontFamily={C.fn}
+                />
+              ) : (
+                <>
+                  <input
+                    ref={el => inputRefs.current[i] = el}
+                    type={field.type || 'text'}
+                    value={(data[field.id] as string) || ''}
+                    onChange={e => update({ [field.id]: e.target.value } as Partial<IntakeData>)}
+                    onKeyDown={e => handleKey(e, i)}
+                    placeholder={field.placeholder}
+                    style={{
+                      width: '100%', background: 'transparent', border: 'none',
+                      color: 'var(--bs-text)', fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
+                      padding: '6px 0', outline: 'none', boxSizing: 'border-box',
+                    }}
+                  />
+                  {field.hint && (
+                    <div style={{ fontSize: 11, color: 'var(--bs-ash)', marginTop: 4 }}>{field.hint}</div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SubmitScreen({ q, data, onSubmit, onOK, submitting, submitError, isMobile }: {
+  q: QuestionDef; data: IntakeData; onSubmit: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
+  onOK: () => void; submitting: boolean; submitError: string | null; isMobile: boolean;
+}) {
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(submitError);
+
+  useEffect(() => {
+    if (submitError) { setStatus('error'); setErrorMsg(submitError); }
+  }, [submitError]);
+
+  const handleSubmitClick = async () => {
+    setStatus('submitting');
+    setErrorMsg(null);
+    const result = await onSubmit(data);
+    if (result.success) {
+      setStatus('success');
+      setTimeout(() => onOK(), 800);
+    } else {
+      setStatus('error');
+      setErrorMsg(result.error || 'Something went wrong.');
+    }
+  };
+
+  const summary = [
+    { label: 'Name', value: [data.fName, data.lName].filter(Boolean).join(' ') || '—' },
+    { label: 'Practice', value: data.companyName || '—' },
+    { label: 'Email', value: data.officeEmail || '—' },
+    { label: 'Phone', value: data.preferredPhoneNumber || '—' },
+    { label: 'Primary Contact', value: data.primaryContactName || '—' },
+    { label: 'Address', value: [data.addressLine1, data.city, data.state, data.zipCode].filter(Boolean).join(', ') || '—' },
+  ];
+
+  return (
+    <div>
+      <QHeader num={q.num} question={q.question} description={q.description} isMobile={isMobile} />
+
+      {/* Summary card */}
+      <div style={{
+        background: 'var(--bs-card)', border: '1px solid var(--bs-border)', borderRadius: 10,
+        padding: isMobile ? '16px 18px' : '20px 24px', marginBottom: 24,
+      }}>
+        {summary.map((row, i) => (
+          <div key={i} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+            padding: '8px 0', borderBottom: i < summary.length - 1 ? '1px solid var(--bs-border)' : 'none',
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--bs-ash)', letterSpacing: 1, textTransform: 'uppercase', minWidth: 100 }}>
+              {row.label}
+            </span>
+            <span style={{ fontSize: 14, color: 'var(--bs-text)', textAlign: 'right', wordBreak: 'break-word' }}>
+              {row.value}
+            </span>
           </div>
         ))}
       </div>
+
+      {/* Error state */}
+      {status === 'error' && errorMsg && (
+        <div style={{
+          background: 'rgba(229,62,62,0.1)', border: '1px solid rgba(229,62,62,0.3)', borderRadius: 8,
+          padding: '12px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <AlertCircle size={18} color={C.red} style={{ flexShrink: 0 }} />
+          <span style={{ fontSize: 13, color: C.red, fontFamily: C.fn }}>{errorMsg}</span>
+        </div>
+      )}
+
+      {/* Action button */}
+      {status === 'success' ? (
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+            <CheckCircle2 size={40} strokeWidth={1.5} color={C.teal} />
+          </div>
+          <p style={{ fontSize: 14, color: C.teal, fontFamily: C.fn, fontWeight: 600 }}>Account created! Continuing…</p>
+        </div>
+      ) : (
+        <button
+          onClick={handleSubmitClick}
+          disabled={submitting || status === 'submitting'}
+          style={{
+            width: '100%', background: submitting || status === 'submitting' ? 'var(--bs-card)' : C.teal,
+            color: submitting || status === 'submitting' ? 'var(--bs-ash)' : C.white,
+            border: 'none', borderRadius: 6, padding: isMobile ? '14px 20px' : '15px 24px',
+            fontSize: 15, fontWeight: 700, fontFamily: C.fn,
+            cursor: submitting || status === 'submitting' ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            transition: 'background 0.2s',
+          }}
+        >
+          {submitting || status === 'submitting' ? (
+            <>
+              <Loader2 size={18} strokeWidth={2} style={{ animation: 'spin 1s linear infinite' }} />
+              Creating account…
+            </>
+          ) : status === 'error' ? (
+            'Retry — Submit & Create Account'
+          ) : (
+            'Submit & Create Account'
+          )}
+        </button>
+      )}
     </div>
   );
 }

@@ -7,6 +7,30 @@ const TOTAL_STEPS = 10;
 export interface IntakeData {
   // step 0 — practice info
   practice_name: string;
+  // portal account — contact
+  fName: string;
+  lName: string;
+  preferredPhoneNumber: string;
+  companyName: string;
+  officeEmail: string;
+  primaryContactName: string;
+  primaryContactRole: string;
+  primaryContactPhoneNumber: string;
+  preferredContactMethodPhone: boolean;
+  preferredContactMethodEmail: boolean;
+  // portal account — shipping
+  addressLine1: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  attentionRecipientName: string;
+  preferredNotificationMethod: string;
+  // portal account — operational
+  estimatedOrdersPerMonth: string;
+  dentalLicenseNumber: string;
+  // legal + auth
+  termsAccepted: boolean;
+  webappPassword: string;
   // step 2 — decision maker
   is_decision_maker: string;
   codecision_name: string;
@@ -44,6 +68,26 @@ export interface IntakeData {
 
 const defaultData: IntakeData = {
   practice_name: '',
+  fName: '',
+  lName: '',
+  preferredPhoneNumber: '',
+  companyName: '',
+  officeEmail: '',
+  primaryContactName: '',
+  primaryContactRole: '',
+  primaryContactPhoneNumber: '',
+  preferredContactMethodPhone: false,
+  preferredContactMethodEmail: false,
+  addressLine1: '',
+  city: '',
+  state: '',
+  zipCode: '',
+  attentionRecipientName: '',
+  preferredNotificationMethod: '',
+  estimatedOrdersPerMonth: '',
+  dentalLicenseNumber: '',
+  termsAccepted: false,
+  webappPassword: '',
   is_decision_maker: '',
   codecision_name: '',
   codecision_role: '',
