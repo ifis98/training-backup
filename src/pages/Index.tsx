@@ -49,27 +49,19 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     (window as any).__isOAuthUser = isOAuthUser;
   }, [clerkUser]);
 
-  // webapp_account status check — gates /app until create-webapp-account succeeds
+  // webapp_account status check — gates /app until create-webapp-account succeeds.
+  // State declared up here, but the effect that uses `s.intakeDone` lives below
+  // the useAppState destructure so the dep array can never reference `s` before
+  // it's initialized (prevents a TDZ in the minified bundle).
   const [webappAccountStatus, setWebappAccountStatus] = useState<string | null>(null);
   const [checkingAccount, setCheckingAccount] = useState(true);
+
+  const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync } = useAppState(clerkUserId);
+  const { isStaff, isAdmin, isByteSenseAdmin, loading: authLoading } = useAuth();
+  const lang = (s.lang || 'en') as Lang;
+
   useEffect(() => {
     if (!clerkUserId) { setCheckingAccount(false); return; }
-    supabase
-      .from('webapp_account')
-      .select('status')
-      .eq('clerk_user_id', clerkUserId)
-      .maybeSingle()
-      .then(({ data: row }) => {
-        setWebappAccountStatus(row?.status ?? null);
-        setCheckingAccount(false);
-      })
-      .catch(() => { setCheckingAccount(false); });
-  }, [clerkUserId]);
-
-  // Re-fetch webapp_account status when intakeDone transitions to true,
-  // since the account was created during intake via the submit step.
-  useEffect(() => {
-    if (!s.intakeDone || !clerkUserId) return;
     setCheckingAccount(true);
     supabase
       .from('webapp_account')
@@ -81,11 +73,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
         setCheckingAccount(false);
       })
       .catch(() => { setCheckingAccount(false); });
-  }, [s.intakeDone, clerkUserId]);
-
-  const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync } = useAppState(clerkUserId);
-  const { isStaff, isAdmin, isByteSenseAdmin, loading: authLoading } = useAuth();
-  const lang = (s.lang || 'en') as Lang;
+  }, [clerkUserId, s.intakeDone]);
 
   const [showBookingGlobal, setShowBookingGlobal] = useState(false);
 
