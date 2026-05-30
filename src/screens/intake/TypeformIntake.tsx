@@ -563,12 +563,20 @@ const QUESTIONS: QuestionDef[] = [
 
 interface Props {
   clerkUserId: string | null;
-  onDone: (staffRoles: string[], intakeData: IntakeData) => void;
+  // Required in 'full' mode (drives the post-intake training handoff). Unused
+  // in 'portal' mode, where onPortalDone is the completion callback instead.
+  onDone?: (staffRoles: string[], intakeData: IntakeData) => void;
   prefilledPracticeName?: string;
+  // 'portal' = legacy re-entry that collects ONLY the client-portal fields
+  // (P1–P9) and provisions the account, skipping welcome/training/complete.
+  mode?: 'full' | 'portal';
+  // Called after create-webapp-account succeeds in 'portal' mode.
+  onPortalDone?: () => void;
 }
 
-export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeName }: Props) {
-  const { data, update, complete } = useIntakeState(clerkUserId);
+export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeName, mode = 'full', onPortalDone }: Props) {
+  const isPortal = mode === 'portal';
+  const { data, update, complete } = useIntakeState(clerkUserId, { persist: !isPortal });
   const { session } = useSession();
   const isMobile = useIsMobile();
 
@@ -647,12 +655,17 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
   const highlightedIdxRef = useRef(-1);
   useEffect(() => { highlightedIdxRef.current = highlightedIdx; }, [highlightedIdx]);
 
-  // Visible questions filtered by showIf
-  const visibleQs = QUESTIONS.filter(q => !q.showIf || q.showIf(data));
+  // Visible questions filtered by showIf. In portal mode, keep ONLY the
+  // client-portal registration steps (num P1–P9) — no welcome, no training
+  // questions (00–16), no complete screen.
+  const visibleQs = QUESTIONS
+    .filter(q => !q.showIf || q.showIf(data))
+    .filter(q => !isPortal || !!q.num?.startsWith('P'));
   const current = visibleQs[qIdx];
-  const totalQ = visibleQs.length - 2; // exclude welcome + complete
-  const visibleNum = qIdx - 1; // 0-based question number (excl welcome)
-  const progress = qIdx === 0 ? 0 : Math.min(100, Math.round((visibleNum / totalQ) * 100));
+  // Full mode excludes welcome + complete (both present); portal mode has neither.
+  const totalQ = visibleQs.length - (isPortal ? 0 : 2);
+  const visibleNum = isPortal ? qIdx + 1 : qIdx - 1; // 1-based step number
+  const progress = (!isPortal && qIdx === 0) ? 0 : Math.min(100, Math.round((visibleNum / Math.max(totalQ, 1)) * 100));
 
   // ── animation helpers ──────────────────────────────────────────────────────
   const transition = useCallback(async (dir: 'forward' | 'backward', fn: () => void) => {
@@ -809,8 +822,16 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     setSaving(true);
     await complete();
     setSaving(false);
-    onDone(data.staff_roles, data);
+    onDone?.(data.staff_roles, data);
   }, [complete, data, onDone]);
+
+  // After create-webapp-account succeeds on the review-submit step: portal mode
+  // finishes (account provisioned, nothing more to do); full mode advances into
+  // the training questions.
+  const handleSubmitSuccess = useCallback(() => {
+    if (isPortal) { onPortalDone?.(); return; }
+    handleOK();
+  }, [isPortal, onPortalDone, handleOK]);
 
   if (!current) return null;
 
@@ -859,6 +880,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
             onOK={handleOK}
             onComplete={handleComplete}
             onSubmit={handleSubmit}
+            onSubmitSuccess={handleSubmitSuccess}
             canAdvance={canAdvance()}
             saving={saving}
             submitting={submitting}
@@ -917,6 +939,7 @@ interface QProps {
   onOK: () => void;
   onComplete: () => Promise<void>;
   onSubmit: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
+  onSubmitSuccess: () => void;
   canAdvance: boolean;
   saving: boolean;
   submitting: boolean;
@@ -926,14 +949,14 @@ interface QProps {
   highlightedIdx: number;
 }
 
-function QuestionRenderer({ q, data, update, onRadioSelect, onOK, onComplete, onSubmit, canAdvance, saving, submitting, submitError, isMobile, inputRefs, highlightedIdx }: QProps) {
+function QuestionRenderer({ q, data, update, onRadioSelect, onOK, onComplete, onSubmit, onSubmitSuccess, canAdvance, saving, submitting, submitError, isMobile, inputRefs, highlightedIdx }: QProps) {
   switch (q.type) {
     case 'welcome':   return <WelcomeScreen onStart={onOK} isMobile={isMobile} />;
     case 'complete':  return <CompleteScreen onComplete={onComplete} saving={saving} isMobile={isMobile} />;
     case 'radio':     return <RadioScreen q={q} data={data} onSelect={v => onRadioSelect(q, v)} isMobile={isMobile} highlightedIdx={highlightedIdx} />;
     case 'multiselect': return <MultiScreen q={q} data={data} update={update} isMobile={isMobile} highlightedIdx={highlightedIdx} />;
     case 'fields':    return <FieldsScreen q={q} data={data} update={update} onOK={onOK} inputRefs={inputRefs} isMobile={isMobile} />;
-    case 'submit':    return <SubmitScreen q={q} data={data} onSubmit={onSubmit} onOK={onOK} submitting={submitting} submitError={submitError} isMobile={isMobile} />;
+    case 'submit':    return <SubmitScreen q={q} data={data} onSubmit={onSubmit} onSubmitSuccess={onSubmitSuccess} submitting={submitting} submitError={submitError} isMobile={isMobile} />;
     default: return null;
   }
 }
@@ -1176,9 +1199,9 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
   );
 }
 
-function SubmitScreen({ q, data, onSubmit, onOK, submitting, submitError, isMobile }: {
+function SubmitScreen({ q, data, onSubmit, onSubmitSuccess, submitting, submitError, isMobile }: {
   q: QuestionDef; data: IntakeData; onSubmit: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
-  onOK: () => void; submitting: boolean; submitError: string | null; isMobile: boolean;
+  onSubmitSuccess: () => void; submitting: boolean; submitError: string | null; isMobile: boolean;
 }) {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(submitError);
@@ -1193,7 +1216,7 @@ function SubmitScreen({ q, data, onSubmit, onOK, submitting, submitError, isMobi
     const result = await onSubmit(data);
     if (result.success) {
       setStatus('success');
-      setTimeout(() => onOK(), 800);
+      setTimeout(() => onSubmitSuccess(), 800);
     } else {
       setStatus('error');
       setErrorMsg(result.error || 'Something went wrong.');
