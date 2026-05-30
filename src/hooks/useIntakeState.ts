@@ -115,8 +115,15 @@ const defaultData: IntakeData = {
   main_blocker: '',
 };
 
-export function useIntakeState(clerkUserId: string | null) {
+export function useIntakeState(clerkUserId: string | null, opts: { persist?: boolean } = {}) {
+  // persist=false (portal re-entry mode) makes this hook side-effect-free:
+  // no localStorage, no practice_intake autosave, no complete() write — so a
+  // legacy user completing only the portal steps can never overwrite their
+  // existing intake row with empty training fields.
+  const persist = opts.persist !== false;
+
   const [step, setStep] = useState(() => {
+    if (!persist) return 1;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved).step ?? 1;
@@ -125,6 +132,7 @@ export function useIntakeState(clerkUserId: string | null) {
   });
 
   const [data, setData] = useState<IntakeData>(() => {
+    if (!persist) return defaultData;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return { ...defaultData, ...(JSON.parse(saved).data ?? {}) };
@@ -148,12 +156,13 @@ export function useIntakeState(clerkUserId: string | null) {
 
   // Persist to localStorage
   useEffect(() => {
+    if (!persist) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ step, data })); } catch {}
-  }, [step, data]);
+  }, [step, data, persist]);
 
   // Autosave to Supabase (debounced)
   useEffect(() => {
-    if (!clerkUserId) return;
+    if (!clerkUserId || !persist) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       try {
@@ -166,10 +175,10 @@ export function useIntakeState(clerkUserId: string | null) {
       } catch {}
     }, 800);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [clerkUserId, step, data]);
+  }, [clerkUserId, step, data, persist]);
 
   const complete = useCallback(async () => {
-    if (!clerkUserId) return;
+    if (!clerkUserId || !persist) return;
     try {
       await supabase
         .from('practice_intake')
@@ -179,7 +188,7 @@ export function useIntakeState(clerkUserId: string | null) {
         );
       localStorage.removeItem(STORAGE_KEY);
     } catch {}
-  }, [clerkUserId, data]);
+  }, [clerkUserId, data, persist]);
 
   return { step, data, update, next, back, complete, totalSteps: TOTAL_STEPS };
 }

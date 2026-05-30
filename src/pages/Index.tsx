@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useUser, useClerk, useSession } from '@clerk/clerk-react';
 import { useAppState } from '@/hooks/useAppState';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -28,16 +28,25 @@ import { BL } from '@/data/constants';
 import { C } from '@/data/constants';
 import { supabase } from '@/integrations/supabase/client';
 
+// sessionStorage key for the PATH-2 portal-setup reminder "Later" dismissal.
+// The stored value is the current Clerk session id, so the dismissal only holds
+// for this login. A new login mints a new session id, so the old value no longer
+// matches — regardless of which sign-out path was used — and the nudge returns
+// until the user actually provisions a portal account.
+const PORTAL_REMINDER_DISMISS_KEY = 'bsa6_portal_reminder_dismissed';
+
 interface IndexProps { forceView?: 'staff' | 'owner'; forcePhase?: string; }
 
 const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
+  const { session } = useSession();
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
   const coachMode = params.mode || 'general';
   const clerkUserId = clerkUser?.id ?? null;
+  const sessionId = session?.id ?? null;
   const isMobile = useIsMobile();
 
   // Make Clerk user ID accessible to legacy screens that can't receive it as a prop
@@ -56,6 +65,19 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const [webappAccountStatus, setWebappAccountStatus] = useState<string | null>(null);
   const [checkingAccount, setCheckingAccount] = useState(true);
 
+  // PATH-2 legacy backfill: a soft, dismissible reminder (not a gate) shown to
+  // grandfathered users who have no portal account yet. The CTA opens a portal-
+  // only re-entry of the intake (mode='portal') that provisions the account.
+  const [showPortalSetup, setShowPortalSetup] = useState(false);
+  const [reminderDismissed, setReminderDismissed] = useState(false);
+  // Dismissal is scoped to the current Clerk session id. Recompute whenever the
+  // session changes so a fresh login (new id) re-shows the nudge.
+  useEffect(() => {
+    setReminderDismissed(
+      !!sessionId && sessionStorage.getItem(PORTAL_REMINDER_DISMISS_KEY) === sessionId
+    );
+  }, [sessionId]);
+
   const { s, u, sRoles, sc, myPH, myM, dN, pr, allD, getQuestion, reset, dbLoaded, immediateSync } = useAppState(clerkUserId);
   const { isStaff, isAdmin, isByteSenseAdmin, loading: authLoading } = useAuth();
   const lang = (s.lang || 'en') as Lang;
@@ -63,17 +85,41 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   useEffect(() => {
     if (!clerkUserId) { setCheckingAccount(false); return; }
     setCheckingAccount(true);
-    supabase
-      .from('webapp_account')
-      .select('status')
-      .eq('clerk_user_id', clerkUserId)
-      .maybeSingle()
-      .then(({ data: row }) => {
+    (async () => {
+      try {
+        const { data: row } = await supabase
+          .from('webapp_account')
+          .select('status')
+          .eq('clerk_user_id', clerkUserId)
+          .maybeSingle();
         setWebappAccountStatus(row?.status ?? null);
+      } catch {
+        // network/unexpected error — leave status unchanged
+      } finally {
         setCheckingAccount(false);
-      })
-      .catch(() => { setCheckingAccount(false); });
+      }
+    })();
   }, [clerkUserId, s.intakeDone]);
+
+  // Re-fetch the webapp_account status (used by the gate retry + after the
+  // PATH-2 portal-setup flow provisions an account, so the reminder clears).
+  const recheckWebappAccount = async () => {
+    if (!clerkUserId) { setCheckingAccount(false); return; }
+    setCheckingAccount(true);
+    setWebappAccountStatus(null);
+    try {
+      const { data: row } = await supabase
+        .from('webapp_account')
+        .select('status')
+        .eq('clerk_user_id', clerkUserId)
+        .maybeSingle();
+      setWebappAccountStatus(row?.status ?? null);
+    } catch {
+      // network/unexpected error — leave status null
+    } finally {
+      setCheckingAccount(false);
+    }
+  };
 
   const [showBookingGlobal, setShowBookingGlobal] = useState(false);
 
@@ -199,20 +245,7 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
     // row (onDone only runs on submit success), so this never lets a real
     // new signup skip provisioning.
     if (s.intakeDone && !checkingAccount && (webappAccountStatus === 'pending' || webappAccountStatus === 'failed')) {
-      return <WebappAccountRetry clerkUserId={clerkUserId} onRetry={() => {
-        setCheckingAccount(true);
-        setWebappAccountStatus(null);
-        supabase
-          .from('webapp_account')
-          .select('status')
-          .eq('clerk_user_id', clerkUserId)
-          .maybeSingle()
-          .then(({ data: row }) => {
-            setWebappAccountStatus(row?.status ?? null);
-            setCheckingAccount(false);
-          })
-          .catch(() => { setCheckingAccount(false); });
-      }} />;
+      return <WebappAccountRetry clerkUserId={clerkUserId} onRetry={recheckWebappAccount} />;
     }
 
     // ── Training flow ────────────────────────────────────────────────────
@@ -264,6 +297,27 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
   const isOnboardingFlow = s.phase === 'baseline' || s.phase === 'blR';
   const showLayout = !isOnboardingFlow && (!!forcePhase || !!forceView || s.intakeDone || ['baseline', 'blR', 'dashboard', 'module', 'simulation', 'simSummary', 'report', 'sales-training', 'product-experience', 'office-workflow', 'office-onboarding', 'roleplay', 'contact-support'].includes(s.phase));
 
+  // PATH-2 portal-setup re-entry — full-screen, no sidebar (like the intake).
+  if (showPortalSetup && clerkUserId) {
+    return (
+      <IntakeFlow
+        mode="portal"
+        clerkUserId={clerkUserId}
+        onPortalDone={() => { setShowPortalSetup(false); recheckWebappAccount(); }}
+      />
+    );
+  }
+
+  // PATH-2 reminder visibility: a grandfathered user (intake done, no portal
+  // account row) who is a practice owner — not a ByteSense admin or staff
+  // sub-account. Only on the dashboard landing, dismissible per session.
+  const needsPortalAccount =
+    s.intakeDone && !checkingAccount && webappAccountStatus === null &&
+    !isByteSenseAdmin && !(isStaff && !isAdmin);
+  const onDashboardLanding =
+    location.pathname === '/app' && !TRANSIENT_PHASES.includes(s.phase) && !isOnboardingFlow;
+  const showPortalReminder = needsPortalAccount && onDashboardLanding && !reminderDismissed;
+
   if (showLayout) {
     return (
       <div style={{ display: 'flex', background: `radial-gradient(ellipse at top, var(--bs-bg2), var(--bs-bg))`, minHeight: '100vh' }}>
@@ -287,6 +341,16 @@ const Index = ({ forceView, forcePhase }: IndexProps = {}) => {
           paddingTop: isMobile ? 60 : 0,
           paddingBottom: 0,
         }}>
+          {showPortalReminder && (
+            <PortalSetupReminder
+              isMobile={isMobile}
+              onSetup={() => setShowPortalSetup(true)}
+              onDismiss={() => {
+                if (sessionId) sessionStorage.setItem(PORTAL_REMINDER_DISMISS_KEY, sessionId);
+                setReminderDismissed(true);
+              }}
+            />
+          )}
           {renderContent()}
         </div>
 
@@ -315,6 +379,56 @@ function NoInviteRedirect({ onSignOut }: { onSignOut: () => Promise<void> | void
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bs-bg)', color: 'var(--bs-ash)', fontFamily: C.fn, fontSize: 14 }}>
       Invite required — redirecting…
+    </div>
+  );
+}
+
+/**
+ * PATH-2 backfill nudge. Non-blocking, dismissible banner shown on the
+ * dashboard to grandfathered users who completed training before unified
+ * registration existed and have no client-portal account yet. "Complete setup"
+ * opens the portal-only intake re-entry; "Later" hides it for the session.
+ */
+function PortalSetupReminder({ isMobile, onSetup, onDismiss }: { isMobile: boolean; onSetup: () => void; onDismiss: () => void }) {
+  return (
+    <div style={{
+      margin: isMobile ? '12px 16px 0' : '20px 28px 0',
+      background: 'var(--bs-card)',
+      border: `1px solid ${C.teal}55`,
+      borderLeft: `3px solid ${C.teal}`,
+      borderRadius: 10,
+      padding: isMobile ? '14px 16px' : '16px 20px',
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      alignItems: isMobile ? 'stretch' : 'center',
+      justifyContent: 'space-between',
+      gap: 14,
+      fontFamily: C.fn,
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>
+          Finish setting up your byteSense portal account
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--bs-ash)', lineHeight: 1.6 }}>
+          You're all set for training. Add a few practice details to activate your
+          client portal — for orders, cases, and billing at app.bytesense.ai. Optional, takes ~2 minutes.
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexShrink: 0, alignItems: 'center' }}>
+        <button onClick={onDismiss} style={{
+          background: 'none', border: 'none', color: 'var(--bs-ash)',
+          fontSize: 13, fontWeight: 600, fontFamily: C.fn, cursor: 'pointer', padding: '8px 10px',
+        }}>
+          Later
+        </button>
+        <button onClick={onSetup} style={{
+          background: C.teal, color: C.white, border: 'none',
+          padding: '10px 18px', fontSize: 13, fontWeight: 700,
+          fontFamily: C.fn, cursor: 'pointer', borderRadius: 6, whiteSpace: 'nowrap',
+        }}>
+          Complete setup
+        </button>
+      </div>
     </div>
   );
 }
