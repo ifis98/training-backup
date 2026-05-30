@@ -75,6 +75,17 @@ Deno.serve(async (req) => {
     return ok({ success: true, allowed: true, reason: "pending_admin_invite" });
   }
 
+  // 5. Legacy grandfather — completed the old intake before the link-on-redeem
+  //    flow existed. A practice_intake row can only exist for a user who
+  //    already passed an earlier gate, so this can't let a brand-new
+  //    ineligible signup in: at their first login they have no row yet.
+  const { data: intakeRow } = await supabase
+    .from("practice_intake").select("clerk_user_id")
+    .eq("clerk_user_id", clerkUserId).limit(1).maybeSingle();
+  if (intakeRow) {
+    return ok({ success: true, allowed: true, reason: "legacy_intake" });
+  }
+
   return ok({ success: true, allowed: false, reason: "no_proof_of_invite" });
 });
 
