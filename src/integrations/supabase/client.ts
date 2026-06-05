@@ -8,6 +8,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   auth: { persistSession: false },
 });
 
-/** Edge Functions live on the old project until they are migrated */
-export const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL || SUPABASE_URL;
-export const FUNCTIONS_KEY = import.meta.env.VITE_SUPABASE_FUNCTIONS_KEY || SUPABASE_PUBLISHABLE_KEY;
+export const FUNCTIONS_URL = SUPABASE_URL;
+export const FUNCTIONS_KEY = SUPABASE_PUBLISHABLE_KEY;
