@@ -128,24 +128,24 @@ serve(async (req) => {
     // Sanitize user-supplied messages against prompt-injection tokens
     const messages = sanitizeMessages(rawMessages);
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const AI_WEBHOOK_URL = Deno.env.get("AI_WEBHOOK_URL");
+    if (!AI_WEBHOOK_URL) {
       return new Response(JSON.stringify({ error: "AI not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const AI_WEBHOOK_SECRET = Deno.env.get("AI_WEBHOOK_SECRET");
 
     const systemPrompt = (MODE_PROMPTS[mode] || MODE_PROMPTS.general) + langInstruction;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(AI_WEBHOOK_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
+        ...(AI_WEBHOOK_SECRET ? { "x-webhook-secret": AI_WEBHOOK_SECRET } : {}),
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
