@@ -94,13 +94,14 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const AI_WEBHOOK_URL = Deno.env.get("AI_WEBHOOK_URL");
+    if (!AI_WEBHOOK_URL) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
+        JSON.stringify({ error: "AI_WEBHOOK_URL is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    const AI_WEBHOOK_SECRET = Deno.env.get("AI_WEBHOOK_SECRET");
 
     const body = await req.json();
     const { messages: rawMessages, patientIndex } = body;
@@ -127,14 +128,13 @@ serve(async (req) => {
     const idx = typeof patientIndex === 'number' ? Math.abs(patientIndex) % PATIENTS.length : 0;
     const patient = PATIENTS[idx];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(AI_WEBHOOK_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
+        ...(AI_WEBHOOK_SECRET ? { "x-webhook-secret": AI_WEBHOOK_SECRET } : {}),
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: patient.system },
           ...messages,
