@@ -407,11 +407,11 @@ function PortalSetupReminder({ isMobile, onSetup, onDismiss }: { isMobile: boole
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--bs-text)', marginBottom: 4 }}>
-          Finish setting up your byteSense portal account
+          Activate your byteSense client portal
         </div>
         <div style={{ fontSize: 13, color: 'var(--bs-ash)', lineHeight: 1.6 }}>
-          You're all set for training. Add a few practice details to activate your
-          client portal — for orders, cases, and billing at app.bytesense.ai. Optional, takes ~2 minutes.
+          Add a few practice details to unlock orders, cases, and billing at
+          app.bytesense.ai. Takes about 2 minutes.
         </div>
       </div>
       <div style={{ display: 'flex', gap: 10, flexShrink: 0, alignItems: 'center' }}>
