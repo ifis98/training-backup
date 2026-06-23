@@ -592,7 +592,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
   }, [prefilledPracticeName]);
 
   // ── submit handler for the review-submit step ───────────────────────────────
-  const handleSubmit = useCallback(async (intakeData: IntakeData) => {
+  const handleSubmit = useCallback(async (intakeData: IntakeData, signature: string) => {
     setSubmitting(true);
     setSubmitError(null);
 
@@ -623,6 +623,10 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
             estimatedOrdersPerMonth: intakeData.estimatedOrdersPerMonth,
             dentalLicenseNumber: intakeData.dentalLicenseNumber,
             webappPassword: intakeData.webappPassword || undefined,
+            // base64 PNG data URL — backend writes it to ./Uploads/signatures/
+            // and stores the path on the dentist's UserProfile. Never persisted
+            // to Supabase (practice_intake), only forwarded to the backend here.
+            signature: signature || undefined,
           },
         }
       );
@@ -938,7 +942,7 @@ interface QProps {
   onRadioSelect: (q: QuestionDef, value: string) => void;
   onOK: () => void;
   onComplete: () => Promise<void>;
-  onSubmit: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
+  onSubmit: (d: IntakeData, signature: string) => Promise<{ success: boolean; error?: string }>;
   onSubmitSuccess: () => void;
   canAdvance: boolean;
   saving: boolean;
@@ -1199,21 +1203,143 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
   );
 }
 
+// ─── Signature pad ────────────────────────────────────────────────────────────
+// Lightweight canvas signature capture (no extra dependency). Draws dark ink on a
+// white panel and emits a base64 PNG data URL via onChange; emits null when empty.
+function SignaturePad({ onChange, isMobile }: { onChange: (dataUrl: string | null) => void; isMobile: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const drawing = useRef(false);
+  const drawn = useRef(false);
+  const [empty, setEmpty] = useState(true);
+
+  const W = 600;
+  const H = isMobile ? 180 : 200;
+
+  const resetCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#0A0A0E';
+  }, []);
+
+  useEffect(() => { resetCanvas(); }, [resetCanvas]);
+
+  const pointFromEvent = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
+
+  const start = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    drawing.current = true;
+    const { x, y } = pointFromEvent(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    canvasRef.current?.setPointerCapture(e.pointerId);
+  };
+
+  const move = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawing.current) return;
+    e.preventDefault();
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const { x, y } = pointFromEvent(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    if (!drawn.current) { drawn.current = true; setEmpty(false); }
+  };
+
+  const end = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    if (drawn.current && canvasRef.current) {
+      onChange(canvasRef.current.toDataURL('image/png'));
+    }
+  };
+
+  const clear = () => {
+    resetCanvas();
+    drawn.current = false;
+    setEmpty(true);
+    onChange(null);
+  };
+
+  return (
+    <div>
+      <div style={{
+        position: 'relative', borderRadius: 10, overflow: 'hidden',
+        border: `1px solid ${empty ? 'var(--bs-border)' : C.teal}`,
+        background: '#FFFFFF', transition: 'border-color 0.2s',
+      }}>
+        <canvas
+          ref={canvasRef}
+          width={W}
+          height={H}
+          onPointerDown={start}
+          onPointerMove={move}
+          onPointerUp={end}
+          onPointerLeave={end}
+          style={{ width: '100%', height: isMobile ? 180 : 200, display: 'block', touchAction: 'none', cursor: 'crosshair' }}
+        />
+        {empty && (
+          <span style={{
+            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+            color: '#B8B8C0', fontSize: 14, fontFamily: C.fn, pointerEvents: 'none', userSelect: 'none',
+          }}>
+            Sign here
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+        <button
+          type="button"
+          onClick={clear}
+          disabled={empty}
+          style={{
+            background: 'transparent', border: 'none', padding: '4px 6px',
+            color: empty ? 'var(--bs-ash)' : C.teal, fontSize: 13, fontWeight: 600,
+            fontFamily: C.fn, cursor: empty ? 'default' : 'pointer',
+          }}
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SubmitScreen({ q, data, onSubmit, onSubmitSuccess, submitting, submitError, isMobile }: {
-  q: QuestionDef; data: IntakeData; onSubmit: (d: IntakeData) => Promise<{ success: boolean; error?: string }>;
+  q: QuestionDef; data: IntakeData; onSubmit: (d: IntakeData, signature: string) => Promise<{ success: boolean; error?: string }>;
   onSubmitSuccess: () => void; submitting: boolean; submitError: string | null; isMobile: boolean;
 }) {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(submitError);
+  const [signature, setSignature] = useState<string | null>(null);
 
   useEffect(() => {
     if (submitError) { setStatus('error'); setErrorMsg(submitError); }
   }, [submitError]);
 
   const handleSubmitClick = async () => {
+    if (!signature) {
+      setStatus('error');
+      setErrorMsg('Please sign in the box above before creating your account.');
+      return;
+    }
     setStatus('submitting');
     setErrorMsg(null);
-    const result = await onSubmit(data);
+    const result = await onSubmit(data, signature);
     if (result.success) {
       setStatus('success');
       setTimeout(() => onSubmitSuccess(), 800);
@@ -1256,6 +1382,22 @@ function SubmitScreen({ q, data, onSubmit, onSubmitSuccess, submitting, submitEr
         ))}
       </div>
 
+      {/* Signature capture — required. Stored on the dentist's profile via the backend. */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 8,
+        }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--bs-ash)', letterSpacing: 1, textTransform: 'uppercase' }}>
+            Signature <span style={{ color: C.red }}>*</span>
+          </span>
+          <span style={{ fontSize: 12, color: 'var(--bs-ash)' }}>
+            Sign with your mouse or finger
+          </span>
+        </div>
+        <SignaturePad onChange={setSignature} isMobile={isMobile} />
+      </div>
+
       {/* Error state */}
       {status === 'error' && errorMsg && (
         <div style={{
@@ -1278,13 +1420,13 @@ function SubmitScreen({ q, data, onSubmit, onSubmitSuccess, submitting, submitEr
       ) : (
         <button
           onClick={handleSubmitClick}
-          disabled={submitting || status === 'submitting'}
+          disabled={submitting || status === 'submitting' || !signature}
           style={{
-            width: '100%', background: submitting || status === 'submitting' ? 'var(--bs-card)' : C.teal,
-            color: submitting || status === 'submitting' ? 'var(--bs-ash)' : C.white,
+            width: '100%', background: submitting || status === 'submitting' || !signature ? 'var(--bs-card)' : C.teal,
+            color: submitting || status === 'submitting' || !signature ? 'var(--bs-ash)' : C.white,
             border: 'none', borderRadius: 6, padding: isMobile ? '14px 20px' : '15px 24px',
             fontSize: 15, fontWeight: 700, fontFamily: C.fn,
-            cursor: submitting || status === 'submitting' ? 'not-allowed' : 'pointer',
+            cursor: submitting || status === 'submitting' || !signature ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             transition: 'background 0.2s',
           }}
