@@ -29,3 +29,5 @@ dist-ssr
 # Claude Code local config
 .claude/
 .vercel
+scripts/scanner-migration-watch.log
+scripts/.scanner-migration-applied
