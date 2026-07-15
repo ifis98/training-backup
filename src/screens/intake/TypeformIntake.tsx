@@ -212,6 +212,17 @@ const OPTS = {
     { key: 'E', label: 'Scan Coordinator', value: 'scan_coordinator' },
     { key: 'F', label: 'Not sure yet', value: 'not_sure' },
   ],
+  SCANNER: [
+    { key: 'A', label: 'iTero', value: 'itero' },
+    { key: 'B', label: '3Shape TRIOS', value: 'trios' },
+    { key: 'C', label: 'Medit', value: 'medit' },
+    { key: 'D', label: 'Dentsply Sirona (Primescan / CEREC)', value: 'sirona' },
+    { key: 'E', label: 'Carestream / Dexis', value: 'dexis' },
+    { key: 'F', label: 'Shining 3D (Aoralscan)', value: 'shining3d' },
+    { key: 'G', label: 'AlliedStar', value: 'alliedstar' },
+    { key: 'H', label: 'Other', value: 'other' },
+    { key: 'I', label: 'No scanner yet — we take physical impressions', value: 'none' },
+  ],
   STAFF_TRAINING: [
     { key: 'A', label: 'Yes — add staff members now', value: 'yes' },
     { key: 'B', label: 'No — just me for now', value: 'no' },
@@ -513,9 +524,18 @@ const QUESTIONS: QuestionDef[] = [
     dataKey: 'who_submits_cases',
   },
   {
-    id: 'add_staff_to_training',
+    id: 'scanner_type',
     type: 'radio',
     num: '12',
+    question: 'What scanner do you use?',
+    description: 'ByteSense cases are submitted as digital scans — this tells us how to tailor your setup.',
+    options: OPTS.SCANNER,
+    dataKey: 'scanner_type',
+  },
+  {
+    id: 'add_staff_to_training',
+    type: 'radio',
+    num: '13',
     question: 'Do you want to add other staff members to this training?',
     options: OPTS.STAFF_TRAINING,
     dataKey: 'add_staff_to_training',
@@ -523,7 +543,7 @@ const QUESTIONS: QuestionDef[] = [
   {
     id: 'has_patient_in_mind',
     type: 'radio',
-    num: '13',
+    num: '14',
     question: 'Do you already have a patient in mind for your first ByteSense case?',
     options: OPTS.PATIENT,
     dataKey: 'has_patient_in_mind',
@@ -531,7 +551,7 @@ const QUESTIONS: QuestionDef[] = [
   {
     id: 'ideal_patient_profile',
     type: 'multiselect',
-    num: '14',
+    num: '15',
     question: 'What does your ideal first patient look like?',
     description: 'Select all that apply.',
     options: OPTS.PROFILE,
@@ -540,7 +560,7 @@ const QUESTIONS: QuestionDef[] = [
   {
     id: 'first_case_timeline',
     type: 'radio',
-    num: '15',
+    num: '16',
     question: 'When do you expect to start your first ByteSense case?',
     options: OPTS.TIMELINE,
     dataKey: 'first_case_timeline',
@@ -548,7 +568,7 @@ const QUESTIONS: QuestionDef[] = [
   {
     id: 'main_blocker',
     type: 'radio',
-    num: '16',
+    num: '17',
     question: 'What would stop your office from starting the first case?',
     options: OPTS.BLOCKER,
     dataKey: 'main_blocker',

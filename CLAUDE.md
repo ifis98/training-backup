@@ -69,7 +69,7 @@ Super users (hardcoded): `nbc1079@gmail.com`, `natasha@bytesense.ai`, `majid@byt
 ### Phase 1 — Intake (first-time users only)
 `Index.tsx` detects `!s.intakeDone` → shows `IntakeFlow` → `TypeformIntake`
 
-16-step Typeform-style form. One question per screen, smooth slide animations, auto-advance on radio select.
+17-step Typeform-style form (plus the P1–P9 portal-registration steps). One question per screen, smooth slide animations, auto-advance on radio select.
 
 | Step | Question | Data Captured |
 |------|----------|---------------|
@@ -86,11 +86,12 @@ Super users (hardcoded): `nbc1079@gmail.com`, `natasha@bytesense.ai`, `majid@byt
 | 09 | How do you collect payment? | `payment_collection` |
 | 10 | Want billing guidance? | `wants_billing_guidance` |
 | 11 | Who submits cases? | `who_submits_cases` |
-| 12 | Add staff to training? | `add_staff_to_training` |
-| 13 | Have a patient in mind? | `has_patient_in_mind` |
-| 14 | Ideal patient profile (multi-select) | `ideal_patient_profile[]` |
-| 15 | When to start first case? | `first_case_timeline` |
-| 16 | **Main blocker** | `main_blocker` → AppState.mainBlocker |
+| 12 | What scanner do you use? | `scanner_type` |
+| 13 | Add staff to training? | `add_staff_to_training` |
+| 14 | Have a patient in mind? | `has_patient_in_mind` |
+| 15 | Ideal patient profile (multi-select) | `ideal_patient_profile[]` |
+| 16 | When to start first case? | `first_case_timeline` |
+| 17 | **Main blocker** | `main_blocker` → AppState.mainBlocker |
 
 On complete: saves to `practice_intake` table, sets `intakeDone: true`, routes to Splash.
 
@@ -177,7 +178,7 @@ Saved to `practice_intake` table on every step change.
 |-------|---------|
 | `profiles` | User metadata, `practice_id`, `last_seen_at` |
 | `training_progress` | Core training state per user (synced from AppState) |
-| `practice_intake` | All 16 intake answers |
+| `practice_intake` | All intake answers (17 training + P1–P9 portal fields) |
 | `user_roles` | Platform roles (admin, staff, bytesense_admin) |
 | `practices` | Practice records |
 | `cases` | Patient case pipeline (pending → in_progress → follow_up → completed) |
@@ -333,7 +334,7 @@ src/
 │   ├── Report.tsx                   # Final certificate
 │   └── intake/
 │       ├── IntakeFlow.tsx           # Orchestrates intake + saves to DB
-│       ├── TypeformIntake.tsx       # 16-step Typeform-style form (largest file)
+│       ├── TypeformIntake.tsx       # Typeform-style intake form (largest file)
 │       └── Step10Complete.tsx       # Intake completion screen
 │
 ├── components/

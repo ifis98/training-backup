@@ -58,6 +58,7 @@ export interface IntakeData {
   wants_billing_guidance: string;
   // step 8 — office workflow
   who_submits_cases: string;
+  scanner_type: string;
   add_staff_to_training: string;
   // step 9 — first case
   has_patient_in_mind: string;
@@ -108,6 +109,7 @@ const defaultData: IntakeData = {
   payment_collection: '',
   wants_billing_guidance: '',
   who_submits_cases: '',
+  scanner_type: '',
   add_staff_to_training: '',
   has_patient_in_mind: '',
   ideal_patient_profile: [],
