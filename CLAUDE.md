@@ -87,6 +87,7 @@ Super users (hardcoded): `nbc1079@gmail.com`, `natasha@bytesense.ai`, `majid@byt
 | 10 | Want billing guidance? | `wants_billing_guidance` |
 | 11 | Who submits cases? | `who_submits_cases` |
 | 12 | What scanner do you use? | `scanner_type` |
+| 12b | Which scanner is it? (only if "Other") | `scanner_other` |
 | 13 | Add staff to training? | `add_staff_to_training` |
 | 14 | Have a patient in mind? | `has_patient_in_mind` |
 | 15 | Ideal patient profile (multi-select) | `ideal_patient_profile[]` |

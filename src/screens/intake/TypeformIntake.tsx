@@ -533,6 +533,17 @@ const QUESTIONS: QuestionDef[] = [
     dataKey: 'scanner_type',
   },
   {
+    id: 'scanner_other',
+    type: 'fields',
+    num: '12b',
+    question: 'Which scanner is it?',
+    description: 'Tell us the make and model so we can support your workflow.',
+    showIf: d => d.scanner_type === 'other',
+    fields: [
+      { id: 'scanner_other', label: 'Scanner name', placeholder: 'e.g. Panda P3, Launca DL-206', required: true },
+    ],
+  },
+  {
     id: 'add_staff_to_training',
     type: 'radio',
     num: '13',
