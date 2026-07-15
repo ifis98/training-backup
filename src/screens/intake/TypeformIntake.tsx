@@ -146,7 +146,15 @@ function PhoneInput({ value, onChange, placeholder, fontSize, fontFamily }: {
 type QType = 'welcome' | 'radio' | 'multiselect' | 'fields' | 'complete' | 'submit';
 
 interface Option { key: string; label: string; value: string }
-interface Field  { id: keyof IntakeData; label: string; placeholder?: string; type?: string; required?: boolean; hint?: string }
+interface Field  {
+  id: keyof IntakeData; label: string; placeholder?: string; type?: string; required?: boolean; hint?: string;
+  // type: 'select' — dropdown; options drive the <select>, resets names fields
+  // cleared when the value changes (e.g. stale "Other" free-text), showIf hides
+  // the field (and exempts it from required-validation) until the condition holds.
+  options?: Option[];
+  resets?: (keyof IntakeData)[];
+  showIf?: (d: IntakeData) => boolean;
+}
 
 interface QuestionDef {
   id: string;
@@ -221,7 +229,7 @@ const OPTS = {
     { key: 'F', label: 'Shining 3D (Aoralscan)', value: 'shining3d' },
     { key: 'G', label: 'AlliedStar', value: 'alliedstar' },
     { key: 'H', label: 'Other', value: 'other' },
-    { key: 'I', label: 'No scanner yet — we take physical impressions', value: 'none' },
+    { key: 'I', label: 'No scanner yet (we take physical impressions)', value: 'none' },
   ],
   STAFF_TRAINING: [
     { key: 'A', label: 'Yes — add staff members now', value: 'yes' },
@@ -525,22 +533,15 @@ const QUESTIONS: QuestionDef[] = [
   },
   {
     id: 'scanner_type',
-    type: 'radio',
+    type: 'fields',
     num: '12',
     question: 'What scanner do you use?',
-    description: 'ByteSense cases are submitted as digital scans — this tells us how to tailor your setup.',
-    options: OPTS.SCANNER,
-    dataKey: 'scanner_type',
-  },
-  {
-    id: 'scanner_other',
-    type: 'fields',
-    num: '12b',
-    question: 'Which scanner is it?',
-    description: 'Tell us the make and model so we can support your workflow.',
-    showIf: d => d.scanner_type === 'other',
+    description: 'ByteSense cases are submitted as digital scans, so this tells us how to tailor your setup.',
     fields: [
-      { id: 'scanner_other', label: 'Scanner name', placeholder: 'e.g. Panda P3, Launca DL-206', required: true },
+      { id: 'scanner_type', label: 'Scanner', type: 'select', required: true,
+        placeholder: 'Select your scanner…', options: OPTS.SCANNER, resets: ['scanner_other'] },
+      { id: 'scanner_other', label: 'Which scanner is it?', required: true,
+        placeholder: 'e.g. Panda P3, Launca DL-206', showIf: d => d.scanner_type === 'other' },
     ],
   },
   {
@@ -835,7 +836,7 @@ export default function TypeformIntake({ clerkUserId, onDone, prefilledPracticeN
     }
     if (current.type === 'fields') {
       const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return (current.fields || []).filter(f => f.required).every(f => {
+      return (current.fields || []).filter(f => f.required && (!f.showIf || f.showIf(data))).every(f => {
         if (f.type === 'checkbox') return true;
         const val = (data[f.id] as string)?.trim();
         if (!val) return false;
@@ -1153,7 +1154,7 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
   q: QuestionDef; data: IntakeData; update: (d: Partial<IntakeData>) => void;
   onOK: () => void; inputRefs: React.MutableRefObject<(HTMLInputElement | null)[]>; isMobile: boolean;
 }) {
-  const fields = q.fields || [];
+  const fields = (q.fields || []).filter(f => !f.showIf || f.showIf(data));
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>, idx: number) => {
     if (e.key === 'Enter') {
@@ -1198,7 +1199,38 @@ function FieldsScreen({ q, data, update, onOK, inputRefs, isMobile }: {
               <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: 'var(--bs-ash)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>
                 {field.label}{field.required && <span style={{ color: C.teal, marginLeft: 3 }}>*</span>}
               </label>
-              {field.type === 'tel' ? (
+              {field.type === 'select' ? (
+                <div style={{ position: 'relative' }}>
+                  <select
+                    value={(data[field.id] as string) || ''}
+                    onChange={e => {
+                      const patch: Partial<IntakeData> = { [field.id]: e.target.value } as Partial<IntakeData>;
+                      (field.resets || []).forEach(id => { (patch as Record<string, string>)[id] = ''; });
+                      update(patch);
+                    }}
+                    style={{
+                      width: '100%', background: 'transparent', border: 'none',
+                      color: (data[field.id] as string) ? 'var(--bs-text)' : 'var(--bs-ash)',
+                      fontSize: isMobile ? 16 : 18, fontFamily: C.fn,
+                      padding: '6px 24px 6px 0', outline: 'none', boxSizing: 'border-box',
+                      appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer',
+                    }}
+                  >
+                    <option value="" disabled style={{ color: 'var(--bs-ash)', background: 'var(--bs-card)' }}>
+                      {field.placeholder || 'Select…'}
+                    </option>
+                    {(field.options || []).map(opt => (
+                      <option key={opt.value} value={opt.value} style={{ color: 'var(--bs-text)', background: 'var(--bs-card)' }}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span style={{
+                    position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)',
+                    color: 'var(--bs-ash)', fontSize: 12, pointerEvents: 'none',
+                  }}>▾</span>
+                </div>
+              ) : field.type === 'tel' ? (
                 <PhoneInput
                   value={(data[field.id] as string) || ''}
                   onChange={v => update({ [field.id]: v } as Partial<IntakeData>)}
