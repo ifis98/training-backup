@@ -16,19 +16,17 @@ ByteSense is a **B2B staff training platform for dental practices** adopting the
 
 ## Deploying
 
-**Always deploy via Vercel CLI from the project directory — do NOT push to main directly.**
+**The project is git-connected: pushing to `main` on GitHub auto-deploys production on Vercel.** (The old "CLI from /Volumes/SSD" instructions are dead — that machine is gone and no Vercel CLI token exists locally.)
 
 ```bash
-cd /Volumes/SSD/Byte/bytesense
-npm run build           # verify zero TypeScript errors first
-vercel deploy --prod --yes
+cd ~/byteSense/remix-onboarding-work
+npm run build           # verify zero TypeScript errors first (needs node 18+, e.g. nvm 20)
+git -c credential.helper='!f() { echo username=ifis98; echo password=$(cat ~/.secrets/github-deploy-token.md); }; f' push upstream main:main
 ```
 
-The `.vercel/project.json` must always contain:
-```json
-{"projectId":"prj_YNweKtyfjSNXARbHb28kkfIAOINW","orgId":"team_55iXexWx6zuvY8wpmtlju41f","projectName":"remix-of-bytesense-onboarding-welcome"}
-```
-Never run `vercel link --yes` — it resets this to the wrong account.
+Remotes: `origin` is a local bare mirror (`~/byteSense/remix-of-bytesense-onboarding-welcome.git`); `upstream` is GitHub (`ifis98/remix-of-bytesense-onboarding-welcome`). Push BOTH so they stay in sync.
+
+**Seat-block gotcha (this silently stranded the 2026-06-23 signature release for 3 weeks):** Vercel deploys whose HEAD commit author is not a seated team member (e.g. Ersapta/`tryea`) end up in state `BLOCKED` with no build logs and no notification. Yash-authored commits (`yash@bytesense.ai` → `ifis98`) deploy fine. After any push, verify the deployment went READY (Vercel MCP `list_deployments` with `since`, project `prj_YNweKtyfjSNXARbHb28kkfIAOINW`, team `team_55iXexWx6zuvY8wpmtlju41f`) or check that `training.bytesense.ai` serves a new `assets/index-*.js` hash.
 
 ---
 

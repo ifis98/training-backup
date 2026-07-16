@@ -28,7 +28,26 @@ echo "$(date '+%F %T') migration result: $OUT" >> "$LOG"
 
 if echo "$OUT" | grep -q scanner_other; then
   touch "$DONE_FILE"
-  echo "Training Supabase DB is restored. scanner_type/scanner_other migration applied automatically. Training app is ready to deploy: tell Claude 'deploy the training app'." | "$TG" || true
+  # Deploy: push main to GitHub; Vercel auto-builds production (git-connected).
+  # Commits must be Yash-authored: unseated contributors (e.g. tryea) get state
+  # BLOCKED silently — that is what stranded the 2026-06-23 signature release.
+  REPO="$DIR/.."
+  OLD_JS=$(curl -s --max-time 15 'https://training.bytesense.ai/' | grep -o 'assets/index-[^"]*\.js' | head -1)
+  if git -C "$REPO" -c credential.helper='!f() { echo username=ifis98; echo password=$(cat ~/.secrets/github-deploy-token.md); }; f' push upstream main:main >> "$LOG" 2>&1; then
+    NEW_JS="$OLD_JS"
+    for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+      sleep 20
+      NEW_JS=$(curl -s --max-time 15 'https://training.bytesense.ai/' | grep -o 'assets/index-[^"]*\.js' | head -1)
+      [ -n "$NEW_JS" ] && [ "$NEW_JS" != "$OLD_JS" ] && break
+    done
+    if [ -n "$NEW_JS" ] && [ "$NEW_JS" != "$OLD_JS" ]; then
+      echo "Training Supabase DB restored, scanner migration applied, and the training app deployed to production automatically (new bundle $NEW_JS live on training.bytesense.ai). Nothing needed from you." | "$TG" || true
+    else
+      echo "Training Supabase DB restored + migration applied + pushed to main, but the new bundle is not live yet — check the Vercel deployment for remix-of-bytesense-onboarding-welcome." | "$TG" || true
+    fi
+  else
+    echo "Training Supabase DB restored + migration applied, but the git push failed — check $LOG. Deploy manually: git push upstream main:main in remix-onboarding-work." | "$TG" || true
+  fi
   launchctl bootout "gui/$(id -u)/com.bytesense.scanner-migration-watch" 2>/dev/null || true
 else
   echo "Training Supabase DB is back ACTIVE but the scanner migration FAILED — check $LOG" | "$TG" || true
